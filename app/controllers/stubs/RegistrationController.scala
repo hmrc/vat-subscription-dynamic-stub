@@ -16,6 +16,7 @@
 
 package controllers.stubs
 
+import actions.NinoExceptionTriggersActions
 import com.google.inject.{Inject, Singleton}
 import helpers.SAPHelper
 import models.BusinessPartner
@@ -27,35 +28,34 @@ import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.util.{Failure, Success, Try}
 
 @Singleton
-class RegistrationController @Inject()(cgtMongoConnector: CGTMongoRepository[BusinessPartner, Nino], sAPHelper: SAPHelper) extends BaseController {
+class RegistrationController @Inject()(bpMongoConnector: BPMongoConnector,
+                                       sAPHelper: SAPHelper,
+                                       ninoExceptionTriggersActions: NinoExceptionTriggersActions) extends BaseController {
 
-  val registerBusinessPartner: Nino => Action[AnyContent] = { nino => Action.async { implicit request =>
+  val registerBusinessPartner: String => Action[AnyContent] = {
+    nino => ninoExceptionTriggersActions.WithNinoExceptionTriggers(Nino(nino)).async {
+      implicit request => {
 
-    val businessPartner = cgtMongoConnector.findLatestVersionBy(nino)
+        val businessPartner = bpMongoConnector.repository.findLatestVersionBy(Nino(nino))
 
-    def getReference(bp: List[BusinessPartner]): Future[String] = {
-      if (bp.isEmpty) {
-        val sap = sAPHelper.generateSap()
+        def getReference(bp: List[BusinessPartner]): Future[String] = {
+          if (bp.isEmpty) {
+            val sap = sAPHelper.generateSap()
+            for {
+              mongo <- bpMongoConnector.repository.addEntry(BusinessPartner(Nino(nino), sap))
+            } yield sap
+          } else {
+            Future.successful(bp.head.sap)
+          }
+        }
+
         for {
-          mongo <- cgtMongoConnector.addEntry(BusinessPartner(nino, sap))
-        } yield sap
-      } else {
-        Future.successful(bp.head.sap)
+          bp <- businessPartner
+          sap <- getReference(bp)
+        } yield Ok(Json.toJson(sap))
       }
-    }
-
-    Try {
-      for {
-        bp <- businessPartner
-        sap <- getReference(bp)
-      } yield Ok(Json.toJson(sap))
-    } match {
-      case Success(result) => result
-      case Failure(error) => Future.successful(InternalServerError(Json.toJson(error.getMessage)))
-    }
   }
   }
 }

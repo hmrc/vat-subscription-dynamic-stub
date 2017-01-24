@@ -16,6 +16,7 @@
 
 package controllers.stubs
 
+import actions.NinoExceptionTriggersActions
 import helpers.SAPHelper
 import models.BusinessPartner
 import org.mockito.ArgumentMatchers
@@ -36,24 +37,25 @@ class RegistrationControllerSpec extends UnitSpec with MockitoSugar with WithFak
 
     val mockConnector = mock[CGTMongoRepository[BusinessPartner, Nino]]
     val mockSAPHelper = mock[SAPHelper]
+    def exceptionTriggersActions() = fakeApplication.injector.instanceOf[NinoExceptionTriggersActions]
 
     when(mockConnector.addEntry(ArgumentMatchers.any())(ArgumentMatchers.any()))
       .thenReturn(addEntryResult)
 
     when(mockConnector.findLatestVersionBy(ArgumentMatchers.any())(ArgumentMatchers.any()))
-      .thenReturn(findLatestVersionResult)
+      .thenReturn(Future.successful(findLatestVersionResult))
 
     when(mockSAPHelper.generateSap())
       .thenReturn(sap)
 
-    new RegistrationController(mockConnector, mockSAPHelper)
+    new RegistrationController(mockConnector, mockSAPHelper, exceptionTriggersActions())
   }
 
   "Calling registerBusinessPartner" when {
 
     "a list with business partners is returned" should {
       val controller = setupController(Future.successful(List(BusinessPartner(Nino("AA123456A"), "CGT123456"))),
-        Future.successful(), "")
+        Future.successful(): Unit, "")
       lazy val result = controller.registerBusinessPartner(Nino("AA123456A"))(FakeRequest("GET", ""))
 
       "return a status of 200" in {
@@ -70,6 +72,45 @@ class RegistrationControllerSpec extends UnitSpec with MockitoSugar with WithFak
         json.as[String] shouldBe "CGT123456"
       }
     }
-  }
 
+    "a list with no Business partners is returned" should {
+      val controller = setupController(Future.successful(List()),
+        Future.successful(): Unit, "CGT654321")
+      lazy val result = controller.registerBusinessPartner(Nino("AA123456A"))(FakeRequest("GET", ""))
+
+      "return a status of 200" in {
+        status(result) shouldBe 200
+      }
+
+      "return a type of Json" in {
+        contentType(result) shouldBe Some("application/json")
+      }
+
+      "return a valid SAP" in {
+        val data = contentAsString(result)
+        val json = Json.parse(data)
+        json.as[String] shouldBe "CGT654321"
+      }
+    }
+
+    "passing in a nino for an error scenario" should {
+      val controller = setupController(Future.successful(List(BusinessPartner(Nino("AA123456A"), "CGT123456"))),
+        Future.successful(): Unit, "CGT654321")
+      lazy val result = controller.registerBusinessPartner(Nino("AA404404A"))(FakeRequest("GET", ""))
+
+      "return a status of 404" in {
+        status(result) shouldBe 404
+      }
+
+      "return a type of Json" in {
+        contentType(result) shouldBe Some("application/json")
+      }
+
+      "return an error code" in {
+        val data = contentAsString(result)
+        val json = Json.parse(data)
+        json.as[String] shouldBe "Not found error"
+      }
+    }
+  }
 }
