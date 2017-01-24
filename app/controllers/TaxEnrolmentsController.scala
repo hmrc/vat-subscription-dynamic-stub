@@ -17,12 +17,11 @@
 package controllers
 
 import com.google.inject.Inject
-import models.{Identifier, SubscriptionIssuerRequest}
+import models.{Error, Identifier, SubscriptionIssuerRequest, SubscriptionSubscriberRequest}
 import play.api.mvc.{Action, BodyParsers}
 import play.libs.Json
 import repository.CGTMongoConnector
 import uk.gov.hmrc.play.microservice.controller.BaseController
-import models.Error
 
 import scala.concurrent.Future
 
@@ -41,8 +40,16 @@ class TaxEnrolmentsController @Inject()(cgtMongoConnector: CGTMongoConnector[Sub
       )
   }
 
-  def subscribeSubscriber(): Unit = {
-
+  def subscribeSubscriber(subscriptionId: String) = Action.async (BodyParsers.parse.json) {
+    implicit request =>
+      val subscribeSubscriberRequestBodyJs = request.body.validate[SubscriptionSubscriberRequest]
+      subscribeSubscriberRequestBodyJs.fold(
+        errors => Future.successful(BadRequest()),
+        subscriptionSubscriberRequest => {
+          cgtMongoConnector.addEntry(subscriptionSubscriberRequest)
+          Future.successful(NoContent)
+        }
+      )
   }
 
 }
