@@ -18,10 +18,16 @@ package helpers
 
 import com.google.inject.{Inject, Singleton}
 
+import scala.concurrent.forkjoin.ThreadLocalRandom
+
 @Singleton
 class SAPHelper @Inject()() {
 
-  def generateSap() = {
-    "CGT123457"
+  def generateSap(): String = {
+    val prefix = "CGT"
+
+    def randomID() = ThreadLocalRandom.current().nextInt(100000, 999999)
+
+    prefix + randomID()
   }
 }
