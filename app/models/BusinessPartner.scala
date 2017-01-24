@@ -16,6 +16,12 @@
 
 package models
 
+import play.api.libs.json.Json
 import uk.gov.hmrc.domain.Nino
 
 case class BusinessPartner (nino: Nino, sap: String)
+
+object BusinessPartner {
+
+  implicit val formats = Json.format[BusinessPartner]
+}

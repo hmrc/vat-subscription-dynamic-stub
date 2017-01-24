@@ -19,11 +19,14 @@ package controllers.stubs
 import helpers.SAPHelper
 import models.BusinessPartner
 import org.mockito.ArgumentMatchers
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
-import repository.CGTMongoConnector
+import play.api.libs.json.Json
+import play.api.test.FakeRequest
+import play.api.test.Helpers._
+import repository.CGTMongoRepository
 import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 import scala.concurrent.Future
 
@@ -31,7 +34,7 @@ class RegistrationControllerSpec extends UnitSpec with MockitoSugar with WithFak
 
   def setupController(findLatestVersionResult: Future[List[BusinessPartner]], addEntryResult: Future[Unit], sap: String) = {
 
-    val mockConnector = mock[CGTMongoConnector[BusinessPartner, Nino]]
+    val mockConnector = mock[CGTMongoRepository[BusinessPartner, Nino]]
     val mockSAPHelper = mock[SAPHelper]
 
     when(mockConnector.addEntry(ArgumentMatchers.any())(ArgumentMatchers.any()))
@@ -51,18 +54,20 @@ class RegistrationControllerSpec extends UnitSpec with MockitoSugar with WithFak
     "a list with business partners is returned" should {
       val controller = setupController(Future.successful(List(BusinessPartner(Nino("AA123456A"), "CGT123456"))),
         Future.successful(), "")
-      lazy val result = controller.registerBusinessPartner(Nino("AA123456A"))
+      lazy val result = controller.registerBusinessPartner(Nino("AA123456A"))(FakeRequest("GET", ""))
 
       "return a status of 200" in {
         status(result) shouldBe 200
       }
 
       "return a type of Json" in {
-
+        contentType(result) shouldBe Some("application/json")
       }
 
       "return a valid SAP" in {
-
+        val data = contentAsString(result)
+        val json = Json.parse(data)
+        json.as[String] shouldBe "CGT123456"
       }
     }
   }

@@ -19,19 +19,20 @@ package controllers.stubs
 import com.google.inject.{Inject, Singleton}
 import helpers.SAPHelper
 import models.BusinessPartner
-import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.{Action, BodyParsers}
-import repository.CGTMongoConnector
+import play.api.libs.json.Json
+import play.api.mvc.{Action, AnyContent}
+import repository.{BPMongoConnector, CGTMongoRepository}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
 @Singleton
-class RegistrationController @Inject()(cgtMongoConnector: CGTMongoConnector[BusinessPartner, Nino], sAPHelper: SAPHelper) extends BaseController {
+class RegistrationController @Inject()(cgtMongoConnector: CGTMongoRepository[BusinessPartner, Nino], sAPHelper: SAPHelper) extends BaseController {
 
-  def registerBusinessPartner(nino: Nino) = Action.async(BodyParsers.parse.json) { implicit request =>
+  val registerBusinessPartner: Nino => Action[AnyContent] = { nino => Action.async { implicit request =>
 
     val businessPartner = cgtMongoConnector.findLatestVersionBy(nino)
 
@@ -53,7 +54,8 @@ class RegistrationController @Inject()(cgtMongoConnector: CGTMongoConnector[Busi
       } yield Ok(Json.toJson(sap))
     } match {
       case Success(result) => result
-      case Failure(error) => Future.successful(InternalServerError(Json.toJson(error)))
+      case Failure(error) => Future.successful(InternalServerError(Json.toJson(error.getMessage)))
     }
-  }}
+  }
+  }
 }
