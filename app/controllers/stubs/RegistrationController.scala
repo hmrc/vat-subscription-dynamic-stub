@@ -19,10 +19,10 @@ package controllers.stubs
 import actions.NinoExceptionTriggersActions
 import com.google.inject.{Inject, Singleton}
 import helpers.SAPHelper
-import models.BusinessPartner
+import models.{BusinessPartner, RegisterModel}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent}
-import repository.{BPMongoConnector, CGTMongoRepository}
+import repository.BPMongoConnector
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
@@ -38,13 +38,15 @@ class RegistrationController @Inject()(bpMongoConnector: BPMongoConnector,
     nino => ninoExceptionTriggersActions.WithNinoExceptionTriggers(Nino(nino)).async {
       implicit request => {
 
-        val businessPartner = bpMongoConnector.repository.findLatestVersionBy(Nino(nino))
+        val body = request.body.asJson
+        val registrationDetails = body.get.as[RegisterModel]
+        val businessPartner = bpMongoConnector.repository.findLatestVersionBy(registrationDetails.nino)
 
         def getReference(bp: List[BusinessPartner]): Future[String] = {
           if (bp.isEmpty) {
             val sap = sAPHelper.generateSap()
             for {
-              mongo <- bpMongoConnector.repository.addEntry(BusinessPartner(Nino(nino), sap))
+              mongo <- bpMongoConnector.repository.addEntry(BusinessPartner(registrationDetails.nino, sap))
             } yield sap
           } else {
             Future.successful(bp.head.sap)
@@ -56,6 +58,6 @@ class RegistrationController @Inject()(bpMongoConnector: BPMongoConnector,
           sap <- getReference(bp)
         } yield Ok(Json.toJson(sap))
       }
-  }
+    }
   }
 }

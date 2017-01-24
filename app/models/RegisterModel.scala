@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package helpers
+package models
 
-import com.google.inject.{Inject, Singleton}
+import play.api.libs.json.Json
+import uk.gov.hmrc.domain.Nino
 
-@Singleton
-class SAPHelper @Inject()() {
+case class RegisterModel (nino: Nino)
 
-  def generateSap() = {
-    "CGT123457"
-  }
+object RegisterModel {
+  implicit val formats = Json.format[RegisterModel]
 }
