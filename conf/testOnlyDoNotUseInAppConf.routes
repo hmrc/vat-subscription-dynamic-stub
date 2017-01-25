@@ -11,3 +11,6 @@
 
 # Add all the application routes to the prod.routes file
 ->         /                          prod.Routes
+
+POST       /test-only/tax-enrolments/issuer/insert @controllers.tests.TaxEnrolmentsController.addSubscriptionIssuerRecord
+DELTE      /test-only/tax-enrolments/issuer/remove @controllers.tests.TaxEnrolmentsController.removeSubscriptionIssuerRecord
