@@ -16,26 +16,28 @@
 
 package controllers
 
-import com.google.inject.Inject
+import com.google.inject.{Inject, Singleton}
 import models.{Error, Identifier, SubscriptionIssuerRequest, SubscriptionSubscriberRequest}
 import play.api.mvc.{Action, BodyParsers}
 import play.libs.Json
 import repository.{CGTMongoConnector, SubscriptionTaxEnrolmentConnector}
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-
+@Singleton
 class TaxEnrolmentsController @Inject()(cgtMongoConnector: SubscriptionTaxEnrolmentConnector) extends BaseController {
 
   def subscribeIssuer(subscriptionId: String) = Action.async (BodyParsers.parse.json) {
     implicit request =>
       val subscriptionIssuerRequestBodyJs = request.body.validate[SubscriptionIssuerRequest]
       subscriptionIssuerRequestBodyJs.fold(
-        errors => Future.successful(BadRequest()),
+        errors => Future.successful(BadRequest),
         subscriptionIssuerRequest => {
           cgtMongoConnector.issuerRepository.addEntry(subscriptionIssuerRequest)
           Future.successful(NoContent)
+          //see TaxEnrolments README.md for response types for subscribeIssuer
         }
       )
   }
@@ -44,10 +46,11 @@ class TaxEnrolmentsController @Inject()(cgtMongoConnector: SubscriptionTaxEnrolm
     implicit request =>
       val subscribeSubscriberRequestBodyJs = request.body.validate[SubscriptionSubscriberRequest]
       subscribeSubscriberRequestBodyJs.fold(
-        errors => Future.successful(BadRequest()),
+        errors => Future.successful(BadRequest),
         subscriptionSubscriberRequest => {
           cgtMongoConnector.subscriberRepository.addEntry(subscriptionSubscriberRequest)
           Future.successful(NoContent)
+          //see TaxEnrolments README.md for response types for subscribeIssuer
         }
       )
   }
