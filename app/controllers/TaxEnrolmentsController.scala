@@ -20,13 +20,13 @@ import com.google.inject.Inject
 import models.{Error, Identifier, SubscriptionIssuerRequest, SubscriptionSubscriberRequest}
 import play.api.mvc.{Action, BodyParsers}
 import play.libs.Json
-import repository.CGTMongoConnector
+import repository.{CGTMongoConnector, SubscriptionTaxEnrolmentConnector}
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.Future
 
 
-class TaxEnrolmentsController @Inject()(cgtMongoConnector: CGTMongoConnector[SubscriptionIssuerRequest, Identifier]) extends BaseController {
+class TaxEnrolmentsController @Inject()(cgtMongoConnector: SubscriptionTaxEnrolmentConnector) extends BaseController {
 
   def subscribeIssuer(subscriptionId: String) = Action.async (BodyParsers.parse.json) {
     implicit request =>
@@ -34,7 +34,7 @@ class TaxEnrolmentsController @Inject()(cgtMongoConnector: CGTMongoConnector[Sub
       subscriptionIssuerRequestBodyJs.fold(
         errors => Future.successful(BadRequest()),
         subscriptionIssuerRequest => {
-          cgtMongoConnector.addEntry(subscriptionIssuerRequest)
+          cgtMongoConnector.issuerRepository.addEntry(subscriptionIssuerRequest)
           Future.successful(NoContent)
         }
       )
@@ -46,7 +46,7 @@ class TaxEnrolmentsController @Inject()(cgtMongoConnector: CGTMongoConnector[Sub
       subscribeSubscriberRequestBodyJs.fold(
         errors => Future.successful(BadRequest()),
         subscriptionSubscriberRequest => {
-          cgtMongoConnector.addEntry(subscriptionSubscriberRequest)
+          cgtMongoConnector.subscriberRepository.addEntry(subscriptionSubscriberRequest)
           Future.successful(NoContent)
         }
       )
