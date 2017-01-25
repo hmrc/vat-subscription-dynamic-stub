@@ -58,8 +58,8 @@ class RegistrationControllerSpec extends UnitSpec with MockitoSugar with WithFak
   "Calling registerBusinessPartner" when {
 
     "a list with business partners is returned" should {
-      val controller = setupController(Future.successful(List(BusinessPartner(Nino("AA123456A"), "CGT123456"))),
-        Future.successful(): Unit, "")
+      val controller = setupController(Future.successful(List(BusinessPartner(Nino("AA123456A"), "123456789"))),
+        Future.successful(()), "")
       lazy val result = controller.registerBusinessPartner("AA123456A")(FakeRequest("POST", "")
         .withJsonBody(Json.toJson(RegisterModel(Nino("AA123456A")))))
 
@@ -74,13 +74,13 @@ class RegistrationControllerSpec extends UnitSpec with MockitoSugar with WithFak
       "return a valid SAP" in {
         val data = contentAsString(result)
         val json = Json.parse(data)
-        json.as[String] shouldBe "CGT123456"
+        json.as[String] shouldBe "123456789"
       }
     }
 
     "a list with no Business partners is returned" should {
       val controller = setupController(Future.successful(List()),
-        Future.successful(): Unit, "CGT654321")
+        Future.successful(()), "987654321")
       lazy val result = controller.registerBusinessPartner("AA123456A")(FakeRequest("POST", "")
         .withJsonBody(Json.toJson(RegisterModel(Nino("AA123456A")))))
 
@@ -95,13 +95,13 @@ class RegistrationControllerSpec extends UnitSpec with MockitoSugar with WithFak
       "return a valid SAP" in {
         val data = contentAsString(result)
         val json = Json.parse(data)
-        json.as[String] shouldBe "CGT654321"
+        json.as[String] shouldBe "987654321"
       }
     }
 
     "passing in a nino for an error scenario" should {
       val controller = setupController(Future.successful(List(BusinessPartner(Nino("AA123456A"), "CGT123456"))),
-        Future.successful(): Unit, "CGT654321")
+        Future.successful(()), "CGT654321")
       lazy val result = controller.registerBusinessPartner("AA404404A")(FakeRequest("POST", "")
         .withJsonBody(Json.toJson(RegisterModel(Nino("AA404404A")))))
 

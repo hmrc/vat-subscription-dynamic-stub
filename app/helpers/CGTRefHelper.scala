@@ -21,11 +21,13 @@ import com.google.inject.{Inject, Singleton}
 import scala.concurrent.forkjoin.ThreadLocalRandom
 
 @Singleton
-class SAPHelper @Inject()() {
+class CGTRefHelper @Inject()() {
 
-  def generateSap(): String = {
-    def randomID() = ThreadLocalRandom.current().nextInt(100000000, 999999999)
+  def generateCGTReference() = {
+    val prefix = "CGT"
 
-    randomID().toString
+    def randomID() = ThreadLocalRandom.current().nextInt(100000, 999999)
+
+    prefix + randomID()
   }
 }

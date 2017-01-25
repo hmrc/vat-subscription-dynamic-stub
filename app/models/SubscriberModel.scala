@@ -14,18 +14,12 @@
  * limitations under the License.
  */
 
-package helpers
+package models
 
-import com.google.inject.{Inject, Singleton}
+import play.api.libs.json.Json
 
-import scala.concurrent.forkjoin.ThreadLocalRandom
+case class SubscriberModel (sap: String, reference: String)
 
-@Singleton
-class SAPHelper @Inject()() {
-
-  def generateSap(): String = {
-    def randomID() = ThreadLocalRandom.current().nextInt(100000000, 999999999)
-
-    randomID().toString
-  }
+object SubscriberModel {
+  implicit val formats = Json.format[SubscriberModel]
 }
