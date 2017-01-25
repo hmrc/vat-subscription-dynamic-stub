@@ -13,4 +13,7 @@
 ->         /                          prod.Routes
 
 POST       /test-only/tax-enrolments/issuer/insert @controllers.tests.TaxEnrolmentsController.addSubscriptionIssuerRecord
-DELTE      /test-only/tax-enrolments/issuer/remove @controllers.tests.TaxEnrolmentsController.removeSubscriptionIssuerRecord
+DELETE      /test-only/tax-enrolments/issuer/remove @controllers.tests.TaxEnrolmentsController.removeSubscriptionIssuerRecord
+
+POST       /test-only/tax-enrolments/subscriber/insert @ controllers.tests.TaxEnrolmentsController.addSubscriptionSubscriberRecord
+DELTE     /test-only/tax-enrolments/subscriber/remove   @controllers.tests.TaxEnrolmentsController.removeSubscriptionIssuerRecord

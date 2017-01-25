@@ -17,7 +17,7 @@
 package controllers.tests
 
 import com.google.inject.Inject
-import models.SubscriptionIssuerRequest
+import models.{Identifier, SubscriptionIssuerRequest, SubscriptionSubscriberRequest}
 import play.api.mvc.Action
 import repository.SubscriptionTaxEnrolmentConnector
 import uk.gov.hmrc.play.microservice.controller.BaseController
@@ -43,12 +43,36 @@ class TaxEnrolmentsTestController @Inject()(cgtMongoConnector: SubscriptionTaxEn
     implicit request =>
       Try{
         val body = request.body.asJson
-        val recordData = body.get.as[String]
+        val recordData = body.get.as[Identifier]
 
-        cgtMongoConnector.subscriberRepository.removeBy(recordData)
+        cgtMongoConnector.issuerRepository.removeBy(recordData)
       } match {
         case Success(_) => Future.successful(Ok("Success"))
         case Failure(_) => Future.successful(BadRequest("Could not delete data"))
+      }
+  }
+
+  val addSubscriptionSubscriberRecord = Action.async {
+    implicit request =>
+      Try{
+        val body = request.body.asJson
+        val recordData = body.get.as[SubscriptionSubscriberRequest]
+        cgtMongoConnector.subscriberRepository.addEntry(recordData)
+      } match {
+        case Success(_) => Future.successful(Ok("Success"))
+        case Failure(_) => Future.successful(BadRequest("Could not store data"))
+      }
+  }
+
+  val removeSubscriptionSubscriberRecord = Action.async {
+    implicit request =>
+      Try{
+        val body = request.body.asJson
+        val recordData = body.get.as[String]
+        cgtMongoConnector.subscriberRepository.removeBy(recordData)
+      } match {
+        case Success(_) => Future.successful(Ok("Success"))
+        case Failure(_) => Future.successful(BadRequest("Could not store data"))
       }
   }
 }
