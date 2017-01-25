@@ -23,13 +23,9 @@ import uk.gov.hmrc.mongo.{ReactiveRepository, Repository}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait CGTMongoConnector[T, O] extends CGTMongoRepository[T, O] {
-  def apply: CGTMongoRepository[T, O]
-}
-
 trait CGTRepository[T, O] extends Repository[T, BSONObjectID] {
 
-  def findAllVersionsBy(o: O)(implicit ec: ExecutionContext): Future[Map[Long, List[T]]]
+  def findAllVersionsBy(o: O)(implicit ec: ExecutionContext): Future[Map[O, List[T]]]
 
   def findLatestVersionBy(o: O)(implicit ec: ExecutionContext): Future[List[T]]
 
