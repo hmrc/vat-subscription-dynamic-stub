@@ -16,6 +16,7 @@
 
 package controllers.stubs
 
+import actions.SAPExceptionTriggers
 import com.google.inject.{Inject, Singleton}
 import helpers.CGTRefHelper
 import models.{SubscribeModel, SubscriberModel}
@@ -28,10 +29,13 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class SubscriptionController @Inject()(subscriptionMongoConnector: SubscriptionMongoConnector, cGTRefHelper: CGTRefHelper) extends BaseController {
+class SubscriptionController @Inject()(subscriptionMongoConnector: SubscriptionMongoConnector,
+                                       cGTRefHelper: CGTRefHelper,
+                                       sAPExceptionTriggers: SAPExceptionTriggers
+                                      ) extends BaseController {
 
   val subscribe: String => Action[AnyContent] = safeId => {
-    Action.async {
+    sAPExceptionTriggers.WithSapExceptionTriggers(safeId).async {
       implicit request => {
 
         val body = request.body.asJson

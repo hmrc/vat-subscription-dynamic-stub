@@ -16,13 +16,13 @@
 
 package helpers
 
-case class ErrorNino(nino: String)
+case class ErrorSafeId (sap: String)
 
-object ErrorNino {
-  val notFoundNino = ErrorNino("AA404404A")
-  val badRequest = ErrorNino("AA400400A")
-  val internalServerError = ErrorNino("AA500500A")
-  val badGateway = ErrorNino("AA502502A")
-  val serviceUnavailable = ErrorNino("AA503503A")
-  val timeout = ErrorNino("AA408408A")
+object ErrorSafeId {
+  val notFound = ErrorSafeId("404404404")
+  val badRequest = ErrorSafeId("400400400")
+  val internalServerError = ErrorSafeId("500500500")
+  val badGateway = ErrorSafeId("502502502")
+  val serviceUnavailable = ErrorSafeId("503503503")
+  val timeout = ErrorSafeId("408408408")
 }

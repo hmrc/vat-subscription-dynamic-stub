@@ -16,17 +16,17 @@
 
 package controllers.stubs
 
+import actions.SAPExceptionTriggers
 import helpers.CGTRefHelper
-import models.{RegisterModel, SubscribeModel, SubscriberModel}
+import models.{SubscribeModel, SubscriberModel}
 import org.mockito.ArgumentMatchers
-import org.scalatest.mock.MockitoSugar
-import repository.{CGTMongoRepository, SubscriptionMongoConnector}
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import org.mockito.Mockito._
+import org.scalatest.mock.MockitoSugar
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.domain.Nino
+import repository.{CGTMongoRepository, SubscriptionMongoConnector}
+import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 import scala.concurrent.Future
 
@@ -37,6 +37,7 @@ class SubscriptionControllerSpec extends UnitSpec with MockitoSugar with WithFak
     val mockRepository = mock[CGTMongoRepository[SubscriberModel, String]]
     val mockConnector = mock[SubscriptionMongoConnector]
     val mockCGTRefHelper = mock[CGTRefHelper]
+    def exceptionTriggersActions = fakeApplication.injector.instanceOf[SAPExceptionTriggers]
 
     when(mockConnector.repository)
       .thenReturn(mockRepository)
@@ -50,7 +51,7 @@ class SubscriptionControllerSpec extends UnitSpec with MockitoSugar with WithFak
     when(mockCGTRefHelper.generateCGTReference())
       .thenReturn(ref)
 
-    new SubscriptionController(mockConnector, mockCGTRefHelper)
+    new SubscriptionController(mockConnector, mockCGTRefHelper, exceptionTriggersActions)
   }
 
   "Calling subscribe" when {
@@ -94,6 +95,25 @@ class SubscriptionControllerSpec extends UnitSpec with MockitoSugar with WithFak
         json.as[String] shouldBe "CGT654321"
       }
     }
-  }
 
+    "an error matching safe id is detected" should {
+      val controller = setupController(Future.successful(List(SubscriberModel("123456789", "CGT123456"))), Future.successful(()), "CGT654321")
+      lazy val result = controller.subscribe("404404404")(FakeRequest("POST", "")
+        .withJsonBody(Json.toJson(SubscribeModel("404404404"))))
+
+      "return a status of 404" in {
+        status(result) shouldBe 404
+      }
+
+      "return a type of Json" in {
+        contentType(result) shouldBe Some("application/json")
+      }
+
+      "return an error code" in {
+        val data = contentAsString(result)
+        val json = Json.parse(data)
+        json.as[String] shouldBe "Not found error"
+      }
+    }
+  }
 }
