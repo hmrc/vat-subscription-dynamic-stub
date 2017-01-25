@@ -14,3 +14,6 @@
 
 POST        /test-only/resident/individuals/register/insert @controllers.tests.RegistrationTestController.addRegistrationRecord
 DELETE      /test-only/resident/individuals/register/remove @controllers.tests.RegistrationTestController.removeRegistrationRecord
+
+POST        /test-only/resident/individuals/subscribe/insert @controllers.tests.SubscriptionTestController.addSubscriptionRecord
+DELETE      /test-only/resident/individuals/subscribe/remove @controllers.tests.SubscriptionTestController.removeSubscriptionRecord
