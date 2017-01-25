@@ -11,3 +11,6 @@
 
 # Add all the application routes to the prod.routes file
 ->         /                          prod.Routes
+
+POST        /test-only/resident/individuals/register/insert @controllers.tests.RegistrationTestController.addRegistrationRecord
+DELETE      /test-only/resident/individuals/register/remove @controllers.tests.RegistrationTestController.removeRegistrationRecord
