@@ -24,10 +24,8 @@ import scala.concurrent.forkjoin.ThreadLocalRandom
 class SAPHelper @Inject()() {
 
   def generateSap(): String = {
-    val prefix = "CGT"
+    def randomID() = ThreadLocalRandom.current().nextInt(100000000, 999999999)
 
-    def randomID() = ThreadLocalRandom.current().nextInt(100000, 999999)
-
-    prefix + randomID()
+    randomID().toString
   }
 }

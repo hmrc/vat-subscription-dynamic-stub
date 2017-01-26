@@ -16,29 +16,28 @@
 
 package controllers.stubs
 
-import actions.NinoExceptionTriggersActions
-import helpers.SAPHelper
-import models.{BusinessPartner, RegisterModel}
+import actions.SAPExceptionTriggers
+import helpers.CGTRefHelper
+import models.{SubscribeModel, SubscriberModel}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import repository.{BPMongoConnector, CGTMongoRepository}
-import uk.gov.hmrc.domain.Nino
+import repository.{CGTMongoRepository, SubscriptionMongoConnector}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 import scala.concurrent.Future
 
-class RegistrationControllerSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
+class SubscriptionControllerSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
 
-  def setupController(findLatestVersionResult: Future[List[BusinessPartner]], addEntryResult: Future[Unit], sap: String) = {
+  def setupController(findLatestVersionResult: Future[List[SubscriberModel]], addEntryResult: Future[Unit], ref: String) = {
 
-    val mockRepository = mock[CGTMongoRepository[BusinessPartner, Nino]]
-    val mockConnector = mock[BPMongoConnector]
-    val mockSAPHelper = mock[SAPHelper]
-    def exceptionTriggersActions() = fakeApplication.injector.instanceOf[NinoExceptionTriggersActions]
+    val mockRepository = mock[CGTMongoRepository[SubscriberModel, String]]
+    val mockConnector = mock[SubscriptionMongoConnector]
+    val mockCGTRefHelper = mock[CGTRefHelper]
+    def exceptionTriggersActions = fakeApplication.injector.instanceOf[SAPExceptionTriggers]
 
     when(mockConnector.repository)
       .thenReturn(mockRepository)
@@ -49,40 +48,18 @@ class RegistrationControllerSpec extends UnitSpec with MockitoSugar with WithFak
     when(mockRepository.findLatestVersionBy(ArgumentMatchers.any())(ArgumentMatchers.any()))
       .thenReturn(Future.successful(findLatestVersionResult))
 
-    when(mockSAPHelper.generateSap())
-      .thenReturn(sap)
+    when(mockCGTRefHelper.generateCGTReference())
+      .thenReturn(ref)
 
-    new RegistrationController(mockConnector, mockSAPHelper, exceptionTriggersActions())
+    new SubscriptionController(mockConnector, mockCGTRefHelper, exceptionTriggersActions)
   }
 
-  "Calling registerBusinessPartner" when {
+  "Calling subscribe" when {
 
-    "a list with business partners is returned" should {
-      val controller = setupController(Future.successful(List(BusinessPartner(Nino("AA123456A"), "123456789"))),
-        Future.successful(()), "")
-      lazy val result = controller.registerBusinessPartner("AA123456A")(FakeRequest("POST", "")
-        .withJsonBody(Json.toJson(RegisterModel(Nino("AA123456A")))))
-
-      "return a status of 200" in {
-        status(result) shouldBe 200
-      }
-
-      "return a type of Json" in {
-        contentType(result) shouldBe Some("application/json")
-      }
-
-      "return a valid SAP" in {
-        val data = contentAsString(result)
-        val json = Json.parse(data)
-        json.as[String] shouldBe "123456789"
-      }
-    }
-
-    "a list with no Business partners is returned" should {
-      val controller = setupController(Future.successful(List()),
-        Future.successful(()), "987654321")
-      lazy val result = controller.registerBusinessPartner("AA123456A")(FakeRequest("POST", "")
-        .withJsonBody(Json.toJson(RegisterModel(Nino("AA123456A")))))
+    "a list with subscribers is returned" should {
+      val controller = setupController(Future.successful(List(SubscriberModel("123456789", "CGT123456"))), Future.successful(()), "CGT654321")
+      lazy val result = controller.subscribe("123456789")(FakeRequest("POST", "")
+        .withJsonBody(Json.toJson(SubscribeModel("123456789"))))
 
       "return a status of 200" in {
         status(result) shouldBe 200
@@ -92,18 +69,37 @@ class RegistrationControllerSpec extends UnitSpec with MockitoSugar with WithFak
         contentType(result) shouldBe Some("application/json")
       }
 
-      "return a valid SAP" in {
+      "return a valid CGT Reference" in {
         val data = contentAsString(result)
         val json = Json.parse(data)
-        json.as[String] shouldBe "987654321"
+        json.as[String] shouldBe "CGT123456"
       }
     }
 
-    "passing in a nino for an error scenario" should {
-      val controller = setupController(Future.successful(List(BusinessPartner(Nino("AA123456A"), "CGT123456"))),
-        Future.successful(()), "CGT654321")
-      lazy val result = controller.registerBusinessPartner("AA404404A")(FakeRequest("POST", "")
-        .withJsonBody(Json.toJson(RegisterModel(Nino("AA404404A")))))
+    "a list with no subscribers is returned" should {
+      val controller = setupController(Future.successful(List()), Future.successful(()), "CGT654321")
+      lazy val result = controller.subscribe("123456789")(FakeRequest("POST", "")
+        .withJsonBody(Json.toJson(SubscribeModel("123456789"))))
+
+      "return a status of 200" in {
+        status(result) shouldBe 200
+      }
+
+      "return a type of Json" in {
+        contentType(result) shouldBe Some("application/json")
+      }
+
+      "return a valid CGT Reference" in {
+        val data = contentAsString(result)
+        val json = Json.parse(data)
+        json.as[String] shouldBe "CGT654321"
+      }
+    }
+
+    "an error matching safe id is detected" should {
+      val controller = setupController(Future.successful(List(SubscriberModel("123456789", "CGT123456"))), Future.successful(()), "CGT654321")
+      lazy val result = controller.subscribe("404404404")(FakeRequest("POST", "")
+        .withJsonBody(Json.toJson(SubscribeModel("404404404"))))
 
       "return a status of 404" in {
         status(result) shouldBe 404

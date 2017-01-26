@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
-package helpers
+package models
 
-case class ErrorNino(nino: String)
+import play.api.libs.json.Json
 
-object ErrorNino {
-  val notFoundNino = ErrorNino("AA404404A")
-  val badRequest = ErrorNino("AA400400A")
-  val internalServerError = ErrorNino("AA500500A")
-  val badGateway = ErrorNino("AA502502A")
-  val serviceUnavailable = ErrorNino("AA503503A")
-  val timeout = ErrorNino("AA408408A")
+case class SubscribeModel(sap: String)
+
+object SubscribeModel {
+  implicit val formats = Json.format[SubscribeModel]
 }
