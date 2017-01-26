@@ -17,49 +17,45 @@
 package repository
 
 import com.google.inject.{Inject, Singleton}
-import models.BusinessPartner
+import models.SubscriberModel
 import play.modules.reactivemongo.MongoDbConnection
 import reactivemongo.api.commands._
-import uk.gov.hmrc.domain.Nino
 
 import scala.concurrent.{ExecutionContext, Future}
 
-
 @Singleton
-class BPMongoConnector @Inject()() extends MongoDbConnection {
+class SubscriptionMongoConnector @Inject()() extends MongoDbConnection {
 
-  lazy val repository = new CGTMongoRepository[BusinessPartner, Nino]() {
+  lazy val repository = new CGTMongoRepository[SubscriberModel, String]() {
 
-    def findAllVersionsBy(o: Nino)(implicit ec: ExecutionContext): Future[Map[Nino, List[BusinessPartner]]] = {
-      find("nino" -> o.nino).map { allBP =>
-        allBP.groupBy(_.nino)
+    override def findAllVersionsBy(o: String)(implicit ec: ExecutionContext): Future[Map[String, List[SubscriberModel]]] = {
+      find("sap" -> o).map {
+        allSubscriptions =>
+          allSubscriptions.groupBy(_.sap)
       }
     }
 
-    def findLatestVersionBy(o: Nino)(implicit ec: ExecutionContext): Future[List[BusinessPartner]] = {
-        findAllVersionsBy(o).map {
+    override def findLatestVersionBy(o: String)(implicit ec: ExecutionContext): Future[List[SubscriberModel]] = {
+      findAllVersionsBy(o).map {
         _.values.toList.map {_.head}
       }
     }
 
-    def removeBy(o: Nino)(implicit ec: ExecutionContext): Future[Unit] = {
-      remove("nino" -> o.nino).map {_ => }
+    override def removeBy(o: String)(implicit ec: ExecutionContext): Future[Unit] = {
+      remove("sap" -> o).map {_ => }
     }
 
-    def removeAll()(implicit ec: ExecutionContext): Future[Unit] = {
+    override def removeAll()(implicit ec: ExecutionContext): Future[Unit] = {
       removeAll(WriteConcern.Acknowledged).map {_ => }
     }
 
-    def addEntry(t: BusinessPartner)(implicit ec: ExecutionContext): Future[Unit] = {
+    override def addEntry(t: SubscriberModel)(implicit ec: ExecutionContext): Future[Unit] = {
       insert(t).map {_ => }
     }
 
-    def addEntries(entries: Seq[BusinessPartner])(implicit ec: ExecutionContext): Future[Unit] = {
+    override def addEntries(entries: Seq[SubscriberModel])(implicit ec: ExecutionContext): Future[Unit] = {
       entries.foreach {addEntry}
       Future.successful()
     }
   }
-
-  def apply(): CGTMongoRepository[BusinessPartner, Nino] = repository
-
 }
