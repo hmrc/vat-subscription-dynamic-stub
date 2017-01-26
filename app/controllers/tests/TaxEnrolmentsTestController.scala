@@ -27,7 +27,7 @@ import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
 class TaxEnrolmentsTestController @Inject()(cgtMongoConnector: SubscriptionTaxEnrolmentConnector) extends BaseController {
-
+  //no obvious use case so far, leaving in out of precaution
   val addSubscriptionIssuerRecord = Action.async{
     implicit request =>
       Try{
