@@ -21,6 +21,7 @@ import models.{Identifier, SubscriptionIssuerRequest, SubscriptionSubscriberRequ
 import play.api.mvc.Action
 import repository.SubscriptionTaxEnrolmentConnector
 import uk.gov.hmrc.play.microservice.controller.BaseController
+import scala.concurrent.ExecutionContext.Implicits.global
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}

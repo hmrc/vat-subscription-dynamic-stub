@@ -25,26 +25,36 @@ import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.{Failure, Success, Try}
 
 @Singleton
 class TaxEnrolmentsController @Inject()(cgtMongoConnector: SubscriptionTaxEnrolmentConnector) extends BaseController {
 
-  def subscribeIssuer(subscriptionId: String) = Action.async (BodyParsers.parse.json) {
+  def subscribeIssuer(subscriptionId: String) = Action.async {
     implicit request =>
-      val subscriptionIssuerRequestBodyJs = request.body.validate[SubscriptionIssuerRequest]
-      subscriptionIssuerRequestBodyJs.fold(
-        errors => Future.successful(BadRequest),
-        subscriptionIssuerRequest => {
-          cgtMongoConnector.issuerRepository.addEntry(subscriptionIssuerRequest)
-          Future.successful(NoContent)
-          //see TaxEnrolments README.md for response types for subscribeIssuer
-        }
-      )
+    Try{
+      val body = request.body.asJson
+      val recordData = body.get.as[SubscriptionIssuerRequest]
+
+      cgtMongoConnector.issuerRepository.addEntry(recordData)
+    } match {
+      case Success(_) => Future.successful(NoContent)
+      case Failure(exception) => Future.successful(BadRequest)
+    }
   }
 
-  def subscribeSubscriber(subscriptionId: String) = Action.async (BodyParsers.parse.json) {
+  def subscribeSubscriber(subscriptionId: String) = Action.async {
+
     implicit request =>
-      val subscribeSubscriberRequestBodyJs = request.body.validate[SubscriptionSubscriberRequest]
+        Try{
+          val body = request.body.asJson
+          val recordData = body.get.as[SubscriptionSubscriberRequest]
+          cgtMongoConnector.subscriberRepository.addEntry(recordData)
+        } match {
+          case Success(_) => Future.successful(NoContent)
+          case Failure(exception) => Future.successful(BadRequest)
+        }
+      /*val subscribeSubscriberRequestBodyJs = request.body.validate[SubscriptionSubscriberRequest]
       subscribeSubscriberRequestBodyJs.fold(
         errors => Future.successful(BadRequest),
         subscriptionSubscriberRequest => {
@@ -52,7 +62,7 @@ class TaxEnrolmentsController @Inject()(cgtMongoConnector: SubscriptionTaxEnrolm
           Future.successful(NoContent)
           //see TaxEnrolments README.md for response types for subscribeIssuer
         }
-      )
+      )*/
   }
 
 }

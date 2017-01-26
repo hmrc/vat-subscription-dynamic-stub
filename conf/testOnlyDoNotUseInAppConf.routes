@@ -12,8 +12,8 @@
 # Add all the application routes to the prod.routes file
 ->         /                          prod.Routes
 
-POST       /test-only/tax-enrolments/issuer/insert  @controllers.tests.TaxEnrolmentsController.addSubscriptionIssuerRecord
-DELETE     /test-only/tax-enrolments/issuer/remove  @controllers.tests.TaxEnrolmentsController.removeSubscriptionIssuerRecord
+POST       /test-only/tax-enrolments/issuer/insert  @controllers.tests.TaxEnrolmentsTestController.addSubscriptionIssuerRecord
+DELETE     /test-only/tax-enrolments/issuer/remove  @controllers.tests.TaxEnrolmentsTestController.removeSubscriptionIssuerRecord
 
-POST       /test-only/tax-enrolments/subscriber/insert   @controllers.tests.TaxEnrolmentsController.addSubscriptionSubscriberRecord
-DELTE      /test-only/tax-enrolments/subscriber/remove   @controllers.tests.TaxEnrolmentsController.removeSubscriptionIssuerRecord
+POST       /test-only/tax-enrolments/subscriber/insert   @controllers.tests.TaxEnrolmentsTestController.addSubscriptionSubscriberRecord
+DELETE      /test-only/tax-enrolments/subscriber/remove   @controllers.tests.TaxEnrolmentsTestController.removeSubscriptionIssuerRecord

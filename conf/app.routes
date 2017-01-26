@@ -2,4 +2,4 @@
 
 GET        /hello-world             controllers.MicroserviceHelloWorld.hello
 PUT        /tax-enrolments/subscriptions/:subscriptionId/issuer @controllers.TaxEnrolmentsController.subscribeIssuer(subscriptionId)
-PUT        /tax-enrolments/subscriptions/:subscriptionId/subscriber @controllers.TaxEnrolmentsController.subscriberSubscriber(subscriptionId)
+PUT        /tax-enrolments/subscriptions/:subscriptionId/subscriber @controllers.TaxEnrolmentsController.subscribeSubscriber(subscriptionId)
