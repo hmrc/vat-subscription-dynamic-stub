@@ -31,6 +31,9 @@ class NinoExceptionTriggersActions @Inject()() {
     def invokeBlock[A](request: Request[A], block: (Request[A]) => Future[Result]) = {
 
       processException(nino, request, block)
+
+
+
     }
 
     def processException[A](nino: Nino, request: Request[A], block: (Request[A]) => Future[Result]) = {
