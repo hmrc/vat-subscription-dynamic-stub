@@ -17,10 +17,10 @@
 package controllers
 
 import com.google.inject.{Inject, Singleton}
-import models.{Error, Identifier, SubscriptionIssuerRequest, SubscriptionSubscriberRequest}
+import models.{Identifier, SubscriptionIssuerRequest, SubscriptionSubscriberRequest}
 import play.api.mvc.{Action, BodyParsers}
 import play.libs.Json
-import repository.{CGTMongoConnector, SubscriptionTaxEnrolmentConnector}
+import repository.{SubscriptionTaxEnrolmentConnector}
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
