@@ -17,13 +17,13 @@
 package controllers.stubs
 
 import com.google.inject.Singleton
-import models.{Identifier, SubscriptionIssuerRequest, SubscriptionSubscriberRequest}
+import models.{Identifier, EnrolmentIssuerRequestModel, EnrolmentSubscriberRequestModel}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
-import repository.{CGTMongoRepository, SubscriptionTaxEnrolmentConnector}
+import repository.{CGTMongoRepository, TaxEnrolmentConnector}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 import scala.concurrent.Future
@@ -32,10 +32,10 @@ import scala.concurrent.Future
 class TaxEnrolmentsControllerSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
 
   def setupController(addEntryResult: Future[Unit]): TaxEnrolmentsController = {
-    val mockIssuerRepository = mock[CGTMongoRepository[SubscriptionIssuerRequest, Identifier]]
-    val mockSubscriberRepository = mock[CGTMongoRepository[SubscriptionSubscriberRequest, String]]
+    val mockIssuerRepository = mock[CGTMongoRepository[EnrolmentIssuerRequestModel, Identifier]]
+    val mockSubscriberRepository = mock[CGTMongoRepository[EnrolmentSubscriberRequestModel, String]]
 
-    val mockConnector = mock[SubscriptionTaxEnrolmentConnector]
+    val mockConnector = mock[TaxEnrolmentConnector]
     new TaxEnrolmentsController(mockConnector)
 
     when(mockConnector.issuerRepository).thenReturn(mockIssuerRepository)
@@ -55,7 +55,7 @@ class TaxEnrolmentsControllerSpec extends UnitSpec with MockitoSugar with WithFa
     "a valid request is submitted" should {
       "return a status of 204" in {
         val controller = setupController(Future.successful())
-        val validSubscribeIssuer = SubscriptionIssuerRequest("cgt", Identifier("nino", "randomNino"))
+        val validSubscribeIssuer = EnrolmentIssuerRequestModel("cgt", Identifier("nino", "randomNino"))
         lazy val result = await(controller.subscribeIssuer("sap")(FakeRequest("PUT", "").withJsonBody(Json.toJson(validSubscribeIssuer))))
 
         status(result) shouldBe 204
@@ -77,7 +77,7 @@ class TaxEnrolmentsControllerSpec extends UnitSpec with MockitoSugar with WithFa
     "a valid request is submitted" should {
       "return a status of 204" in {
         val controller = setupController(Future.successful())
-        val validSubscriberSubscriber = SubscriptionSubscriberRequest("CGT", "http://google.com", "id")
+        val validSubscriberSubscriber = EnrolmentSubscriberRequestModel("CGT", "http://google.com", "id")
         lazy val result = await(controller.subscribeSubscriber("sap")(FakeRequest("PUT", "").withJsonBody(Json.toJson(validSubscriberSubscriber))))
 
         status(result) shouldBe 204

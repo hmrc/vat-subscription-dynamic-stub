@@ -16,20 +16,12 @@
 
 package models
 
-import play.api.libs.json._
+import play.api.libs.json.{Json, OFormat}
 
-case class SubscriptionIssuerRequest(
-                                    serviceName: String,
-                                    identifier: Identifier)
-//See tax enrolments readme for request body JSON
+case class EnrolmentSubscriberRequestModel(serviceName: String,
+                                           callbackUrl: String,
+                                           etmpId: String)
 
-case object SubscriptionIssuerRequest {
-  implicit val formats: OFormat[SubscriptionIssuerRequest] = Json.format[SubscriptionIssuerRequest]
-}
-
-case class Identifier(name: String,
-                      nino: String)
-
-case object Identifier {
-  implicit val formats: OFormat[Identifier] = Json.format[Identifier]
+case object EnrolmentSubscriberRequestModel {
+  implicit val formats: OFormat[EnrolmentSubscriberRequestModel] = Json.format[EnrolmentSubscriberRequestModel]
 }

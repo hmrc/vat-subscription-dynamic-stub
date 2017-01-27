@@ -17,7 +17,7 @@
 package repository
 
 import com.google.inject.{Inject, Singleton}
-import models.BusinessPartner
+import models.BusinessPartnerModel
 import play.modules.reactivemongo.MongoDbConnection
 import reactivemongo.api.commands._
 import uk.gov.hmrc.domain.Nino
@@ -28,15 +28,15 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class BPMongoConnector @Inject()() extends MongoDbConnection {
 
-  lazy val repository = new CGTMongoRepository[BusinessPartner, Nino]() {
+  lazy val repository = new CGTMongoRepository[BusinessPartnerModel, Nino]() {
 
-    def findAllVersionsBy(o: Nino)(implicit ec: ExecutionContext): Future[Map[Nino, List[BusinessPartner]]] = {
+    def findAllVersionsBy(o: Nino)(implicit ec: ExecutionContext): Future[Map[Nino, List[BusinessPartnerModel]]] = {
       find("nino" -> o.nino).map { allBP =>
         allBP.groupBy(_.nino)
       }
     }
 
-    def findLatestVersionBy(o: Nino)(implicit ec: ExecutionContext): Future[List[BusinessPartner]] = {
+    def findLatestVersionBy(o: Nino)(implicit ec: ExecutionContext): Future[List[BusinessPartnerModel]] = {
         findAllVersionsBy(o).map {
         _.values.toList.map {_.head}
       }
@@ -50,16 +50,16 @@ class BPMongoConnector @Inject()() extends MongoDbConnection {
       removeAll(WriteConcern.Acknowledged).map {_ => }
     }
 
-    def addEntry(t: BusinessPartner)(implicit ec: ExecutionContext): Future[Unit] = {
+    def addEntry(t: BusinessPartnerModel)(implicit ec: ExecutionContext): Future[Unit] = {
       insert(t).map {_ => }
     }
 
-    def addEntries(entries: Seq[BusinessPartner])(implicit ec: ExecutionContext): Future[Unit] = {
+    def addEntries(entries: Seq[BusinessPartnerModel])(implicit ec: ExecutionContext): Future[Unit] = {
       entries.foreach {addEntry}
       Future.successful()
     }
   }
 
-  def apply(): CGTMongoRepository[BusinessPartner, Nino] = repository
+  def apply(): CGTMongoRepository[BusinessPartnerModel, Nino] = repository
 
 }

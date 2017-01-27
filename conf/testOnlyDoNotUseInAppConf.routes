@@ -24,3 +24,5 @@ DELETE      /test-only/resident/individuals/register/remove     @controllers.tes
 
 POST        /test-only/resident/individuals/subscribe/insert    @controllers.tests.SubscriptionTestController.addSubscriptionRecord
 DELETE      /test-only/resident/individuals/subscribe/remove    @controllers.tests.SubscriptionTestController.removeSubscriptionRecord
+
+DELETE      /test-only/clear-down/all                           @controllers.ClearDownController.removeAll

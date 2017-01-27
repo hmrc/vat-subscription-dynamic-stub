@@ -16,12 +16,20 @@
 
 package models
 
-import play.api.libs.json.Json
-import uk.gov.hmrc.domain.Nino
+import play.api.libs.json._
 
-case class BusinessPartner (nino: Nino, sap: String)
+case class EnrolmentIssuerRequestModel(
+                                    serviceName: String,
+                                    identifier: Identifier)
+//See tax enrolments readme for request body JSON
 
-object BusinessPartner {
+case object EnrolmentIssuerRequestModel {
+  implicit val formats: OFormat[EnrolmentIssuerRequestModel] = Json.format[EnrolmentIssuerRequestModel]
+}
 
-  implicit val formats = Json.format[BusinessPartner]
+case class Identifier(name: String,
+                      nino: String)
+
+case object Identifier {
+  implicit val formats: OFormat[Identifier] = Json.format[Identifier]
 }

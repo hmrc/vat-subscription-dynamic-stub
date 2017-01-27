@@ -17,11 +17,11 @@
 package models
 
 import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.domain.Nino
 
-case class SubscriptionSubscriberRequest(serviceName: String,
-                                         callbackUrl: String,
-                                         etmpId: String)
+case class BusinessPartnerModel(nino: Nino, sap: String)
 
-case object SubscriptionSubscriberRequest {
-  implicit val formats: OFormat[SubscriptionSubscriberRequest] = Json.format[SubscriptionSubscriberRequest]
+object BusinessPartnerModel {
+
+  implicit val formats: OFormat[BusinessPartnerModel] = Json.format[BusinessPartnerModel]
 }

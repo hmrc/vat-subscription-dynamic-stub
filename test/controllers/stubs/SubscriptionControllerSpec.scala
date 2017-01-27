@@ -32,7 +32,7 @@ import scala.concurrent.Future
 
 class SubscriptionControllerSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
 
-  def setupController(findLatestVersionResult: Future[List[SubscriberModel]], addEntryResult: Future[Unit], ref: String) = {
+  def setupController(findLatestVersionResult: Future[List[SubscriberModel]], addEntryResult: Future[Unit], ref: String): SubscriptionController = {
 
     val mockRepository = mock[CGTMongoRepository[SubscriberModel, String]]
     val mockConnector = mock[SubscriptionMongoConnector]
