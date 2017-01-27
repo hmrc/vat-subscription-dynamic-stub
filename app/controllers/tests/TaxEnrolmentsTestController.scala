@@ -16,19 +16,20 @@
 
 package controllers.tests
 
+import actions.BearerTokenCheck
 import com.google.inject.Inject
 import models.{Identifier, SubscriptionIssuerRequest, SubscriptionSubscriberRequest}
 import play.api.mvc.Action
 import repository.SubscriptionTaxEnrolmentConnector
 import uk.gov.hmrc.play.microservice.controller.BaseController
-import scala.concurrent.ExecutionContext.Implicits.global
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
-class TaxEnrolmentsTestController @Inject()(cgtMongoConnector: SubscriptionTaxEnrolmentConnector) extends BaseController {
+class TaxEnrolmentsTestController @Inject()(bearerTokenCheck: BearerTokenCheck, cgtMongoConnector: SubscriptionTaxEnrolmentConnector) extends BaseController {
   //no obvious use case so far, leaving in out of precaution
-  val addSubscriptionIssuerRecord = Action.async{
+  val addSubscriptionIssuerRecord = bearerTokenCheck.WithBearerTokenCheck().async {
     implicit request =>
       Try{
         val body = request.body.asJson
@@ -40,7 +41,7 @@ class TaxEnrolmentsTestController @Inject()(cgtMongoConnector: SubscriptionTaxEn
       }
   }
 
-  val removeSubscriptionIssuerRecord = Action.async{
+  val removeSubscriptionIssuerRecord = bearerTokenCheck.WithBearerTokenCheck().async {
     implicit request =>
       Try{
         val body = request.body.asJson
@@ -53,7 +54,7 @@ class TaxEnrolmentsTestController @Inject()(cgtMongoConnector: SubscriptionTaxEn
       }
   }
 
-  val addSubscriptionSubscriberRecord = Action.async {
+  val addSubscriptionSubscriberRecord = bearerTokenCheck.WithBearerTokenCheck().async {
     implicit request =>
       Try{
         val body = request.body.asJson
@@ -65,7 +66,7 @@ class TaxEnrolmentsTestController @Inject()(cgtMongoConnector: SubscriptionTaxEn
       }
   }
 
-  val removeSubscriptionSubscriberRecord = Action.async {
+  val removeSubscriptionSubscriberRecord = bearerTokenCheck.WithBearerTokenCheck().async {
     implicit request =>
       Try{
         val body = request.body.asJson
