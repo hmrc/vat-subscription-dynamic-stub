@@ -2,7 +2,10 @@
 
 GET        /hello-world             controllers.MicroserviceHelloWorld.hello
 
-PUT        /tax-enrolments/subscriptions/:subscriptionId/issuer @controllers.TaxEnrolmentsController.subscribeIssuer(subscriptionId)
-PUT        /tax-enrolments/subscriptions/:subscriptionId/subscriber @controllers.TaxEnrolmentsController.subscribeSubscriber(subscriptionId)
-POST        /capital-gains-tax/individual/:nino/register  @controllers.stubs.RegistrationController.registerBusinessPartner(nino: String)
+PUT        /tax-enrolments/subscriptions/:subscriptionId/issuer         @controllers.stubs.TaxEnrolmentsController.subscribeIssuer(subscriptionId)
+PUT        /tax-enrolments/subscriptions/:subscriptionId/subscriber     @controllers.stubs.TaxEnrolmentsController.subscribeSubscriber(subscriptionId)
+POST       /capital-gains-tax/individual/:nino/register                 @controllers.stubs.RegistrationController.registerBusinessPartner(nino: String)
 
+POST        /capital-gains-tax/individual/:nino/register                @controllers.stubs.RegistrationController.registerBusinessPartner(nino: String)
+
+POST        /capital-gains-tax/individual/:safeId/subscribe             @controllers.stubs.SubscriptionController.subscribe(safeId: String)

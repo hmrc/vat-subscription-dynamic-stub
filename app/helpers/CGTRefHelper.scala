@@ -16,13 +16,18 @@
 
 package helpers
 
-case class ErrorNino(nino: String)
+import com.google.inject.{Inject, Singleton}
 
-object ErrorNino {
-  val notFoundNino = ErrorNino("AA404404A")
-  val badRequest = ErrorNino("AA400400A")
-  val internalServerError = ErrorNino("AA500500A")
-  val badGateway = ErrorNino("AA502502A")
-  val serviceUnavailable = ErrorNino("AA503503A")
-  val timeout = ErrorNino("AA408408A")
+import scala.concurrent.forkjoin.ThreadLocalRandom
+
+@Singleton
+class CGTRefHelper @Inject()() {
+
+  def generateCGTReference() = {
+    val prefix = "CGT"
+
+    def randomID() = ThreadLocalRandom.current().nextInt(100000, 999999)
+
+    prefix + randomID()
+  }
 }

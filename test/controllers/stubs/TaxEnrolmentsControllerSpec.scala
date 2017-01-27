@@ -14,24 +14,24 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.stubs
 
-import com.google.inject.{Inject, Singleton}
+import com.google.inject.Singleton
 import models.{Identifier, SubscriptionIssuerRequest, SubscriptionSubscriberRequest}
 import org.mockito.ArgumentMatchers
+import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
-import repository.{CGTMongoRepository, CGTRepository, SubscriptionTaxEnrolmentConnector}
+import repository.{CGTMongoRepository, SubscriptionTaxEnrolmentConnector}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
-import org.mockito.Mockito._
 
 import scala.concurrent.Future
 
 @Singleton
-class TaxEnrolmentsControllerControllerSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
+class TaxEnrolmentsControllerSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
 
-  def setupController(addEntryResult: Future[Unit]): TaxEnrolmentsController ={
+  def setupController(addEntryResult: Future[Unit]): TaxEnrolmentsController = {
     val mockIssuerRepository = mock[CGTMongoRepository[SubscriptionIssuerRequest, Identifier]]
     val mockSubscriberRepository = mock[CGTMongoRepository[SubscriptionSubscriberRequest, String]]
 
@@ -46,7 +46,7 @@ class TaxEnrolmentsControllerControllerSpec extends UnitSpec with MockitoSugar w
       .thenReturn(addEntryResult)
 
     when(mockSubscriberRepository.addEntry(ArgumentMatchers.any())(ArgumentMatchers.any()))
-    .thenReturn(addEntryResult)
+      .thenReturn(addEntryResult)
 
     new TaxEnrolmentsController(mockConnector)
   }
@@ -82,17 +82,16 @@ class TaxEnrolmentsControllerControllerSpec extends UnitSpec with MockitoSugar w
 
         status(result) shouldBe 204
       }
+    }
 
-      "an invalid request is submitted" should {
-        "return a status of 400" in {
-          val controller = setupController(Future.failed(new Exception))
-          val invalidSubscriberSubscriber = "cast me to json please"
-          lazy val result = await(controller.subscribeIssuer("sap")(FakeRequest("PUT", "").withJsonBody(Json.toJson(invalidSubscriberSubscriber))))
+    "an invalid request is submitted" should {
+      "return a status of 400" in {
+        val controller = setupController(Future.failed(new Exception))
+        val invalidSubscriberSubscriber = "cast me to json please"
+        lazy val result = await(controller.subscribeIssuer("sap")(FakeRequest("PUT", "").withJsonBody(Json.toJson(invalidSubscriberSubscriber))))
 
-          status(result) shouldBe 400
-        }
+        status(result) shouldBe 400
       }
     }
   }
-
 }

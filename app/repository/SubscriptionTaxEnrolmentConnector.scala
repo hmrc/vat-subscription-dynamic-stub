@@ -28,6 +28,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class SubscriptionTaxEnrolmentConnector @Inject()() extends MongoDbConnection {
 
   lazy val issuerRepository = new CGTMongoRepository[SubscriptionIssuerRequest, Identifier] {
+
     override def findAllVersionsBy(o: Identifier)(implicit ec: ExecutionContext): Future[Map[Identifier, List[SubscriptionIssuerRequest]]] = {
       val allEntries = find("identifier.nino" -> o.nino)
       allEntries.map {
