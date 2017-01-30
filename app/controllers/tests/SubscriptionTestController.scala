@@ -18,19 +18,18 @@ package controllers.tests
 
 import com.google.inject.{Inject, Singleton}
 import models.SubscriberModel
-import play.api.mvc.{Action, Result}
+import play.api.mvc.{Action, AnyContent}
 import repository.SubscriptionMongoConnector
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
-import actions.BearerTokenCheck
 
 @Singleton
 class SubscriptionTestController @Inject()(subscriptionMongoConnector: SubscriptionMongoConnector) extends BaseController {
 
-  val addSubscriptionRecord = Action.async { implicit request =>
+  val addSubscriptionRecord: Action[AnyContent] = Action.async { implicit request =>
 
     Try {
       val body = request.body.asJson
@@ -44,7 +43,7 @@ class SubscriptionTestController @Inject()(subscriptionMongoConnector: Subscript
 
   }
 
-  val removeSubscriptionRecord = Action.async { implicit request =>
+  val removeSubscriptionRecord: Action[AnyContent] = Action.async { implicit request =>
     Try {
       val body = request.body.asJson
       val recordData = body.get.as[String]
