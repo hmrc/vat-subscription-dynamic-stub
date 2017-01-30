@@ -19,7 +19,7 @@ package actions
 import com.google.inject.{Inject, Singleton}
 import helpers.ErrorSafeId
 import play.api.libs.json.Json
-import play.api.mvc.{ActionBuilder, Request, Result, Results}
+import play.api.mvc._
 
 import scala.concurrent.Future
 
@@ -27,7 +27,7 @@ import scala.concurrent.Future
 class SAPExceptionTriggers @Inject()() {
 
   case class WithSapExceptionTriggers(sap: String) extends ActionBuilder[Request] {
-    def invokeBlock[A](request: Request[A], block: (Request[A]) => Future[Result]) = {
+    def invokeBlock[A](request: Request[A], block: (Request[A]) => Future[Result]): Future[Result] = {
       sap match {
         case ErrorSafeId.notFound.sap => Future.successful(Results.NotFound(Json.toJson("Not found error")))
         case ErrorSafeId.badRequest.sap => Future.successful(Results.BadRequest(Json.toJson("Bad request error")))
