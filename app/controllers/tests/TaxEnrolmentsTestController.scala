@@ -18,22 +18,22 @@ package controllers.tests
 
 import actions.BearerTokenCheck
 import com.google.inject.Inject
-import models.{Identifier, SubscriptionIssuerRequest, SubscriptionSubscriberRequest}
-import play.api.mvc.Action
-import repository.SubscriptionTaxEnrolmentConnector
+import models.{EnrolmentIssuerRequestModel, EnrolmentSubscriberRequestModel, Identifier}
+import play.api.mvc.{Action, AnyContent}
+import repository.TaxEnrolmentConnector
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
-class TaxEnrolmentsTestController @Inject()(bearerTokenCheck: BearerTokenCheck, cgtMongoConnector: SubscriptionTaxEnrolmentConnector) extends BaseController {
+class TaxEnrolmentsTestController @Inject()(bearerTokenCheck: BearerTokenCheck, cgtMongoConnector: TaxEnrolmentConnector) extends BaseController {
   //no obvious use case so far, leaving in out of precaution
-  val addSubscriptionIssuerRecord = bearerTokenCheck.WithBearerTokenCheck().async {
+  val addSubscriptionIssuerRecord: Action[AnyContent] = bearerTokenCheck.WithBearerTokenCheck().async {
     implicit request =>
       Try{
         val body = request.body.asJson
-        val recordData = body.get.as[SubscriptionIssuerRequest]
+        val recordData = body.get.as[EnrolmentIssuerRequestModel]
         cgtMongoConnector.issuerRepository.addEntry(recordData)
       } match {
         case Success(_) => Future.successful(Ok("Success"))
@@ -41,7 +41,7 @@ class TaxEnrolmentsTestController @Inject()(bearerTokenCheck: BearerTokenCheck, 
       }
   }
 
-  val removeSubscriptionIssuerRecord = bearerTokenCheck.WithBearerTokenCheck().async {
+  val removeSubscriptionIssuerRecord: Action[AnyContent] = bearerTokenCheck.WithBearerTokenCheck().async{
     implicit request =>
       Try{
         val body = request.body.asJson
@@ -54,11 +54,11 @@ class TaxEnrolmentsTestController @Inject()(bearerTokenCheck: BearerTokenCheck, 
       }
   }
 
-  val addSubscriptionSubscriberRecord = bearerTokenCheck.WithBearerTokenCheck().async {
+  val addSubscriptionSubscriberRecord: Action[AnyContent] = bearerTokenCheck.WithBearerTokenCheck().async {
     implicit request =>
       Try{
         val body = request.body.asJson
-        val recordData = body.get.as[SubscriptionSubscriberRequest]
+        val recordData = body.get.as[EnrolmentSubscriberRequestModel]
         cgtMongoConnector.subscriberRepository.addEntry(recordData)
       } match {
         case Success(_) => Future.successful(Ok("Success"))
@@ -66,7 +66,7 @@ class TaxEnrolmentsTestController @Inject()(bearerTokenCheck: BearerTokenCheck, 
       }
   }
 
-  val removeSubscriptionSubscriberRecord = bearerTokenCheck.WithBearerTokenCheck().async {
+  val removeSubscriptionSubscriberRecord: Action[AnyContent] = bearerTokenCheck.WithBearerTokenCheck().async {
     implicit request =>
       Try{
         val body = request.body.asJson

@@ -17,9 +17,9 @@
 package controllers.stubs
 
 import com.google.inject.{Inject, Singleton}
-import models.{SubscriptionIssuerRequest, SubscriptionSubscriberRequest}
-import play.api.mvc.Action
-import repository.SubscriptionTaxEnrolmentConnector
+import models.{EnrolmentIssuerRequestModel, EnrolmentSubscriberRequestModel}
+import play.api.mvc.{Action, AnyContent}
+import repository.TaxEnrolmentConnector
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -27,13 +27,13 @@ import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
 @Singleton
-class TaxEnrolmentsController @Inject()(cgtMongoConnector: SubscriptionTaxEnrolmentConnector) extends BaseController {
+class TaxEnrolmentsController @Inject()(cgtMongoConnector: TaxEnrolmentConnector) extends BaseController {
 
-  def subscribeIssuer(subscriptionId: String) = Action.async {
+  def subscribeIssuer(subscriptionId: String): Action[AnyContent] = Action.async {
     implicit request =>
       Try {
         val body = request.body.asJson
-        val recordData = body.get.as[SubscriptionIssuerRequest]
+        val recordData = body.get.as[EnrolmentIssuerRequestModel]
 
         cgtMongoConnector.issuerRepository.addEntry(recordData)
       } match {
@@ -42,12 +42,12 @@ class TaxEnrolmentsController @Inject()(cgtMongoConnector: SubscriptionTaxEnrolm
       }
   }
 
-  def subscribeSubscriber(subscriptionId: String) = Action.async {
+  def subscribeSubscriber(subscriptionId: String): Action[AnyContent] = Action.async {
 
     implicit request =>
       Try {
         val body = request.body.asJson
-        val recordData = body.get.as[SubscriptionSubscriberRequest]
+        val recordData = body.get.as[EnrolmentSubscriberRequestModel]
         cgtMongoConnector.subscriberRepository.addEntry(recordData)
       } match {
         case Success(_) => Future.successful(NoContent)

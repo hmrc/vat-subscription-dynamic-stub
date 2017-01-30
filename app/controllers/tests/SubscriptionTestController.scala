@@ -30,7 +30,6 @@ import scala.util.{Failure, Success, Try}
 class SubscriptionTestController @Inject()(subscriptionMongoConnector: SubscriptionMongoConnector) extends BaseController {
 
   val addSubscriptionRecord: Action[AnyContent] = Action.async { implicit request =>
-
     Try {
       val body = request.body.asJson
       val recordData = body.get.as[SubscriberModel]

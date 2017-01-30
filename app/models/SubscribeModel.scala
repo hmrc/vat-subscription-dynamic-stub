@@ -16,10 +16,10 @@
 
 package models
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class SubscribeModel(sap: String)
 
 object SubscribeModel {
-  implicit val formats = Json.format[SubscribeModel]
+  implicit val formats: OFormat[SubscribeModel] = Json.format[SubscribeModel]
 }

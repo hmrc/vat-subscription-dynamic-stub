@@ -16,7 +16,7 @@
 
 package controllers.tests
 
-import models.BusinessPartner
+import models.BusinessPartnerModel
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
@@ -31,7 +31,7 @@ import scala.concurrent.Future
 class RegistrationTestControllerSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
 
   lazy val controller: RegistrationTestController = {
-    val mockRepository = mock[CGTMongoRepository[BusinessPartner, Nino]]
+    val mockRepository = mock[CGTMongoRepository[BusinessPartnerModel, Nino]]
     val mockConnector = mock[BPMongoConnector]
 
     when(mockConnector.apply())
@@ -50,7 +50,7 @@ class RegistrationTestControllerSpec extends UnitSpec with MockitoSugar with Wit
 
     "return a status of 200 with valid Json" in {
       lazy val result = controller.addRegistrationRecord(FakeRequest("POST", "")
-        .withJsonBody(Json.toJson(BusinessPartner(Nino("AA123456A"), "CGT123456"))))
+        .withJsonBody(Json.toJson(BusinessPartnerModel(Nino("AA123456A"), "CGT123456"))))
 
       status(result) shouldBe 200
     }

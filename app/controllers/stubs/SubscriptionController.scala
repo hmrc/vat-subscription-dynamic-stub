@@ -45,9 +45,8 @@ class SubscriptionController @Inject()(subscriptionMongoConnector: SubscriptionM
         def getReference(subscriber: List[SubscriberModel]): Future[String] = {
           if (subscriber.isEmpty) {
             val reference = cGTRefHelper.generateCGTReference()
-            for {
-              subscription <- subscriptionMongoConnector.repository.addEntry(SubscriberModel(safeId, reference))
-            } yield reference
+            subscriptionMongoConnector.repository.addEntry(SubscriberModel(safeId, reference))
+            Future.successful(cGTRefHelper.generateCGTReference())
           } else {
             Future.successful(subscriber.head.reference)
           }

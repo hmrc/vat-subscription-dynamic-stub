@@ -18,7 +18,7 @@ package controllers.stubs
 
 import actions.NinoExceptionTriggersActions
 import helpers.SAPHelper
-import models.{BusinessPartner, RegisterModel}
+import models.{BusinessPartnerModel, RegisterModel}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
@@ -33,9 +33,9 @@ import scala.concurrent.Future
 
 class RegistrationControllerSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
 
-  def setupController(findLatestVersionResult: Future[List[BusinessPartner]], addEntryResult: Future[Unit], sap: String): RegistrationController = {
+  def setupController(findLatestVersionResult: Future[List[BusinessPartnerModel]], addEntryResult: Future[Unit], sap: String): RegistrationController = {
 
-    val mockRepository = mock[CGTMongoRepository[BusinessPartner, Nino]]
+    val mockRepository = mock[CGTMongoRepository[BusinessPartnerModel, Nino]]
     val mockConnector = mock[BPMongoConnector]
     val mockSAPHelper = mock[SAPHelper]
     def exceptionTriggersActions() = fakeApplication.injector.instanceOf[NinoExceptionTriggersActions]
@@ -58,7 +58,7 @@ class RegistrationControllerSpec extends UnitSpec with MockitoSugar with WithFak
   "Calling registerBusinessPartner" when {
 
     "a list with business partners is returned" should {
-      val controller = setupController(Future.successful(List(BusinessPartner(Nino("AA123456A"), "123456789"))),
+      val controller = setupController(Future.successful(List(BusinessPartnerModel(Nino("AA123456A"), "123456789"))),
         Future.successful(()), "")
       lazy val result = controller.registerBusinessPartner("AA123456A")(FakeRequest("POST", "")
         .withJsonBody(Json.toJson(RegisterModel(Nino("AA123456A")))))
@@ -100,7 +100,7 @@ class RegistrationControllerSpec extends UnitSpec with MockitoSugar with WithFak
     }
 
     "passing in a nino for an error scenario" should {
-      val controller = setupController(Future.successful(List(BusinessPartner(Nino("AA123456A"), "CGT123456"))),
+      val controller = setupController(Future.successful(List(BusinessPartnerModel(Nino("AA123456A"), "CGT123456"))),
         Future.successful(()), "CGT654321")
       lazy val result = controller.registerBusinessPartner("AA404404A")(FakeRequest("POST", "")
         .withJsonBody(Json.toJson(RegisterModel(Nino("AA404404A")))))

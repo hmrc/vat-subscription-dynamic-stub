@@ -28,11 +28,11 @@ import scala.concurrent.Future
 class NinoExceptionTriggersActions @Inject()() {
 
   case class WithNinoExceptionTriggers(nino: Nino) extends ActionBuilder[Request] {
-    def invokeBlock[A](request: Request[A], block: (Request[A]) => Future[Result]) = {
+    def invokeBlock[A](request: Request[A], block: (Request[A]) => Future[Result]): Future[Result] = {
       processException(nino, request, block)
     }
 
-    def processException[A](nino: Nino, request: Request[A], block: (Request[A]) => Future[Result]) = {
+    def processException[A](nino: Nino, request: Request[A], block: (Request[A]) => Future[Result]): Future[Result] = {
       nino match {
         case Nino(ErrorNino.notFoundNino.nino) => Future.successful(Results.NotFound(Json.toJson("Not found error")))
         case Nino(ErrorNino.badGateway.nino) => Future.successful(Results.BadGateway(Json.toJson("Bad gateway error")))

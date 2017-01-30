@@ -16,7 +16,7 @@
 
 package controllers
 
-import play.api.mvc.Action
+import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.Future
@@ -26,7 +26,7 @@ import scala.concurrent.Future
   */
 trait MicroserviceHelloWorld extends BaseController {
 
-	def hello() = Action.async { implicit request =>
+	def hello(): Action[AnyContent] = Action.async { implicit request =>
 		Future.successful(Ok("Hello world"))
 	}
 }
