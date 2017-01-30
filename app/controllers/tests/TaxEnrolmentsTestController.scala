@@ -17,22 +17,22 @@
 package controllers.tests
 
 import com.google.inject.Inject
-import models.{Identifier, SubscriptionIssuerRequest, SubscriptionSubscriberRequest}
-import play.api.mvc.Action
-import repository.SubscriptionTaxEnrolmentConnector
+import models.{EnrolmentIssuerRequestModel, EnrolmentSubscriberRequestModel, Identifier}
+import play.api.mvc.{Action, AnyContent}
+import repository.TaxEnrolmentConnector
 import uk.gov.hmrc.play.microservice.controller.BaseController
-import scala.concurrent.ExecutionContext.Implicits.global
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
-class TaxEnrolmentsTestController @Inject()(cgtMongoConnector: SubscriptionTaxEnrolmentConnector) extends BaseController {
+class TaxEnrolmentsTestController @Inject()(cgtMongoConnector: TaxEnrolmentConnector) extends BaseController {
   //no obvious use case so far, leaving in out of precaution
-  val addSubscriptionIssuerRecord = Action.async{
+  val addSubscriptionIssuerRecord: Action[AnyContent] = Action.async{
     implicit request =>
       Try{
         val body = request.body.asJson
-        val recordData = body.get.as[SubscriptionIssuerRequest]
+        val recordData = body.get.as[EnrolmentIssuerRequestModel]
         cgtMongoConnector.issuerRepository.addEntry(recordData)
       } match {
         case Success(_) => Future.successful(Ok("Success"))
@@ -40,7 +40,7 @@ class TaxEnrolmentsTestController @Inject()(cgtMongoConnector: SubscriptionTaxEn
       }
   }
 
-  val removeSubscriptionIssuerRecord = Action.async{
+  val removeSubscriptionIssuerRecord: Action[AnyContent] = Action.async{
     implicit request =>
       Try{
         val body = request.body.asJson
@@ -53,11 +53,11 @@ class TaxEnrolmentsTestController @Inject()(cgtMongoConnector: SubscriptionTaxEn
       }
   }
 
-  val addSubscriptionSubscriberRecord = Action.async {
+  val addSubscriptionSubscriberRecord: Action[AnyContent] = Action.async {
     implicit request =>
       Try{
         val body = request.body.asJson
-        val recordData = body.get.as[SubscriptionSubscriberRequest]
+        val recordData = body.get.as[EnrolmentSubscriberRequestModel]
         cgtMongoConnector.subscriberRepository.addEntry(recordData)
       } match {
         case Success(_) => Future.successful(Ok("Success"))
@@ -65,7 +65,7 @@ class TaxEnrolmentsTestController @Inject()(cgtMongoConnector: SubscriptionTaxEn
       }
   }
 
-  val removeSubscriptionSubscriberRecord = Action.async {
+  val removeSubscriptionSubscriberRecord: Action[AnyContent] = Action.async {
     implicit request =>
       Try{
         val body = request.body.asJson

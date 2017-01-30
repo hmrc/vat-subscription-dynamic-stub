@@ -17,19 +17,18 @@
 package repository
 
 import com.google.inject.{Inject, Singleton}
-import models.{Identifier, SubscriptionIssuerRequest, SubscriptionSubscriberRequest}
-import org.apache.commons.lang3.exception.ExceptionContext
+import models.{Identifier, EnrolmentIssuerRequestModel, EnrolmentSubscriberRequestModel}
 import play.modules.reactivemongo.MongoDbConnection
 import reactivemongo.api.commands._
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class SubscriptionTaxEnrolmentConnector @Inject()() extends MongoDbConnection {
+class TaxEnrolmentConnector @Inject()() extends MongoDbConnection {
 
-  lazy val issuerRepository = new CGTMongoRepository[SubscriptionIssuerRequest, Identifier] {
+  lazy val issuerRepository = new CGTMongoRepository[EnrolmentIssuerRequestModel, Identifier] {
 
-    override def findAllVersionsBy(o: Identifier)(implicit ec: ExecutionContext): Future[Map[Identifier, List[SubscriptionIssuerRequest]]] = {
+    override def findAllVersionsBy(o: Identifier)(implicit ec: ExecutionContext): Future[Map[Identifier, List[EnrolmentIssuerRequestModel]]] = {
       val allEntries = find("identifier.nino" -> o.nino)
       allEntries.map {
         allSubscriptionIssuerRequests =>
@@ -37,7 +36,7 @@ class SubscriptionTaxEnrolmentConnector @Inject()() extends MongoDbConnection {
       }
     }
 
-    override def findLatestVersionBy(o: Identifier)(implicit ec: ExecutionContext): Future[List[SubscriptionIssuerRequest]] = {
+    override def findLatestVersionBy(o: Identifier)(implicit ec: ExecutionContext): Future[List[EnrolmentIssuerRequestModel]] = {
       val allVersions = findAllVersionsBy(o)
       allVersions.map {
         _.values.toList.map {_.head}
@@ -53,11 +52,11 @@ class SubscriptionTaxEnrolmentConnector @Inject()() extends MongoDbConnection {
       removeAll(WriteConcern.Acknowledged).map {_ => }
     }
 
-    override def addEntry(t: SubscriptionIssuerRequest)(implicit ec: ExecutionContext): Future[Unit] = {
+    override def addEntry(t: EnrolmentIssuerRequestModel)(implicit ec: ExecutionContext): Future[Unit] = {
       insert(t).map {_ => }
     }
 
-    override def addEntries(entries: Seq[SubscriptionIssuerRequest])(implicit ec: ExecutionContext): Future[Unit] ={
+    override def addEntries(entries: Seq[EnrolmentIssuerRequestModel])(implicit ec: ExecutionContext): Future[Unit] ={
       entries.foreach {
         subscriptionIssuer =>
           insert(subscriptionIssuer)
@@ -66,8 +65,8 @@ class SubscriptionTaxEnrolmentConnector @Inject()() extends MongoDbConnection {
     }
   }
 
-  lazy val subscriberRepository = new CGTMongoRepository[SubscriptionSubscriberRequest, String] {
-    override def findAllVersionsBy(o: String)(implicit ec: ExecutionContext): Future[Map[String, List[SubscriptionSubscriberRequest]]] = {
+  lazy val subscriberRepository = new CGTMongoRepository[EnrolmentSubscriberRequestModel, String] {
+    override def findAllVersionsBy(o: String)(implicit ec: ExecutionContext): Future[Map[String, List[EnrolmentSubscriberRequestModel]]] = {
       val allEntries = find("etmpId" -> o)
       //unsure, might need to look at the nino with-in the Identifier object
       allEntries.map {
@@ -76,7 +75,7 @@ class SubscriptionTaxEnrolmentConnector @Inject()() extends MongoDbConnection {
       }
     }
 
-    override def findLatestVersionBy(o: String)(implicit ec: ExecutionContext): Future[List[SubscriptionSubscriberRequest]] = {
+    override def findLatestVersionBy(o: String)(implicit ec: ExecutionContext): Future[List[EnrolmentSubscriberRequestModel]] = {
       val allVersions = findAllVersionsBy(o)
       allVersions.map {
         _.values.toList.map {_.head}
@@ -92,11 +91,11 @@ class SubscriptionTaxEnrolmentConnector @Inject()() extends MongoDbConnection {
       removeAll(WriteConcern.Acknowledged).map {_ => }
     }
 
-    override def addEntry(t: SubscriptionSubscriberRequest)(implicit ec: ExecutionContext): Future[Unit] = {
+    override def addEntry(t: EnrolmentSubscriberRequestModel)(implicit ec: ExecutionContext): Future[Unit] = {
       insert(t).map {_ => }
     }
 
-    override def addEntries(entries: Seq[SubscriptionSubscriberRequest])(implicit ec: ExecutionContext): Future[Unit] ={
+    override def addEntries(entries: Seq[EnrolmentSubscriberRequestModel])(implicit ec: ExecutionContext): Future[Unit] ={
       entries.foreach {
         subscriptionIssuer =>
           insert(subscriptionIssuer)

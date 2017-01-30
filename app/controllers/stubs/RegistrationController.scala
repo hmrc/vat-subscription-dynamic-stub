@@ -19,7 +19,7 @@ package controllers.stubs
 import actions.NinoExceptionTriggersActions
 import com.google.inject.{Inject, Singleton}
 import helpers.SAPHelper
-import models.{BusinessPartner, RegisterModel}
+import models.{BusinessPartnerModel, RegisterModel}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent}
 import repository.BPMongoConnector
@@ -42,11 +42,11 @@ class RegistrationController @Inject()(bpMongoConnector: BPMongoConnector,
         val registrationDetails = body.get.as[RegisterModel]
         val businessPartner = bpMongoConnector.repository.findLatestVersionBy(registrationDetails.nino)
 
-        def getReference(bp: List[BusinessPartner]): Future[String] = {
+        def getReference(bp: List[BusinessPartnerModel]): Future[String] = {
           if (bp.isEmpty) {
             val sap = sAPHelper.generateSap()
             for {
-              mongo <- bpMongoConnector.repository.addEntry(BusinessPartner(registrationDetails.nino, sap))
+              mongo <- bpMongoConnector.repository.addEntry(BusinessPartnerModel(registrationDetails.nino, sap))
             } yield sap
           } else {
             Future.successful(bp.head.sap)

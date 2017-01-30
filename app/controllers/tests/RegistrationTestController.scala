@@ -17,8 +17,8 @@
 package controllers.tests
 
 import com.google.inject.{Inject, Singleton}
-import models.BusinessPartner
-import play.api.mvc.Action
+import models.BusinessPartnerModel
+import play.api.mvc.{Action, AnyContent}
 import repository.BPMongoConnector
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.play.microservice.controller.BaseController
@@ -30,10 +30,10 @@ import scala.util.{Failure, Success, Try}
 @Singleton
 class RegistrationTestController @Inject()(bpMongoConnector: BPMongoConnector) extends BaseController {
 
-  val addRegistrationRecord = Action.async { implicit request =>
+  val addRegistrationRecord: Action[AnyContent] = Action.async { implicit request =>
     Try {
       val body = request.body.asJson
-      val recordData = body.get.as[BusinessPartner]
+      val recordData = body.get.as[BusinessPartnerModel]
 
       bpMongoConnector.apply().addEntry(recordData)
     } match {
@@ -42,7 +42,7 @@ class RegistrationTestController @Inject()(bpMongoConnector: BPMongoConnector) e
     }
   }
 
-  val removeRegistrationRecord = Action.async { implicit request =>
+  val removeRegistrationRecord: Action[AnyContent] = Action.async { implicit request =>
     Try {
       val body = request.body.asJson
       val recordData = body.get.as[Nino]
