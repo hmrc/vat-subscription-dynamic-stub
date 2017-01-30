@@ -29,7 +29,6 @@ class NinoExceptionTriggersActions @Inject()() {
 
   case class WithNinoExceptionTriggers(nino: Nino) extends ActionBuilder[Request] {
     def invokeBlock[A](request: Request[A], block: (Request[A]) => Future[Result]): Future[Result] = {
-
       processException(nino, request, block)
     }
 
@@ -45,5 +44,4 @@ class NinoExceptionTriggersActions @Inject()() {
       }
     }
   }
-
 }

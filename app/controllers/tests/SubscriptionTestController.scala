@@ -39,6 +39,7 @@ class SubscriptionTestController @Inject()(subscriptionMongoConnector: Subscript
       case Success(_) => Future.successful(Ok("Success"))
       case Failure(_) => Future.successful(BadRequest("Could not store data"))
     }
+
   }
 
   val removeSubscriptionRecord: Action[AnyContent] = Action.async { implicit request =>
