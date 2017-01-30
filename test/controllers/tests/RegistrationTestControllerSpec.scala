@@ -30,7 +30,7 @@ import scala.concurrent.Future
 
 class RegistrationTestControllerSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
 
-  lazy val controller = {
+  lazy val controller: RegistrationTestController = {
     val mockRepository = mock[CGTMongoRepository[BusinessPartner, Nino]]
     val mockConnector = mock[BPMongoConnector]
 

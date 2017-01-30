@@ -33,7 +33,7 @@ import scala.concurrent.Future
 
 class RegistrationControllerSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
 
-  def setupController(findLatestVersionResult: Future[List[BusinessPartner]], addEntryResult: Future[Unit], sap: String) = {
+  def setupController(findLatestVersionResult: Future[List[BusinessPartner]], addEntryResult: Future[Unit], sap: String): RegistrationController = {
 
     val mockRepository = mock[CGTMongoRepository[BusinessPartner, Nino]]
     val mockConnector = mock[BPMongoConnector]
