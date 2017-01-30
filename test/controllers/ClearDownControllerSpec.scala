@@ -45,23 +45,23 @@ class ClearDownControllerSpec extends UnitSpec with BaseController with WithFake
     val fourFailedClearDowns = Seq(failed, failed, failed, failed)
 
     "when all the clears succeed" in {
-      await(controller.checkForFailed(successfulClearDown)) shouldEqual true
+      await(controller.checkSuccess(successfulClearDown)) shouldEqual true
     }
 
     "when one of the clears fails" in {
-      await(controller.checkForFailed(oneFailedClearDown)) shouldEqual false
+      await(controller.checkSuccess(oneFailedClearDown)) shouldEqual false
     }
 
     "when two of the clears fail" in {
-      await(controller.checkForFailed(twoFailedClearDowns)) shouldEqual false
+      await(controller.checkSuccess(twoFailedClearDowns)) shouldEqual false
     }
 
     "when three of the clears fail" in {
-      await(controller.checkForFailed(threeFailedClearDowns)) shouldEqual false
+      await(controller.checkSuccess(threeFailedClearDowns)) shouldEqual false
     }
 
     "when all four of the clears fail" in {
-      await(controller.checkForFailed(fourFailedClearDowns)) shouldEqual false
+      await(controller.checkSuccess(fourFailedClearDowns)) shouldEqual false
     }
   }
 }

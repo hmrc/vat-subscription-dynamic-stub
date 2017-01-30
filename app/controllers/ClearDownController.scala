@@ -48,9 +48,9 @@ class ClearDownController @Inject()(
 
   def clearEnrolmentIssuer: Future[Result] = clearResult(subscriptionTaxEnrolmentConnector.issuerRepository.removeAll())
 
-  def checkForFailed(seq: Seq[Result]): Future[Boolean] = {
+  def checkSuccess(seq: Seq[Result]): Future[Boolean] = {
     //I'm sure there is a better way of doing this but... Can't think of it right now
-    Future.successful(seq.map(_.header.status).count(_ == 200) == seq.length)
+    Future.successful(seq.forall(_.header.status == 200))
   }
 
   def clearDown(): Action[AnyContent] = Action.async {
@@ -66,7 +66,7 @@ class ClearDownController @Inject()(
         clearedSubscribed <- clearSubscribedUserRepository
         clearedEnrolmentSubscribed <- clearEnrolmentSubscribeRepository
         clearedEnrolmentIssuer <- clearEnrolmentIssuerRepository
-        checkClearDownResult <- checkForFailed(Seq(clearedRegistered, clearedSubscribed, clearedEnrolmentSubscribed, clearedEnrolmentIssuer))
+        checkClearDownResult <- checkSuccess(Seq(clearedRegistered, clearedSubscribed, clearedEnrolmentSubscribed, clearedEnrolmentIssuer))
       } yield Ok(checkClearDownResult.toString)
     }
   }
