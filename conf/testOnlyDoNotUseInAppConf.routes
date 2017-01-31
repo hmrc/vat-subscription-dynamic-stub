@@ -10,7 +10,6 @@
 # Failing to follow this rule may result in test routes deployed in production.
 
 # Add all the application routes to the prod.routes file
-->         /                          prod.Routes
 
 
 POST        /test-only/tax-enrolments/issuer/insert             @controllers.tests.TaxEnrolmentsTestController.addSubscriptionIssuerRecord
@@ -26,3 +25,6 @@ POST        /test-only/resident/individuals/subscribe/insert    @controllers.tes
 DELETE      /test-only/resident/individuals/subscribe/remove    @controllers.tests.SubscriptionTestController.removeSubscriptionRecord
 
 DELETE      /test-only/clear-down/all                           @controllers.ClearDownController.clearDown
+
+
+->         /                          prod.Routes
