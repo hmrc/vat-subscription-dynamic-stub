@@ -22,7 +22,7 @@ import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
-import repository.{BPMongoConnector, CGTMongoRepository}
+import repository.{BPMongoConnector, BPMongoRepository}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
@@ -31,7 +31,7 @@ import scala.concurrent.Future
 class RegistrationTestControllerSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
 
   lazy val controller: RegistrationTestController = {
-    val mockRepository = mock[CGTMongoRepository[BusinessPartnerModel, Nino]]
+    val mockRepository = mock[BPMongoRepository[BusinessPartnerModel, Nino]]
     val mockConnector = mock[BPMongoConnector]
 
     when(mockConnector.apply())

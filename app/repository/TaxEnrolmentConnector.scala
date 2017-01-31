@@ -26,7 +26,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class TaxEnrolmentConnector @Inject()() extends MongoDbConnection {
 
-  lazy val issuerRepository = new CGTMongoRepository[EnrolmentIssuerRequestModel, Identifier] {
+  lazy val issuerRepository = new EnrolmentMongoRepository[EnrolmentIssuerRequestModel, Identifier] {
 
     override def findAllVersionsBy(o: Identifier)(implicit ec: ExecutionContext): Future[Map[Identifier, List[EnrolmentIssuerRequestModel]]] = {
       val allEntries = find("identifier.nino" -> o.nino)
@@ -65,7 +65,7 @@ class TaxEnrolmentConnector @Inject()() extends MongoDbConnection {
     }
   }
 
-  lazy val subscriberRepository = new CGTMongoRepository[EnrolmentSubscriberRequestModel, String] {
+  lazy val subscriberRepository = new EnrolmentMongoRepository[EnrolmentSubscriberRequestModel, String] {
     override def findAllVersionsBy(o: String)(implicit ec: ExecutionContext): Future[Map[String, List[EnrolmentSubscriberRequestModel]]] = {
       val allEntries = find("etmpId" -> o)
       //unsure, might need to look at the nino with-in the Identifier object

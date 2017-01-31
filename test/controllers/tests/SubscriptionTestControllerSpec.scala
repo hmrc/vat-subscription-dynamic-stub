@@ -22,7 +22,7 @@ import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
-import repository.{CGTMongoRepository, SubscriptionMongoConnector}
+import repository.{SubscriberMongoRepository, SubscriptionMongoConnector}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 import scala.concurrent.Future
@@ -30,7 +30,7 @@ import scala.concurrent.Future
 class SubscriptionTestControllerSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
 
   lazy val controller: SubscriptionTestController = {
-    val mockRepository = mock[CGTMongoRepository[SubscriberModel, String]]
+    val mockRepository = mock[SubscriberMongoRepository[SubscriberModel, String]]
     val mockConnector = mock[SubscriptionMongoConnector]
 
     when(mockConnector.repository)
