@@ -22,7 +22,7 @@ import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
-import repository.{CGTMongoRepository, NRBPMongoConnector}
+import repository.{NRBPMongoRepository, NRBPMongoConnector}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 import scala.concurrent.Future
@@ -30,7 +30,7 @@ import scala.concurrent.Future
 class GhostRegistrationTestControllerSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
 
   lazy val controller: GhostRegistrationTestController = {
-    val mockRepository = mock[CGTMongoRepository[NRBusinessPartnerModel, FullDetailsModel]]
+    val mockRepository = mock[NRBPMongoRepository[NRBusinessPartnerModel, FullDetailsModel]]
     val mockConnector = mock[NRBPMongoConnector]
 
     when(mockConnector.apply())

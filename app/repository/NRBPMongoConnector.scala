@@ -26,7 +26,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class NRBPMongoConnector @Inject()() extends MongoDbConnection {
 
-  lazy val repository = new CGTMongoRepository[NRBusinessPartnerModel, FullDetailsModel]() {
+  lazy val repository = new NRBPMongoRepository[NRBusinessPartnerModel, FullDetailsModel]() {
 
     def findAllVersionsBy(o: FullDetailsModel)(implicit ec: ExecutionContext): Future[Map[FullDetailsModel, List[NRBusinessPartnerModel]]] = {
       find("firstName" -> o.firstName, "lastName" -> o.lastName, "addressLineOne" -> o.addressLineOne).map { allBP =>
@@ -58,6 +58,6 @@ class NRBPMongoConnector @Inject()() extends MongoDbConnection {
     }
   }
 
-  def apply(): CGTMongoRepository[NRBusinessPartnerModel, FullDetailsModel] = repository
+  def apply(): NRBPMongoRepository[NRBusinessPartnerModel, FullDetailsModel] = repository
 
 }

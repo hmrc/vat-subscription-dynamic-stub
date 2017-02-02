@@ -26,7 +26,7 @@ import org.scalatest.mock.MockitoSugar
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import repository.{CGTMongoRepository, NRBPMongoConnector}
+import repository.{NRBPMongoRepository, NRBPMongoConnector}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 import scala.concurrent.Future
@@ -36,7 +36,7 @@ class GhostRegistrationControllerSpec extends UnitSpec with MockitoSugar with Wi
 
   def setupController(findLatestVersionResult: Future[List[NRBusinessPartnerModel]], addEntryResult: Future[Unit], sap: String): GhostRegistrationController = {
 
-    val mockRepository = mock[CGTMongoRepository[NRBusinessPartnerModel, FullDetailsModel]]
+    val mockRepository = mock[NRBPMongoRepository[NRBusinessPartnerModel, FullDetailsModel]]
     val mockConnector = mock[NRBPMongoConnector]
     val mockSAPHelper = mock[SAPHelper]
     def exceptionTriggersActions() = fakeApplication.injector.instanceOf[FullDetailsExceptionTriggersActions]
