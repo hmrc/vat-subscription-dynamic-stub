@@ -25,7 +25,7 @@ import org.scalatest.mock.MockitoSugar
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import repository.{BPMongoConnector, CGTMongoRepository}
+import repository.{BPMongoConnector, BPMongoRepository}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
@@ -35,7 +35,7 @@ class RegistrationControllerSpec extends UnitSpec with MockitoSugar with WithFak
 
   def setupController(findLatestVersionResult: Future[List[BusinessPartnerModel]], addEntryResult: Future[Unit], sap: String): RegistrationController = {
 
-    val mockRepository = mock[CGTMongoRepository[BusinessPartnerModel, Nino]]
+    val mockRepository = mock[BPMongoRepository[BusinessPartnerModel, Nino]]
     val mockConnector = mock[BPMongoConnector]
     val mockSAPHelper = mock[SAPHelper]
     def exceptionTriggersActions() = fakeApplication.injector.instanceOf[NinoExceptionTriggersActions]

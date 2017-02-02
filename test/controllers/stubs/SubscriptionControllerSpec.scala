@@ -25,7 +25,7 @@ import org.scalatest.mock.MockitoSugar
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import repository.{CGTMongoRepository, SubscriptionMongoConnector}
+import repository.{SubscriberMongoRepository, SubscriptionMongoConnector}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 import scala.concurrent.Future
@@ -34,7 +34,7 @@ class SubscriptionControllerSpec extends UnitSpec with MockitoSugar with WithFak
 
   def setupController(findLatestVersionResult: Future[List[SubscriberModel]], addEntryResult: Future[Unit], ref: String): SubscriptionController = {
 
-    val mockRepository = mock[CGTMongoRepository[SubscriberModel, String]]
+    val mockRepository = mock[SubscriberMongoRepository[SubscriberModel, String]]
     val mockConnector = mock[SubscriptionMongoConnector]
     val mockCGTRefHelper = mock[CGTRefHelper]
     def exceptionTriggersActions = fakeApplication.injector.instanceOf[SAPExceptionTriggers]
@@ -79,7 +79,7 @@ class SubscriptionControllerSpec extends UnitSpec with MockitoSugar with WithFak
     "a list with no subscribers is returned" should {
       val controller = setupController(Future.successful(List()), Future.successful(()), "CGT654321")
       lazy val result = controller.subscribe("123456789")(FakeRequest("POST", "")
-        .withJsonBody(Json.toJson(SubscribeModel("123456789"))))
+        .withJsonBody(Json.toJson(SubscribeModel("397436038"))))
 
       "return a status of 200" in {
         status(result) shouldBe 200

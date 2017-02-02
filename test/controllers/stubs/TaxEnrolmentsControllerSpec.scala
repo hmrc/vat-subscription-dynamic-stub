@@ -17,13 +17,13 @@
 package controllers.stubs
 
 import com.google.inject.Singleton
-import models.{Identifier, EnrolmentIssuerRequestModel, EnrolmentSubscriberRequestModel}
+import models.{EnrolmentIssuerRequestModel, EnrolmentSubscriberRequestModel, Identifier}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
-import repository.{CGTMongoRepository, TaxEnrolmentConnector}
+import repository.{EnrolmentMongoRepository, TaxEnrolmentConnector}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 import scala.concurrent.Future
@@ -32,8 +32,8 @@ import scala.concurrent.Future
 class TaxEnrolmentsControllerSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
 
   def setupController(addEntryResult: Future[Unit]): TaxEnrolmentsController = {
-    val mockIssuerRepository = mock[CGTMongoRepository[EnrolmentIssuerRequestModel, Identifier]]
-    val mockSubscriberRepository = mock[CGTMongoRepository[EnrolmentSubscriberRequestModel, String]]
+    val mockIssuerRepository = mock[EnrolmentMongoRepository[EnrolmentIssuerRequestModel, Identifier]]
+    val mockSubscriberRepository = mock[EnrolmentMongoRepository[EnrolmentSubscriberRequestModel, String]]
 
     val mockConnector = mock[TaxEnrolmentConnector]
     new TaxEnrolmentsController(mockConnector)

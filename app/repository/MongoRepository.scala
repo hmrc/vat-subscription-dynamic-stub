@@ -39,6 +39,14 @@ trait CGTRepository[T, O] extends Repository[T, BSONObjectID] {
 
 }
 
-abstract class CGTMongoRepository[T, O](implicit mongo: () => DB, formats: Format[T], manifest: Manifest[T])
-  extends ReactiveRepository[T, BSONObjectID]("protections", mongo, formats)
+abstract class BPMongoRepository[T, O](implicit mongo: () => DB, formats: Format[T], manifest: Manifest[T])
+  extends ReactiveRepository[T, BSONObjectID]("businessPartners", mongo, formats)
+    with CGTRepository[T, O]
+
+abstract class SubscriberMongoRepository[T, O](implicit mongo: () => DB, formats: Format[T], manifest: Manifest[T])
+  extends ReactiveRepository[T, BSONObjectID]("subscribers", mongo, formats)
+    with CGTRepository[T, O]
+
+abstract class EnrolmentMongoRepository[T, O](implicit mongo: () => DB, formats: Format[T], manifest: Manifest[T])
+  extends ReactiveRepository[T, BSONObjectID]("enrolments", mongo, formats)
     with CGTRepository[T, O]

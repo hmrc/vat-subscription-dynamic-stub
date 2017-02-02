@@ -28,7 +28,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class BPMongoConnector @Inject()() extends MongoDbConnection {
 
-  lazy val repository = new CGTMongoRepository[BusinessPartnerModel, Nino]() {
+  lazy val repository = new BPMongoRepository[BusinessPartnerModel, Nino]() {
 
     def findAllVersionsBy(o: Nino)(implicit ec: ExecutionContext): Future[Map[Nino, List[BusinessPartnerModel]]] = {
       find("nino" -> o.nino).map { allBP =>
@@ -60,6 +60,6 @@ class BPMongoConnector @Inject()() extends MongoDbConnection {
     }
   }
 
-  def apply(): CGTMongoRepository[BusinessPartnerModel, Nino] = repository
+  def apply(): BPMongoRepository[BusinessPartnerModel, Nino] = repository
 
 }

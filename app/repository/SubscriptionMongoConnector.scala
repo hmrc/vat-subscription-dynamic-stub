@@ -26,7 +26,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class SubscriptionMongoConnector @Inject()() extends MongoDbConnection {
 
-  lazy val repository = new CGTMongoRepository[SubscriberModel, String]() {
+  lazy val repository = new SubscriberMongoRepository[SubscriberModel, String]() {
 
     override def findAllVersionsBy(o: String)(implicit ec: ExecutionContext): Future[Map[String, List[SubscriberModel]]] = {
       find("sap" -> o).map {
