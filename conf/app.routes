@@ -6,4 +6,5 @@ PUT        /tax-enrolments/subscriptions/:subscriptionId/issuer         @control
 PUT        /tax-enrolments/subscriptions/:subscriptionId/subscriber     @controllers.stubs.TaxEnrolmentsController.subscribeSubscriber(subscriptionId)
 
 POST       /capital-gains-tax/individual/:nino/register                 @controllers.stubs.RegistrationController.registerBusinessPartner(nino: String)
-POST        /capital-gains-tax/individual/:safeId/subscribe             @controllers.stubs.SubscriptionController.subscribe(safeId: String)
+POST       /capital-gains-tax/non-resident/individual/register          @controllers.stubs.GhostRegistrationController.registerBusinessPartner
+POST       /capital-gains-tax/individual/:safeId/subscribe              @controllers.stubs.SubscriptionController.subscribe(safeId: String)
