@@ -39,7 +39,7 @@ class SubscriptionController @Inject()(subscriptionMongoConnector: SubscriptionM
     sAPExceptionTriggers.WithSapExceptionTriggers(safeId).async {
       implicit request => {
 
-        Logger.info("Received a call from the back end to subscribe")
+        Logger.warn("Received a call from the back end to subscribe")
 
         val body = request.body.asJson
         val subscriptionDetails = body.get.as[SubscribeModel]
