@@ -33,7 +33,7 @@ class TaxEnrolmentsController @Inject()(cgtMongoConnector: TaxEnrolmentConnector
   def subscribeIssuer(subscriptionId: String): Action[AnyContent] = Action.async {
     implicit request =>
 
-      Logger.info("Received a call from the back end to make an enrolment issuer request")
+      Logger.warn("Received a call from the back end to make an enrolment issuer request")
 
       Try {
         val body = request.body.asJson

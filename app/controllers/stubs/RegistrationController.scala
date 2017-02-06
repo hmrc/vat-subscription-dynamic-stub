@@ -39,7 +39,7 @@ class RegistrationController @Inject()(bpMongoConnector: BPMongoConnector,
     nino => ninoExceptionTriggersActions.WithNinoExceptionTriggers(Nino(nino)).async {
       implicit request => {
 
-        Logger.info("Received a call from the back end to register")
+        Logger.warn("Received a call from the back end to register")
 
         val body = request.body.asJson
         val registrationDetails = body.get.as[RegisterModel]
