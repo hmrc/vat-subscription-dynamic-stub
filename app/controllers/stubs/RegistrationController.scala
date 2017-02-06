@@ -25,6 +25,7 @@ import play.api.mvc.{Action, AnyContent}
 import repository.BPMongoConnector
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.play.microservice.controller.BaseController
+import play.api.Logger
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -37,6 +38,8 @@ class RegistrationController @Inject()(bpMongoConnector: BPMongoConnector,
   val registerBusinessPartner: String => Action[AnyContent] = {
     nino => ninoExceptionTriggersActions.WithNinoExceptionTriggers(Nino(nino)).async {
       implicit request => {
+
+        Logger.info("Received a call from the back end to register")
 
         val body = request.body.asJson
         val registrationDetails = body.get.as[RegisterModel]

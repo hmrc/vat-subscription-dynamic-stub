@@ -20,6 +20,7 @@ import actions.SAPExceptionTriggers
 import com.google.inject.{Inject, Singleton}
 import helpers.CGTRefHelper
 import models.{SubscribeModel, SubscriberModel}
+import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent}
 import repository.SubscriptionMongoConnector
@@ -37,6 +38,8 @@ class SubscriptionController @Inject()(subscriptionMongoConnector: SubscriptionM
   val subscribe: String => Action[AnyContent] = safeId => {
     sAPExceptionTriggers.WithSapExceptionTriggers(safeId).async {
       implicit request => {
+
+        Logger.info("Received a call from the back end to subscribe")
 
         val body = request.body.asJson
         val subscriptionDetails = body.get.as[SubscribeModel]
