@@ -21,10 +21,10 @@ import models.FullDetailsModel
 case class ErrorFullDetails(fullDetails: FullDetailsModel)
 
 object ErrorFullDetails {
-  val notFound = ErrorFullDetails(FullDetailsModel("John", "Smith", "25 Big House", None, "Telford", None, "ABC 123", "UK"))
-  val badRequest = ErrorFullDetails(FullDetailsModel("Bruce", "Wayne", "25 Big House", None, "Telford", None, "ABC 123", "UK"))
-  val internalServerError = ErrorFullDetails(FullDetailsModel("Dr", "Who", "25 Big House", None, "Telford", None, "ABC 123", "UK"))
-  val badGateway = ErrorFullDetails(FullDetailsModel("Peter", "Parker", "25 Big House", None, "Telford", None, "ABC 123", "UK"))
-  val serviceUnavailable = ErrorFullDetails(FullDetailsModel("Bruce", "Banner", "25 Big House", None, "Telford", None, "ABC 123", "UK"))
-  val timeout = ErrorFullDetails(FullDetailsModel("Clark", "Kent", "25 Big House", None, "Telford", None, "ABC 123", "UK"))
+  val notFound = ErrorFullDetails(FullDetailsModel("John", "Smith", "25 Big House", None, "Telford", None, "ABC 404", "UK"))
+  val badRequest = ErrorFullDetails(FullDetailsModel("Bruce", "Wayne", "25 Big House", None, "Telford", None, "ABC 400", "UK"))
+  val internalServerError = ErrorFullDetails(FullDetailsModel("Dr", "Who", "25 Big House", None, "Telford", None, "ABC 500", "UK"))
+  val badGateway = ErrorFullDetails(FullDetailsModel("Peter", "Parker", "25 Big House", None, "Telford", None, "ABC 502", "UK"))
+  val serviceUnavailable = ErrorFullDetails(FullDetailsModel("Bruce", "Banner", "25 Big House", None, "Telford", None, "ABC 503", "UK"))
+  val timeout = ErrorFullDetails(FullDetailsModel("Clark", "Kent", "25 Big House", None, "Telford", None, "ABC 408", "UK"))
 }

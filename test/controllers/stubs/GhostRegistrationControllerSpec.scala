@@ -93,7 +93,7 @@ class GhostRegistrationControllerSpec extends UnitSpec with MockitoSugar with Wi
     }
 
     "passing in a full details model for an error scenario" should {
-      val fullDetailsModel = FullDetailsModel("John", "Smith", "25 Big House", None, "Telford", None, "ABC 123", "UK")
+      val fullDetailsModel = FullDetailsModel("John", "Smith", "25 Big House", None, "Telford", None, "ABC 404", "UK")
       val controller = setupController(Future.successful(List(NRBusinessPartnerModel(fullDetailsModel, "1234567890"))), Future.successful(()), "1234567890")
       lazy val result = controller.registerBusinessPartner()(FakeRequest("POST", "")
         .withJsonBody(Json.toJson(fullDetailsModel)))
