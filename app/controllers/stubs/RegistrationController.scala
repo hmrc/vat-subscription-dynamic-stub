@@ -47,11 +47,14 @@ class RegistrationController @Inject()(bpMongoConnector: BPMongoConnector,
 
         def getReference(bp: List[BusinessPartnerModel]): Future[String] = {
           if (bp.isEmpty) {
+            Logger.warn("Created a new entry with sap")
             val sap = sAPHelper.generateSap()
             for {
               mongo <- bpMongoConnector.repository.addEntry(BusinessPartnerModel(registrationDetails.nino, sap))
             } yield sap
+
           } else {
+            Logger.warn("Created a new entry with sap " + bp.head.sap)
             Future.successful(bp.head.sap)
           }
         }
