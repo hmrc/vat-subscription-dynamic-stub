@@ -50,3 +50,7 @@ abstract class SubscriberMongoRepository[T, O](implicit mongo: () => DB, formats
 abstract class EnrolmentMongoRepository[T, O](implicit mongo: () => DB, formats: Format[T], manifest: Manifest[T])
   extends ReactiveRepository[T, BSONObjectID]("enrolments", mongo, formats)
     with CGTRepository[T, O]
+
+abstract class NRBPMongoRepository[T, O](implicit mongo: () => DB, formats: Format[T], manifest: Manifest[T])
+  extends ReactiveRepository[T, BSONObjectID]("nonResidentBusinessPartners", mongo, formats)
+    with CGTRepository[T, O]

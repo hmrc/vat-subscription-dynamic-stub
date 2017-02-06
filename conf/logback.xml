@@ -45,7 +45,7 @@
 
     <logger name="com.google.inject" level="INFO"/>
 
-    <logger name="uk.gov" level="DEBUG"/>
+    <logger name="uk.gov" level="WARN"/>
 
     <logger name="application" level="DEBUG"/>
 
@@ -55,7 +55,7 @@
         <appender-ref ref="STDOUT"/>
     </logger>
 
-    <root level="DEBUG">
+    <root level="WARN">
         <appender-ref ref="FILE"/>
         <appender-ref ref="STDOUT"/>
     </root>
