@@ -18,6 +18,7 @@ package controllers.stubs
 
 import com.google.inject.{Inject, Singleton}
 import models.{EnrolmentIssuerRequestModel, EnrolmentSubscriberRequestModel}
+import play.api.Logger
 import play.api.mvc.{Action, AnyContent}
 import repository.TaxEnrolmentConnector
 import uk.gov.hmrc.play.microservice.controller.BaseController
@@ -31,6 +32,9 @@ class TaxEnrolmentsController @Inject()(cgtMongoConnector: TaxEnrolmentConnector
 
   def subscribeIssuer(subscriptionId: String): Action[AnyContent] = Action.async {
     implicit request =>
+
+      Logger.info("Received a call from the back end to make an enrolment issuer request")
+
       Try {
         val body = request.body.asJson
         val recordData = body.get.as[EnrolmentIssuerRequestModel]
@@ -45,6 +49,9 @@ class TaxEnrolmentsController @Inject()(cgtMongoConnector: TaxEnrolmentConnector
   def subscribeSubscriber(subscriptionId: String): Action[AnyContent] = Action.async {
 
     implicit request =>
+
+      Logger.info("Received a call from the back end to make an enrolment subscriber request")
+
       Try {
         val body = request.body.asJson
         val recordData = body.get.as[EnrolmentSubscriberRequestModel]
