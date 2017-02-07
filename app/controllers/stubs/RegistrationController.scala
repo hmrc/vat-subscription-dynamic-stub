@@ -48,7 +48,7 @@ class RegistrationController @Inject()(bpMongoConnector: BPMongoConnector,
 
         val businessPartner = bpMongoConnector.repository.findLatestVersionBy(registrationDetails.nino)
 
-        Logger.warn("Connection established to mongo.")
+        Logger.warn("Promise of business partners established.")
 
         def getReference(bp: List[BusinessPartnerModel]): Future[String] = {
 
