@@ -43,7 +43,12 @@ class RegistrationController @Inject()(bpMongoConnector: BPMongoConnector,
 
         val body = request.body.asJson
         val registrationDetails = body.get.as[RegisterModel]
+
+        Logger.warn("Opening a connection to mongo.")
+
         val businessPartner = bpMongoConnector.repository.findLatestVersionBy(registrationDetails.nino)
+
+        Logger.warn("Connection established to mongo.")
 
         def getReference(bp: List[BusinessPartnerModel]): Future[String] = {
           if (bp.isEmpty) {
