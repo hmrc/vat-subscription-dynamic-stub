@@ -16,7 +16,7 @@
 
 package models
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class CompanySubmissionModel(
                                    sap: Option[String],
@@ -25,6 +25,5 @@ case class CompanySubmissionModel(
                                  )
 
 object CompanySubmissionModel {
-  implicit val formats = Json.format[CompanySubmissionModel]
+  implicit val formats: OFormat[CompanySubmissionModel] = Json.format[CompanySubmissionModel]
 }
-

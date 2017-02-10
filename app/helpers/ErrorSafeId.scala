@@ -26,3 +26,14 @@ object ErrorSafeId {
   val serviceUnavailable = ErrorSafeId("503503503")
   val timeout = ErrorSafeId("408408408")
 }
+
+case class CompanyErrorSafeId(sap: String)
+
+object CompanyErrorSafeId {
+  val notFound = ErrorSafeId("003404404")
+  val badRequest = ErrorSafeId("003400400")
+  val internalServerError = ErrorSafeId("003500500")
+  val badGateway = ErrorSafeId("003502502")
+  val serviceUnavailable = ErrorSafeId("003503503")
+  val timeout = ErrorSafeId("003408408")
+}
