@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package repository
+package repositories
 
-import com.google.inject.{Inject, Singleton}
+import javax.inject.{Inject, Singleton}
 import models.SubscriberModel
 import play.modules.reactivemongo.MongoDbConnection
 import reactivemongo.api.commands._
@@ -24,9 +24,9 @@ import reactivemongo.api.commands._
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class SubscriptionMongoConnector @Inject()() extends MongoDbConnection {
+class SubscriptionRepository @Inject()() extends MongoDbConnection {
 
-  lazy val repository = new SubscriberMongoRepository[SubscriberModel, String]() {
+  lazy val repository = new SubscriberRepositoryBase {
 
     override def findAllVersionsBy(o: String)(implicit ec: ExecutionContext): Future[Map[String, List[SubscriberModel]]] = {
       find("sap" -> o).map {
@@ -37,25 +37,31 @@ class SubscriptionMongoConnector @Inject()() extends MongoDbConnection {
 
     override def findLatestVersionBy(o: String)(implicit ec: ExecutionContext): Future[List[SubscriberModel]] = {
       findAllVersionsBy(o).map {
-        _.values.toList.map {_.head}
+        _.values.toList.map {
+          _.head
+        }
       }
     }
 
     override def removeBy(o: String)(implicit ec: ExecutionContext): Future[Unit] = {
-      remove("sap" -> o).map {_ => }
+      remove("sap" -> o).map { _ => }
     }
 
     override def removeAll()(implicit ec: ExecutionContext): Future[Unit] = {
-      removeAll(WriteConcern.Acknowledged).map {_ => }
+      removeAll(WriteConcern.Acknowledged).map { _ => }
     }
 
     override def addEntry(t: SubscriberModel)(implicit ec: ExecutionContext): Future[Unit] = {
-      insert(t).map {_ => }
+      insert(t).map { _ => }
     }
 
     override def addEntries(entries: Seq[SubscriberModel])(implicit ec: ExecutionContext): Future[Unit] = {
-      entries.foreach {addEntry}
-      Future.successful()
+      entries.foreach {
+        addEntry
+      }
+      Future.successful({})
     }
   }
+
+  def apply(): CgtRepository[SubscriberModel, String] = repository
 }

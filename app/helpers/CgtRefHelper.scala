@@ -14,23 +14,20 @@
  * limitations under the License.
  */
 
-package controllers
+package helpers
 
-import play.api.http.Status
-import play.api.test.FakeRequest
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import javax.inject.{Inject, Singleton}
 
-class MicroserviceHelloWorldControllerSpec extends UnitSpec with WithFakeApplication{
+import scala.concurrent.forkjoin.ThreadLocalRandom
 
-  val fakeRequest = FakeRequest("GET", "/")
+@Singleton
+class CgtRefHelper @Inject()() {
 
+  def generateCGTReference() = {
+    val prefix = "CGT"
 
-  "GET /" should {
-    "return 200" in {
-      val result = MicroserviceHelloWorld.hello()(fakeRequest)
-      status(result) shouldBe Status.OK
-    }
+    def randomID() = ThreadLocalRandom.current().nextInt(100000, 999999)
+
+    prefix + randomID()
   }
-
-
 }

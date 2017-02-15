@@ -16,10 +16,10 @@
 
 package controllers.tests
 
-import com.google.inject.{Inject, Singleton}
+import javax.inject.{Inject, Singleton}
 import models.BusinessPartnerModel
 import play.api.mvc.{Action, AnyContent}
-import repository.BPMongoConnector
+import repositories.BusinessPartnerRepository
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
@@ -28,14 +28,14 @@ import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
 @Singleton
-class RegistrationTestController @Inject()(bpMongoConnector: BPMongoConnector) extends BaseController {
+class RegistrationTestController @Inject()(repository: BusinessPartnerRepository) extends BaseController {
 
   val addRegistrationRecord: Action[AnyContent] = Action.async { implicit request =>
     Try {
       val body = request.body.asJson
       val recordData = body.get.as[BusinessPartnerModel]
 
-      bpMongoConnector.apply().addEntry(recordData)
+      repository().addEntry(recordData)
     } match {
       case Success(_) => Future.successful(Ok("Success"))
       case Failure(_) => Future.successful(BadRequest("Could not store data"))
@@ -47,7 +47,7 @@ class RegistrationTestController @Inject()(bpMongoConnector: BPMongoConnector) e
       val body = request.body.asJson
       val recordData = body.get.as[Nino]
 
-      bpMongoConnector.apply().removeBy(recordData)
+      repository().removeBy(recordData)
     } match {
       case Success(_) => Future.successful(Ok("Success"))
       case Failure(_) => Future.successful(BadRequest("Could not delete data"))

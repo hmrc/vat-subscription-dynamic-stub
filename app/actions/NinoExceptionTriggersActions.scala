@@ -16,7 +16,7 @@
 
 package actions
 
-import com.google.inject.{Inject, Singleton}
+import javax.inject.{Inject, Singleton}
 import helpers.ErrorNino
 import play.api.libs.json.Json
 import play.api.mvc.{ActionBuilder, Request, Result, Results}

@@ -17,20 +17,21 @@
 package controllers.stubs
 
 import actions.FullDetailsExceptionTriggersActions
-import com.google.inject.{Inject, Singleton}
-import helpers.SAPHelper
-import models.{FullDetailsModel, NRBusinessPartnerModel}
-import play.api.mvc.{Action, AnyContent}
+import javax.inject.{Inject, Singleton}
+
+import helpers.SapHelper
+import models.{FullDetailsModel, NonResidentBusinessPartnerModel}
 import play.api.libs.json.Json
-import repository.NRBPMongoConnector
+import play.api.mvc.{Action, AnyContent}
+import repositories.NonResidentBusinessPartnerRepository
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 @Singleton
-class GhostRegistrationController @Inject()(nrBPMongoConnector: NRBPMongoConnector,
-                                            sapHelper: SAPHelper,
+class GhostRegistrationController @Inject()(repository: NonResidentBusinessPartnerRepository,
+                                            sapHelper: SapHelper,
                                             fullDetailsExceptionTriggersActions: FullDetailsExceptionTriggersActions) extends BaseController {
 
   val registerBusinessPartner: Action[AnyContent] = {
@@ -39,18 +40,19 @@ class GhostRegistrationController @Inject()(nrBPMongoConnector: NRBPMongoConnect
 
         val body = request.body.asJson
         val registrationDetails = body.get.as[FullDetailsModel]
-        val businessPartner = nrBPMongoConnector.repository.findLatestVersionBy(registrationDetails)
+        val businessPartner = repository().findLatestVersionBy(registrationDetails)
 
-        def getReference(bp: List[NRBusinessPartnerModel]): Future[String] = {
+        def getReference(bp: List[NonResidentBusinessPartnerModel]): Future[String] = {
           if (bp.isEmpty) {
             val sap = sapHelper.generateSap()
             for {
-              mongo <- nrBPMongoConnector.repository.addEntry(NRBusinessPartnerModel(registrationDetails, sap))
+              _ <- repository().addEntry(NonResidentBusinessPartnerModel(registrationDetails, sap))
             } yield sap
           } else {
             Future.successful(bp.head.sap)
           }
         }
+
         for {
           bp <- businessPartner
           sap <- getReference(bp)

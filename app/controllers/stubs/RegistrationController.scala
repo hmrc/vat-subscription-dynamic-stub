@@ -17,61 +17,62 @@
 package controllers.stubs
 
 import actions.NinoExceptionTriggersActions
-import com.google.inject.{Inject, Singleton}
-import helpers.SAPHelper
+import javax.inject.{Inject, Singleton}
+import helpers.SapHelper
 import models.{BusinessPartnerModel, RegisterModel}
+import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent}
-import repository.BPMongoConnector
+import repositories.BusinessPartnerRepository
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.play.microservice.controller.BaseController
-import play.api.Logger
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class RegistrationController @Inject()(bpMongoConnector: BPMongoConnector,
-                                       sAPHelper: SAPHelper,
+class RegistrationController @Inject()(repository: BusinessPartnerRepository,
+                                       sAPHelper: SapHelper,
                                        ninoExceptionTriggersActions: NinoExceptionTriggersActions) extends BaseController {
 
   val registerBusinessPartner: String => Action[AnyContent] = {
-    nino => ninoExceptionTriggersActions.WithNinoExceptionTriggers(Nino(nino)).async {
-      implicit request => {
+    nino =>
+      ninoExceptionTriggersActions.WithNinoExceptionTriggers(Nino(nino)).async {
+        implicit request => {
 
-        Logger.warn("Received a call from the back end to register")
+          Logger.warn("Received a call from the back end to register")
 
-        val body = request.body.asJson
-        val registrationDetails = body.get.as[RegisterModel]
+          val body = request.body.asJson
+          val registrationDetails = body.get.as[RegisterModel]
 
-        Logger.warn("Opening a connection to mongo.")
+          Logger.warn("Opening a connection to mongo.")
 
-        val businessPartner = bpMongoConnector.repository.findLatestVersionBy(registrationDetails.nino)
+          val businessPartner = repository().findLatestVersionBy(registrationDetails.nino)
 
-        Logger.warn("Promise of business partners established.")
+          Logger.warn("Promise of business partners established.")
 
-        def getReference(bp: List[BusinessPartnerModel]): Future[String] = {
+          def getReference(bp: List[BusinessPartnerModel]): Future[String] = {
 
-          Logger.warn("Was passed a list of bp's that is empty? -- " + bp.isEmpty)
+            Logger.warn("Was passed a list of bp's that is empty? -- " + bp.isEmpty)
 
-          if (bp.isEmpty) {
-            Logger.warn("Created a new entry with sap")
-            val sap = sAPHelper.generateSap()
-            for {
-              mongo <- bpMongoConnector.repository.addEntry(BusinessPartnerModel(registrationDetails.nino, sap))
-            } yield sap
+            if (bp.isEmpty) {
+              Logger.warn("Created a new entry with sap")
+              val sap = sAPHelper.generateSap()
+              for {
+                _ <- repository().addEntry(BusinessPartnerModel(registrationDetails.nino, sap))
+              } yield sap
 
-          } else {
-            Logger.warn("Found an existing entry with sap " + bp.head.sap)
-            Future.successful(bp.head.sap)
+            } else {
+              Logger.warn("Found an existing entry with sap " + bp.head.sap)
+              Future.successful(bp.head.sap)
+            }
           }
-        }
 
-        for {
-          bp <- businessPartner
-          sap <- getReference(bp)
-        } yield Ok(Json.toJson(sap))
+          for {
+            bp <- businessPartner
+            sap <- getReference(bp)
+          } yield Ok(Json.toJson(sap))
+        }
       }
-    }
   }
 }

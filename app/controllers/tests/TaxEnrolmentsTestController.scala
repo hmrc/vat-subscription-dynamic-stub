@@ -17,37 +17,40 @@
 package controllers.tests
 
 import actions.BearerTokenCheck
-import com.google.inject.Inject
+import javax.inject.Inject
 import models.{EnrolmentIssuerRequestModel, EnrolmentSubscriberRequestModel, Identifier}
 import play.api.mvc.{Action, AnyContent}
-import repository.TaxEnrolmentConnector
+import repositories.{TaxEnrolmentIssuerRepository, TaxEnrolmentSubscriberRepository}
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
-class TaxEnrolmentsTestController @Inject()(bearerTokenCheck: BearerTokenCheck, cgtMongoConnector: TaxEnrolmentConnector) extends BaseController {
+class TaxEnrolmentsTestController @Inject()(bearerTokenCheck: BearerTokenCheck,
+                                            subscriberRepository: TaxEnrolmentSubscriberRepository,
+                                            issuerRepository: TaxEnrolmentIssuerRepository)
+  extends BaseController {
   //no obvious use case so far, leaving in out of precaution
   val addSubscriptionIssuerRecord: Action[AnyContent] = bearerTokenCheck.WithBearerTokenCheck().async {
     implicit request =>
-      Try{
+      Try {
         val body = request.body.asJson
         val recordData = body.get.as[EnrolmentIssuerRequestModel]
-        cgtMongoConnector.issuerRepository.addEntry(recordData)
+        issuerRepository().addEntry(recordData)
       } match {
         case Success(_) => Future.successful(Ok("Success"))
         case Failure(_) => Future.successful(BadRequest("Could not store data"))
       }
   }
 
-  val removeSubscriptionIssuerRecord: Action[AnyContent] = bearerTokenCheck.WithBearerTokenCheck().async{
+  val removeSubscriptionIssuerRecord: Action[AnyContent] = bearerTokenCheck.WithBearerTokenCheck().async {
     implicit request =>
-      Try{
+      Try {
         val body = request.body.asJson
         val recordData = body.get.as[Identifier]
 
-        cgtMongoConnector.issuerRepository.removeBy(recordData)
+        issuerRepository().removeBy(recordData)
       } match {
         case Success(_) => Future.successful(Ok("Success"))
         case Failure(_) => Future.successful(BadRequest("Could not delete data"))
@@ -56,10 +59,10 @@ class TaxEnrolmentsTestController @Inject()(bearerTokenCheck: BearerTokenCheck, 
 
   val addSubscriptionSubscriberRecord: Action[AnyContent] = bearerTokenCheck.WithBearerTokenCheck().async {
     implicit request =>
-      Try{
+      Try {
         val body = request.body.asJson
         val recordData = body.get.as[EnrolmentSubscriberRequestModel]
-        cgtMongoConnector.subscriberRepository.addEntry(recordData)
+        subscriberRepository().addEntry(recordData)
       } match {
         case Success(_) => Future.successful(Ok("Success"))
         case Failure(_) => Future.successful(BadRequest("Could not store data"))
@@ -68,10 +71,10 @@ class TaxEnrolmentsTestController @Inject()(bearerTokenCheck: BearerTokenCheck, 
 
   val removeSubscriptionSubscriberRecord: Action[AnyContent] = bearerTokenCheck.WithBearerTokenCheck().async {
     implicit request =>
-      Try{
+      Try {
         val body = request.body.asJson
         val recordData = body.get.as[String]
-        cgtMongoConnector.subscriberRepository.removeBy(recordData)
+        subscriberRepository().removeBy(recordData)
       } match {
         case Success(_) => Future.successful(Ok("Success"))
         case Failure(_) => Future.successful(BadRequest("Could not store data"))

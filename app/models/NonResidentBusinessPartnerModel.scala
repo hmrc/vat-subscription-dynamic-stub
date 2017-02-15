@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-package helpers
+package models
 
-import com.google.inject.{Inject, Singleton}
+import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.domain.Nino
 
-import scala.concurrent.forkjoin.ThreadLocalRandom
+case class NonResidentBusinessPartnerModel(fullDetailsModel: FullDetailsModel, sap: String)
 
-@Singleton
-class SAPHelper @Inject()() {
+object NonResidentBusinessPartnerModel {
 
-  def generateSap(): String = {
-    def randomID() = ThreadLocalRandom.current().nextInt(100000000, 999999999)
-
-    randomID().toString
-  }
+  implicit val formats: OFormat[NonResidentBusinessPartnerModel] = Json.format[NonResidentBusinessPartnerModel]
 }

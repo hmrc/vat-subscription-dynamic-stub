@@ -16,11 +16,11 @@
 
 package controllers.stubs
 
-import com.google.inject.{Inject, Singleton}
+import javax.inject.{Inject, Singleton}
 import models.{EnrolmentIssuerRequestModel, EnrolmentSubscriberRequestModel}
 import play.api.Logger
 import play.api.mvc.{Action, AnyContent}
-import repository.TaxEnrolmentConnector
+import repositories.{TaxEnrolmentIssuerRepository, TaxEnrolmentSubscriberRepository}
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -28,7 +28,9 @@ import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
 @Singleton
-class TaxEnrolmentsController @Inject()(cgtMongoConnector: TaxEnrolmentConnector) extends BaseController {
+class TaxEnrolmentsController @Inject()(subscriberRepository: TaxEnrolmentSubscriberRepository,
+                                        issuerRepository: TaxEnrolmentIssuerRepository)
+  extends BaseController {
 
   def subscribeIssuer(subscriptionId: String): Action[AnyContent] = Action.async {
     implicit request =>
@@ -39,10 +41,10 @@ class TaxEnrolmentsController @Inject()(cgtMongoConnector: TaxEnrolmentConnector
         val body = request.body.asJson
         val recordData = body.get.as[EnrolmentIssuerRequestModel]
 
-        cgtMongoConnector.issuerRepository.addEntry(recordData)
+        issuerRepository().addEntry(recordData)
       } match {
         case Success(_) => Future.successful(NoContent)
-        case Failure(exception) => Future.successful(BadRequest)
+        case Failure(_) => Future.successful(BadRequest)
       }
   }
 
@@ -55,10 +57,10 @@ class TaxEnrolmentsController @Inject()(cgtMongoConnector: TaxEnrolmentConnector
       Try {
         val body = request.body.asJson
         val recordData = body.get.as[EnrolmentSubscriberRequestModel]
-        cgtMongoConnector.subscriberRepository.addEntry(recordData)
+        subscriberRepository().addEntry(recordData)
       } match {
         case Success(_) => Future.successful(NoContent)
-        case Failure(exception) => Future.successful(BadRequest)
+        case Failure(_) => Future.successful(BadRequest)
       }
   }
 

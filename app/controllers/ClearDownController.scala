@@ -16,9 +16,9 @@
 
 package controllers
 
-import com.google.inject.{Inject, Singleton}
+import javax.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, Result}
-import repository.{BPMongoConnector, SubscriptionMongoConnector, TaxEnrolmentConnector}
+import repositories.{BusinessPartnerRepository, SubscriptionRepository, TaxEnrolmentSubscriberRepository}
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -26,11 +26,10 @@ import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
 @Singleton
-class ClearDownController @Inject()(
-                                     bPMongoConnector: BPMongoConnector,
-                                     subscriptionETMPMongoConnector: SubscriptionMongoConnector,
-                                     subscriptionTaxEnrolmentConnector: TaxEnrolmentConnector
-                                   ) extends BaseController {
+class ClearDownController @Inject()(businessPartnerRepository: BusinessPartnerRepository,
+                                    subscriptionRepository: SubscriptionRepository,
+                                    enrolmentSubscriberRepository: TaxEnrolmentSubscriberRepository)
+  extends BaseController {
 
   private val clearResult: Future[Unit] => Future[Result] = clearAction =>
     Try {
@@ -39,19 +38,6 @@ class ClearDownController @Inject()(
       case Success(_) => Future.successful(Ok("Success"))
       case Failure(_) => Future.successful(BadRequest("Could not delete data"))
     }
-
-  def clearRegistration: Future[Result] = clearResult(bPMongoConnector.repository.removeAll())
-
-  def clearSubscription: Future[Result] = clearResult(subscriptionETMPMongoConnector.repository.removeAll())
-
-  def clearEnrolmentSubscription: Future[Result] = clearResult(subscriptionTaxEnrolmentConnector.subscriberRepository.removeAll())
-
-  def clearEnrolmentIssuer: Future[Result] = clearResult(subscriptionTaxEnrolmentConnector.issuerRepository.removeAll())
-
-  def checkSuccess(seq: Seq[Result]): Future[Boolean] = {
-    //I'm sure there is a better way of doing this but... Can't think of it right now
-    Future.successful(seq.forall(_.header.status == 200))
-  }
 
   def clearDown(): Action[AnyContent] = Action.async {
     implicit request => {
@@ -69,6 +55,19 @@ class ClearDownController @Inject()(
         checkClearDownResult <- checkSuccess(Seq(clearedRegistered, clearedSubscribed, clearedEnrolmentSubscribed, clearedEnrolmentIssuer))
       } yield Ok(checkClearDownResult.toString)
     }
+  }
+
+  def clearRegistration: Future[Result] = clearResult(businessPartnerRepository().removeAll())
+
+  def clearSubscription: Future[Result] = clearResult(subscriptionRepository().removeAll())
+
+  def clearEnrolmentSubscription: Future[Result] = clearResult(enrolmentSubscriberRepository().removeAll())
+
+  def clearEnrolmentIssuer: Future[Result] = clearResult(enrolmentSubscriberRepository().removeAll())
+
+  def checkSuccess(seq: Seq[Result]): Future[Boolean] = {
+    //I'm sure there is a better way of doing this but... Can't think of it right now
+    Future.successful(seq.forall(_.header.status == 200))
   }
 }
 

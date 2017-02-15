@@ -16,7 +16,8 @@
 
 package actions
 
-import com.google.inject.{Inject, Singleton}
+import javax.inject.{Inject, Singleton}
+
 import play.api.mvc.{ActionBuilder, Request, Result}
 
 import scala.concurrent.Future
@@ -24,11 +25,9 @@ import scala.concurrent.Future
 
 @Singleton
 class BearerTokenCheck @Inject()() {
+
   case class WithBearerTokenCheck(hc: String = "something") extends ActionBuilder[Request] {
-    override def invokeBlock[A](request: Request[A], block: (Request[A]) => Future[Result]): Future[Result] = {
-      request match {
-        case _ => block(request)
-      }
-    }
+    override def invokeBlock[A](request: Request[A], block: (Request[A]) => Future[Result]): Future[Result] = block(request)
   }
+
 }

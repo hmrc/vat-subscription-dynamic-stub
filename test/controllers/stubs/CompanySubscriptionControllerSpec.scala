@@ -18,42 +18,21 @@ package controllers.stubs
 
 import javax.inject.Inject
 
-import helpers.CGTRefHelper
+import helpers.CgtRefHelper
 import models.{CompanyAddressModel, CompanySubmissionModel, SubscriberModel}
-import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito.when
 import org.scalatest.mock.MockitoSugar
 import play.api.libs.json.Json
 import play.api.mvc.Results
 import play.api.test.Helpers._
-import repository.{SubscriberMongoRepository, SubscriptionMongoConnector}
+import repositories.{CgtRepository, SubscriptionRepository}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 import scala.concurrent.Future
 
 class CompanySubscriptionControllerSpec @Inject()(companySubscriptionController: CompanySubscriptionController)
   extends UnitSpec with MockitoSugar with WithFakeApplication {
-
-  def setupController(findLatestVersionResult: Future[List[SubscriberModel]], addEntryResult: Future[Unit], ref: String): CompanySubscriptionController = {
-
-    val mockRepository = mock[SubscriberMongoRepository[SubscriberModel, String]]
-    val mockConnector = mock[SubscriptionMongoConnector]
-    val mockCGTRefHelper = mock[CGTRefHelper]
-
-    when(mockConnector.repository)
-      .thenReturn(mockRepository)
-
-    when(mockRepository.addEntry(ArgumentMatchers.any())(ArgumentMatchers.any()))
-      .thenReturn(addEntryResult)
-
-    when(mockRepository.findLatestVersionBy(ArgumentMatchers.any())(ArgumentMatchers.any()))
-      .thenReturn(Future.successful(findLatestVersionResult))
-
-    when(mockCGTRefHelper.generateCGTReference())
-      .thenReturn(ref)
-
-    new CompanySubscriptionController(mockConnector, mockCGTRefHelper)
-  }
 
   val companyAddressModel = CompanyAddressModel(
     Some("Line one"),
@@ -67,6 +46,27 @@ class CompanySubscriptionControllerSpec @Inject()(companySubscriptionController:
   val noRegAddressCompanySubmissionModel = CompanySubmissionModel(Some("dummySap"), None, Some(companyAddressModel))
   val noCorAddressCompanySubmissionModel = CompanySubmissionModel(Some("dummySap"), Some(companyAddressModel), None)
   val companySubmissionModel = CompanySubmissionModel(Some("dummySap"), Some(companyAddressModel), Some(companyAddressModel))
+
+  def setupController(findLatestVersionResult: Future[List[SubscriberModel]], addEntryResult: Future[Unit], ref: String): CompanySubscriptionController = {
+
+    val mockCollection = mock[CgtRepository[SubscriberModel, String]]
+    val mockRepository = mock[SubscriptionRepository]
+    val mockCgtRefHelper = mock[CgtRefHelper]
+
+    when(mockRepository.apply())
+      .thenReturn(mockCollection)
+
+    when(mockCollection.addEntry(any())(any()))
+      .thenReturn(addEntryResult)
+
+    when(mockCollection.findLatestVersionBy(any())(any()))
+      .thenReturn(Future.successful(findLatestVersionResult))
+
+    when(mockCgtRefHelper.generateCGTReference())
+      .thenReturn(ref)
+
+    new CompanySubscriptionController(mockRepository, mockCgtRefHelper)
+  }
 
   "Calling .validateBody" when {
 
@@ -134,7 +134,7 @@ class CompanySubscriptionControllerSpec @Inject()(companySubscriptionController:
 
     "there is an entry in the database for the supplied sap already" should {
 
-      val controller = setupController(Future.successful(List(SubscriberModel("123456789", "CGT123456"))), Future.successful(()), "CGT123456")
+      val controller = setupController(Future.successful(List(SubscriberModel("123456789", "CGT123456"))), Future.successful({}), "CGT123456")
       lazy val result = controller.returnSubscriptionReference("123456789")
 
       "return a status of 200" in {
@@ -154,7 +154,7 @@ class CompanySubscriptionControllerSpec @Inject()(companySubscriptionController:
 
     "there is no entry in the database for the supplied sap already" should {
 
-      val controller = setupController(Future.successful(List()), Future.successful(()), "CGT654321")
+      val controller = setupController(Future.successful(List()), Future.successful({}), "CGT654321")
       lazy val result = controller.returnSubscriptionReference("123456789")
 
       "return a status of 200" in {

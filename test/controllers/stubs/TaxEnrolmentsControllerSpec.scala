@@ -16,14 +16,14 @@
 
 package controllers.stubs
 
-import com.google.inject.Singleton
+import javax.inject.Singleton
 import models.{EnrolmentIssuerRequestModel, EnrolmentSubscriberRequestModel, Identifier}
-import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
-import repository.{EnrolmentMongoRepository, TaxEnrolmentConnector}
+import repositories._
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 import scala.concurrent.Future
@@ -32,29 +32,30 @@ import scala.concurrent.Future
 class TaxEnrolmentsControllerSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
 
   def setupController(addEntryResult: Future[Unit]): TaxEnrolmentsController = {
-    val mockIssuerRepository = mock[EnrolmentMongoRepository[EnrolmentIssuerRequestModel, Identifier]]
-    val mockSubscriberRepository = mock[EnrolmentMongoRepository[EnrolmentSubscriberRequestModel, String]]
+    val mockIssuerCollection = mock[CgtRepository[EnrolmentIssuerRequestModel, Identifier]]
+    val mockIssuerRepository = mock[TaxEnrolmentIssuerRepository]
 
-    val mockConnector = mock[TaxEnrolmentConnector]
-    new TaxEnrolmentsController(mockConnector)
+    val mockSubscriberCollection = mock[CgtRepository[EnrolmentSubscriberRequestModel, String]]
+    val mockSubscriberRepository = mock[TaxEnrolmentSubscriberRepository]
 
-    when(mockConnector.issuerRepository).thenReturn(mockIssuerRepository)
+    new TaxEnrolmentsController(mockSubscriberRepository, mockIssuerRepository)
 
-    when(mockConnector.subscriberRepository).thenReturn(mockSubscriberRepository)
+    when(mockIssuerRepository.apply()).thenReturn(mockIssuerCollection)
+    when(mockSubscriberRepository.apply()).thenReturn(mockSubscriberCollection)
 
-    when(mockIssuerRepository.addEntry(ArgumentMatchers.any())(ArgumentMatchers.any()))
+    when(mockIssuerCollection.addEntry(any())(any()))
       .thenReturn(addEntryResult)
 
-    when(mockSubscriberRepository.addEntry(ArgumentMatchers.any())(ArgumentMatchers.any()))
+    when(mockSubscriberCollection.addEntry(any())(any()))
       .thenReturn(addEntryResult)
 
-    new TaxEnrolmentsController(mockConnector)
+    new TaxEnrolmentsController(mockSubscriberRepository, mockIssuerRepository)
   }
 
   "Calling .subscribeIssue" when {
     "a valid request is submitted" should {
       "return a status of 204" in {
-        val controller = setupController(Future.successful())
+        val controller = setupController(Future.successful({}))
         val validSubscribeIssuer = EnrolmentIssuerRequestModel("cgt", Identifier("nino", "randomNino"))
         lazy val result = await(controller.subscribeIssuer("sap")(FakeRequest("PUT", "").withJsonBody(Json.toJson(validSubscribeIssuer))))
 
@@ -76,7 +77,7 @@ class TaxEnrolmentsControllerSpec extends UnitSpec with MockitoSugar with WithFa
   "Calling .subscribeSubscriber" when {
     "a valid request is submitted" should {
       "return a status of 204" in {
-        val controller = setupController(Future.successful())
+        val controller = setupController(Future.successful({}))
         val validSubscriberSubscriber = EnrolmentSubscriberRequestModel("CGT", "http://google.com", "id")
         lazy val result = await(controller.subscribeSubscriber("sap")(FakeRequest("PUT", "").withJsonBody(Json.toJson(validSubscriberSubscriber))))
 

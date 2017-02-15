@@ -17,7 +17,7 @@
 package controllers.stubs
 
 import actions.NinoExceptionTriggersActions
-import helpers.SAPHelper
+import helpers.SapHelper
 import models.{BusinessPartnerModel, RegisterModel}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
@@ -25,7 +25,7 @@ import org.scalatest.mock.MockitoSugar
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import repository.{BPMongoConnector, BPMongoRepository}
+import repositories.{BusinessPartnerRepository, CgtRepository}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
@@ -35,31 +35,32 @@ class RegistrationControllerSpec extends UnitSpec with MockitoSugar with WithFak
 
   def setupController(findLatestVersionResult: Future[List[BusinessPartnerModel]], addEntryResult: Future[Unit], sap: String): RegistrationController = {
 
-    val mockRepository = mock[BPMongoRepository[BusinessPartnerModel, Nino]]
-    val mockConnector = mock[BPMongoConnector]
-    val mockSAPHelper = mock[SAPHelper]
+    val mockCollection = mock[CgtRepository[BusinessPartnerModel, Nino]]
+    val mockRepository = mock[BusinessPartnerRepository]
+    val mockSAPHelper = mock[SapHelper]
+
     def exceptionTriggersActions() = fakeApplication.injector.instanceOf[NinoExceptionTriggersActions]
 
-    when(mockConnector.repository)
-      .thenReturn(mockRepository)
+    when(mockRepository.apply())
+      .thenReturn(mockCollection)
 
-    when(mockRepository.addEntry(ArgumentMatchers.any())(ArgumentMatchers.any()))
+    when(mockCollection.addEntry(ArgumentMatchers.any())(ArgumentMatchers.any()))
       .thenReturn(addEntryResult)
 
-    when(mockRepository.findLatestVersionBy(ArgumentMatchers.any())(ArgumentMatchers.any()))
+    when(mockCollection.findLatestVersionBy(ArgumentMatchers.any())(ArgumentMatchers.any()))
       .thenReturn(Future.successful(findLatestVersionResult))
 
     when(mockSAPHelper.generateSap())
       .thenReturn(sap)
 
-    new RegistrationController(mockConnector, mockSAPHelper, exceptionTriggersActions())
+    new RegistrationController(mockRepository, mockSAPHelper, exceptionTriggersActions())
   }
 
   "Calling registerBusinessPartner" when {
 
     "a list with business partners is returned" should {
       val controller = setupController(Future.successful(List(BusinessPartnerModel(Nino("AA123456A"), "123456789"))),
-        Future.successful(()), "")
+        Future.successful({}), "")
       lazy val result = controller.registerBusinessPartner("AA123456A")(FakeRequest("POST", "")
         .withJsonBody(Json.toJson(RegisterModel(Nino("AA123456A")))))
 
@@ -80,7 +81,7 @@ class RegistrationControllerSpec extends UnitSpec with MockitoSugar with WithFak
 
     "a list with no Business partners is returned" should {
       val controller = setupController(Future.successful(List()),
-        Future.successful(()), "987654321")
+        Future.successful({}), "987654321")
       lazy val result = controller.registerBusinessPartner("AA123456A")(FakeRequest("POST", "")
         .withJsonBody(Json.toJson(RegisterModel(Nino("AA123456A")))))
 
@@ -101,7 +102,7 @@ class RegistrationControllerSpec extends UnitSpec with MockitoSugar with WithFak
 
     "passing in a nino for an error scenario" should {
       val controller = setupController(Future.successful(List(BusinessPartnerModel(Nino("AA123456A"), "CGT123456"))),
-        Future.successful(()), "CGT654321")
+        Future.successful({}), "CGT654321")
       lazy val result = controller.registerBusinessPartner("AA404404A")(FakeRequest("POST", "")
         .withJsonBody(Json.toJson(RegisterModel(Nino("AA404404A")))))
 

@@ -17,12 +17,12 @@
 package controllers.tests
 
 import models.BusinessPartnerModel
-import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
-import repository.{BPMongoConnector, BPMongoRepository}
+import repositories.{BusinessPartnerRepository, CgtRepository}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
@@ -31,19 +31,19 @@ import scala.concurrent.Future
 class RegistrationTestControllerSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
 
   lazy val controller: RegistrationTestController = {
-    val mockRepository = mock[BPMongoRepository[BusinessPartnerModel, Nino]]
-    val mockConnector = mock[BPMongoConnector]
+    val mockCollection = mock[CgtRepository[BusinessPartnerModel, Nino]]
+    val mockConnection = mock[BusinessPartnerRepository]
 
-    when(mockConnector.apply())
-      .thenReturn(mockRepository)
+    when(mockConnection.apply())
+      .thenReturn(mockCollection)
 
-    when(mockRepository.addEntry(ArgumentMatchers.any())(ArgumentMatchers.any()))
-      .thenReturn(Future.successful())
+    when(mockCollection.addEntry(any())(any()))
+      .thenReturn(Future.successful({}))
 
-    when(mockRepository.removeBy(ArgumentMatchers.any())(ArgumentMatchers.any()))
-      .thenReturn(Future.successful())
+    when(mockCollection.removeBy(any())(any()))
+      .thenReturn(Future.successful({}))
 
-    new RegistrationTestController(mockConnector)
+    new RegistrationTestController(mockConnection)
   }
 
   "Calling .addRegistrationRecord" should {

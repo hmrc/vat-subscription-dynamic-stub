@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package models
+package helpers
 
-import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.domain.Nino
+import javax.inject.{Inject, Singleton}
 
-case class NRBusinessPartnerModel(fullDetailsModel: FullDetailsModel, sap: String)
+import scala.concurrent.forkjoin.ThreadLocalRandom
 
-object NRBusinessPartnerModel {
-
-  implicit val formats: OFormat[NRBusinessPartnerModel] = Json.format[NRBusinessPartnerModel]
+@Singleton
+class SapHelper @Inject()() {
+  def generateSap(): String = ThreadLocalRandom.current().nextInt(100000000, 999999999).toString
 }

@@ -16,23 +16,44 @@
 
 package controllers.stubs
 
-import com.google.inject.{Inject, Singleton}
-import helpers.{CGTRefHelper, CompanyErrorSafeId}
+import javax.inject.{Inject, Singleton}
+import helpers.{CgtRefHelper, CompanyErrorSafeId}
 import models.{CompanySubmissionModel, SubscriberModel}
 import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc._
-import repository.SubscriptionMongoConnector
+import repositories.SubscriptionRepository
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class CompanySubscriptionController @Inject()(subscriptionMongoConnector: SubscriptionMongoConnector,
-                                              cGTRefHelper: CGTRefHelper
+class CompanySubscriptionController @Inject()(subscriptionMongoConnector: SubscriptionRepository,
+                                              cGTRefHelper: CgtRefHelper
                                              ) extends BaseController {
 
+
+  def subscribe(): Action[AnyContent] = {
+    Action.async {
+      implicit request => {
+        Logger.info("Received a call from the back end to subscribe a Company")
+        val companySubmissionModel = request.body.asJson.get.as[CompanySubmissionModel]
+        returnBody(companySubmissionModel)
+      }
+    }
+  }
+
+  def returnBody(model: CompanySubmissionModel): Future[Result] = {
+
+    if (validateBody(model)) {
+      checkExceptionTriggers(model.sap.get) match {
+        case Some(response) => Future.successful(response)
+        case _ => returnSubscriptionReference(model.sap.get)
+      }
+    }
+    else Future.successful(Results.BadRequest(Json.toJson("Body of request did not contain the expected values for the company submission model")))
+  }
 
   def validateBody(model: CompanySubmissionModel): Boolean = {
     Logger.info("Checking the supplied CompanySubmissionModel has all fields defined")
@@ -72,26 +93,5 @@ class CompanySubscriptionController @Inject()(subscriptionMongoConnector: Subscr
       checkSubscribers <- subscriber
       reference <- getReference(checkSubscribers)
     } yield Ok(Json.toJson(reference))
-  }
-
-  def returnBody(model: CompanySubmissionModel): Future[Result] = {
-
-    if (validateBody(model)) {
-      checkExceptionTriggers(model.sap.get) match {
-        case Some(response) => Future.successful(response)
-        case _ => returnSubscriptionReference(model.sap.get)
-      }
-    }
-    else Future.successful(Results.BadRequest(Json.toJson("Body of request did not contain the expected values for the company submission model")))
-  }
-
-  def subscribe(): Action[AnyContent] = {
-    Action.async {
-      implicit request => {
-        Logger.info("Received a call from the back end to subscribe a Company")
-        val companySubmissionModel = request.body.asJson.get.as[CompanySubmissionModel]
-        returnBody(companySubmissionModel)
-      }
-    }
   }
 }

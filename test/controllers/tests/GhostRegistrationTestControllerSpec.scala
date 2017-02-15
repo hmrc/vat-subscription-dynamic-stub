@@ -16,13 +16,13 @@
 
 package controllers.tests
 
-import models.{FullDetailsModel, NRBusinessPartnerModel}
+import models.{FullDetailsModel, NonResidentBusinessPartnerModel}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
-import repository.{NRBPMongoRepository, NRBPMongoConnector}
+import repositories.{CgtRepository, NonResidentBusinessPartnerRepository}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 import scala.concurrent.Future
@@ -30,19 +30,19 @@ import scala.concurrent.Future
 class GhostRegistrationTestControllerSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
 
   lazy val controller: GhostRegistrationTestController = {
-    val mockRepository = mock[NRBPMongoRepository[NRBusinessPartnerModel, FullDetailsModel]]
-    val mockConnector = mock[NRBPMongoConnector]
+    val mockCollection = mock[CgtRepository[NonResidentBusinessPartnerModel, FullDetailsModel]]
+    val mockRepository = mock[NonResidentBusinessPartnerRepository]
 
-    when(mockConnector.apply())
-      .thenReturn(mockRepository)
+    when(mockRepository.apply())
+      .thenReturn(mockCollection)
 
-    when(mockRepository.addEntry(ArgumentMatchers.any())(ArgumentMatchers.any()))
-      .thenReturn(Future.successful())
+    when(mockCollection.addEntry(ArgumentMatchers.any())(ArgumentMatchers.any()))
+      .thenReturn(Future.successful({}))
 
-    when(mockRepository.removeBy(ArgumentMatchers.any())(ArgumentMatchers.any()))
-      .thenReturn(Future.successful())
+    when(mockCollection.removeBy(ArgumentMatchers.any())(ArgumentMatchers.any()))
+      .thenReturn(Future.successful({}))
 
-    new GhostRegistrationTestController(mockConnector)
+    new GhostRegistrationTestController(mockRepository)
   }
 
   val fullDetailsModel = FullDetailsModel("Daniel", "Dorito", "25 Big House", None, "New York", None, "NY1 1NY", "United States of America")
@@ -51,7 +51,7 @@ class GhostRegistrationTestControllerSpec extends UnitSpec with MockitoSugar wit
 
     "return a status of 200 with valid Json" in {
       lazy val result = controller.addRegistrationRecord(FakeRequest("POST", "")
-        .withJsonBody(Json.toJson(NRBusinessPartnerModel(fullDetailsModel, "1234567890"))))
+        .withJsonBody(Json.toJson(NonResidentBusinessPartnerModel(fullDetailsModel, "1234567890"))))
 
       status(result) shouldBe 200
     }

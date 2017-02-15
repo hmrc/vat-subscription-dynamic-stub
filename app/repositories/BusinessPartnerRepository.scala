@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package repository
+package repositories
 
-import com.google.inject.{Inject, Singleton}
+import javax.inject.{Inject, Singleton}
 import models.BusinessPartnerModel
 import play.modules.reactivemongo.MongoDbConnection
 import reactivemongo.api.commands._
@@ -24,11 +24,10 @@ import uk.gov.hmrc.domain.Nino
 
 import scala.concurrent.{ExecutionContext, Future}
 
-
 @Singleton
-class BPMongoConnector @Inject()() extends MongoDbConnection {
+class BusinessPartnerRepository @Inject()() extends MongoDbConnection {
 
-  lazy val repository = new BPMongoRepository[BusinessPartnerModel, Nino]() {
+  lazy val repository = new BusinessPartnerRepositoryBase {
 
     def findAllVersionsBy(o: Nino)(implicit ec: ExecutionContext): Future[Map[Nino, List[BusinessPartnerModel]]] = {
       find("nino" -> o.nino).map { allBP =>
@@ -37,29 +36,33 @@ class BPMongoConnector @Inject()() extends MongoDbConnection {
     }
 
     def findLatestVersionBy(o: Nino)(implicit ec: ExecutionContext): Future[List[BusinessPartnerModel]] = {
-        findAllVersionsBy(o).map {
-        _.values.toList.map {_.head}
+      findAllVersionsBy(o).map {
+        _.values.toList.map {
+          _.head
+        }
       }
     }
 
     def removeBy(o: Nino)(implicit ec: ExecutionContext): Future[Unit] = {
-      remove("nino" -> o.nino).map {_ => }
+      remove("nino" -> o.nino).map { _ => }
     }
 
     def removeAll()(implicit ec: ExecutionContext): Future[Unit] = {
-      removeAll(WriteConcern.Acknowledged).map {_ => }
+      removeAll(WriteConcern.Acknowledged).map { _ => }
     }
 
     def addEntry(t: BusinessPartnerModel)(implicit ec: ExecutionContext): Future[Unit] = {
-      insert(t).map {_ => }
+      insert(t).map { _ => }
     }
 
     def addEntries(entries: Seq[BusinessPartnerModel])(implicit ec: ExecutionContext): Future[Unit] = {
-      entries.foreach {addEntry}
-      Future.successful()
+      entries.foreach {
+        addEntry
+      }
+      Future.successful({})
     }
   }
 
-  def apply(): BPMongoRepository[BusinessPartnerModel, Nino] = repository
+  def apply(): CgtRepository[BusinessPartnerModel, Nino] = repository
 
 }

@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/hmrc/capital-gains-subscription-dynamic-stub.svg)](https://travis-ci.org/hmrc/capital-gains-subscription-dynamic-stub) [ ![Download](https://api.bintray.com/packages/hmrc/releases/capital-gains-subscription-dynamic-stub/images/download.svg) ](https://bintray.com/hmrc/releases/capital-gains-subscription-dynamic-stub/_latestVersion)
 
-This is a placeholder README.md for a new repository
+This is a placeholder README.md for a new repositories
 
 ### License
 

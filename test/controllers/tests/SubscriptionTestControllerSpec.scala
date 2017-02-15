@@ -17,12 +17,12 @@
 package controllers.tests
 
 import models.SubscriberModel
-import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
-import repository.{SubscriberMongoRepository, SubscriptionMongoConnector}
+import repositories.{CgtRepository, SubscriptionRepository}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 import scala.concurrent.Future
@@ -30,19 +30,19 @@ import scala.concurrent.Future
 class SubscriptionTestControllerSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
 
   lazy val controller: SubscriptionTestController = {
-    val mockRepository = mock[SubscriberMongoRepository[SubscriberModel, String]]
-    val mockConnector = mock[SubscriptionMongoConnector]
+    val mockCollection = mock[CgtRepository[SubscriberModel, String]]
+    val mockRepository = mock[SubscriptionRepository]
 
-    when(mockConnector.repository)
-      .thenReturn(mockRepository)
+    when(mockRepository.apply())
+      .thenReturn(mockCollection)
 
-    when(mockRepository.addEntry(ArgumentMatchers.any())(ArgumentMatchers.any()))
-      .thenReturn(Future.successful())
+    when(mockCollection.addEntry(any())(any()))
+      .thenReturn(Future.successful({}))
 
-    when(mockRepository.removeBy(ArgumentMatchers.any())(ArgumentMatchers.any()))
-      .thenReturn(Future.successful())
+    when(mockCollection.removeBy(any())(any()))
+      .thenReturn(Future.successful({}))
 
-    new SubscriptionTestController(mockConnector)
+    new SubscriptionTestController(mockRepository)
   }
 
   "Calling addSubscriptionRecord" should {

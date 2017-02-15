@@ -16,7 +16,7 @@
 
 package actions
 
-import com.google.inject.{Inject, Singleton}
+import javax.inject.{Inject, Singleton}
 import helpers.ErrorFullDetails
 import models.FullDetailsModel
 import play.api.libs.json.Json

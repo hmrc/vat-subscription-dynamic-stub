@@ -17,16 +17,16 @@
 package controllers.stubs
 
 import actions.FullDetailsExceptionTriggersActions
-import com.google.inject.Singleton
-import helpers.SAPHelper
-import models.{FullDetailsModel, NRBusinessPartnerModel}
-import org.mockito.ArgumentMatchers
+import javax.inject.Singleton
+import helpers.SapHelper
+import models.{FullDetailsModel, NonResidentBusinessPartnerModel}
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import repository.{NRBPMongoRepository, NRBPMongoConnector}
+import repositories.{CgtRepository, NonResidentBusinessPartnerRepository}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 import scala.concurrent.Future
@@ -34,26 +34,27 @@ import scala.concurrent.Future
 @Singleton
 class GhostRegistrationControllerSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
 
-  def setupController(findLatestVersionResult: Future[List[NRBusinessPartnerModel]], addEntryResult: Future[Unit], sap: String): GhostRegistrationController = {
+  def setupController(findLatestVersionResult: Future[List[NonResidentBusinessPartnerModel]], addEntryResult: Future[Unit], sap: String): GhostRegistrationController = {
 
-    val mockRepository = mock[NRBPMongoRepository[NRBusinessPartnerModel, FullDetailsModel]]
-    val mockConnector = mock[NRBPMongoConnector]
-    val mockSAPHelper = mock[SAPHelper]
+    val mockCollection = mock[CgtRepository[NonResidentBusinessPartnerModel, FullDetailsModel]]
+    val mockRepository = mock[NonResidentBusinessPartnerRepository]
+    val mockSAPHelper = mock[SapHelper]
+
     def exceptionTriggersActions() = fakeApplication.injector.instanceOf[FullDetailsExceptionTriggersActions]
 
-    when(mockConnector.repository)
-      .thenReturn(mockRepository)
+    when(mockRepository.apply())
+      .thenReturn(mockCollection)
 
-    when(mockRepository.addEntry(ArgumentMatchers.any())(ArgumentMatchers.any()))
+    when(mockCollection.addEntry(any())(any()))
       .thenReturn(addEntryResult)
 
-    when(mockRepository.findLatestVersionBy(ArgumentMatchers.any())(ArgumentMatchers.any()))
+    when(mockCollection.findLatestVersionBy(any())(any()))
       .thenReturn(Future.successful(findLatestVersionResult))
 
     when(mockSAPHelper.generateSap())
       .thenReturn(sap)
 
-    new GhostRegistrationController(mockConnector, mockSAPHelper, exceptionTriggersActions())
+    new GhostRegistrationController(mockRepository, mockSAPHelper, exceptionTriggersActions())
   }
 
   "Calling registerGhostBusinessPartner" when {
@@ -61,8 +62,8 @@ class GhostRegistrationControllerSpec extends UnitSpec with MockitoSugar with Wi
     "a list with existing business partners is returned" should {
 
       val fullDetailsModel = FullDetailsModel("Daniel", "Dorito", "25 Big House", None, "New York", None, "NY1 1NY", "United States of America")
-      val controller = setupController(Future.successful(List(NRBusinessPartnerModel(fullDetailsModel, "123456789"))),
-        Future.successful(()), "")
+      val controller = setupController(Future.successful(List(NonResidentBusinessPartnerModel(fullDetailsModel, "123456789"))),
+        Future.successful({}), "")
       lazy val result = controller.registerBusinessPartner()(FakeRequest("POST", "")
         .withJsonBody(Json.toJson(fullDetailsModel)))
 
@@ -73,7 +74,7 @@ class GhostRegistrationControllerSpec extends UnitSpec with MockitoSugar with Wi
 
     "a list with no existing business partners is returned" should {
       val fullDetailsModel = FullDetailsModel("Michael", "Dorito", "25 Big House", None, "New York", None, "NY1 1NY", "United States of America")
-      val controller = setupController(Future.successful(List()), Future.successful(()), "1234567890")
+      val controller = setupController(Future.successful(List()), Future.successful({}), "1234567890")
       lazy val result = controller.registerBusinessPartner()(FakeRequest("POST", "")
         .withJsonBody(Json.toJson(fullDetailsModel)))
 
@@ -94,7 +95,7 @@ class GhostRegistrationControllerSpec extends UnitSpec with MockitoSugar with Wi
 
     "passing in a full details model for an error scenario" should {
       val fullDetailsModel = FullDetailsModel("John", "Smith", "25 Big House", None, "Telford", None, "ABC 404", "UK")
-      val controller = setupController(Future.successful(List(NRBusinessPartnerModel(fullDetailsModel, "1234567890"))), Future.successful(()), "1234567890")
+      val controller = setupController(Future.successful(List(NonResidentBusinessPartnerModel(fullDetailsModel, "1234567890"))), Future.successful({}), "1234567890")
       lazy val result = controller.registerBusinessPartner()(FakeRequest("POST", "")
         .withJsonBody(Json.toJson(fullDetailsModel)))
 

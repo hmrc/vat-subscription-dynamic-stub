@@ -16,25 +16,26 @@
 
 package controllers.tests
 
-import com.google.inject.{Inject, Singleton}
-import models.{FullDetailsModel, NRBusinessPartnerModel}
+import javax.inject.{Inject, Singleton}
+import models.{FullDetailsModel, NonResidentBusinessPartnerModel}
 import play.api.mvc.{Action, AnyContent}
-import repository.NRBPMongoConnector
+import repositories.NonResidentBusinessPartnerRepository
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
 @Singleton
-class GhostRegistrationTestController @Inject()(nrBPMongoConnector: NRBPMongoConnector) extends BaseController {
+class GhostRegistrationTestController @Inject()(repository: NonResidentBusinessPartnerRepository)
+  extends BaseController {
 
   val addRegistrationRecord: Action[AnyContent] = Action.async { implicit request =>
     Try {
       val body = request.body.asJson
-      val recordData = body.get.as[NRBusinessPartnerModel]
+      val recordData = body.get.as[NonResidentBusinessPartnerModel]
 
-      nrBPMongoConnector.apply().addEntry(recordData)
+      repository().addEntry(recordData)
     } match {
       case Success(_) => Future.successful(Ok("Success"))
       case Failure(_) => Future.successful(BadRequest("Could not store data"))
@@ -46,7 +47,7 @@ class GhostRegistrationTestController @Inject()(nrBPMongoConnector: NRBPMongoCon
       val body = request.body.asJson
       val recordData = body.get.as[FullDetailsModel]
 
-      nrBPMongoConnector.apply().removeBy(recordData)
+      repository().removeBy(recordData)
     } match {
       case Success(_) => Future.successful(Ok("Success"))
       case Failure(_) => Future.successful(BadRequest("Could not delete data"))
