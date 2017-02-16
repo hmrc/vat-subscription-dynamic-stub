@@ -84,7 +84,7 @@ class RegistrationController @Inject()(repository: BusinessPartnerRepository,
       }
   }
 
-  val obtainDetails: String => Action[AnyContent] = {
+  val getExistingSAP: String => Action[AnyContent] = {
     nino =>
       ninoExceptionTriggersActions.WithNinoExceptionTriggers(Nino(nino)).async {
             //TODO: Update with new error guard when completed
