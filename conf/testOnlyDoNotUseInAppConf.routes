@@ -12,21 +12,21 @@
 # Add all the application routes to the prod.routes file
 
 
-POST        /test-only/tax-enrolments/issuer/insert             @controllers.tests.TaxEnrolmentsTestController.addSubscriptionIssuerRecord
-DELETE      /test-only/tax-enrolments/issuer/remove             @controllers.tests.TaxEnrolmentsTestController.removeSubscriptionIssuerRecord
+POST          /test-only/tax-enrolments/issuer/insert                   @controllers.tests.TaxEnrolmentsTestController.addSubscriptionIssuerRecord
+DELETE        /test-only/tax-enrolments/issuer/remove                   @controllers.tests.TaxEnrolmentsTestController.removeSubscriptionIssuerRecord
 
-POST        /test-only/tax-enrolments/subscriber/insert         @controllers.tests.TaxEnrolmentsTestController.addSubscriptionSubscriberRecord
-DELETE      /test-only/tax-enrolments/subscriber/remove         @controllers.tests.TaxEnrolmentsTestController.removeSubscriptionIssuerRecord
+POST          /test-only/tax-enrolments/subscriber/insert               @controllers.tests.TaxEnrolmentsTestController.addSubscriptionSubscriberRecord
+DELETE        /test-only/tax-enrolments/subscriber/remove               @controllers.tests.TaxEnrolmentsTestController.removeSubscriptionIssuerRecord
 
-POST        /test-only/resident/individuals/register/insert     @controllers.tests.RegistrationTestController.addRegistrationRecord
-DELETE      /test-only/resident/individuals/register/remove     @controllers.tests.RegistrationTestController.removeRegistrationRecord
+POST          /test-only/resident/individuals/register/insert           @controllers.tests.RegistrationTestController.addRegistrationRecord
+DELETE        /test-only/resident/individuals/register/remove           @controllers.tests.RegistrationTestController.removeRegistrationRecord
 
-POST        /test-only/resident/individuals/subscribe/insert    @controllers.tests.SubscriptionTestController.addSubscriptionRecord
-DELETE      /test-only/resident/individuals/subscribe/remove    @controllers.tests.SubscriptionTestController.removeSubscriptionRecord
+POST          /test-only/resident/individuals/subscribe/insert          @controllers.tests.SubscriptionTestController.addSubscriptionRecord
+DELETE        /test-only/resident/individuals/subscribe/remove          @controllers.tests.SubscriptionTestController.removeSubscriptionRecord
 
-POST        /test-only/non-resident/individual/register/insert  @controllers.tests.GhostRegistrationTestController.addRegistrationRecord
-DELETE      /test-only/non-resident/individual/register/remove  @controllers.tests.GhostRegistrationTestController.removeRegistrationRecord
+POST          /test-only/non-resident/individual/register/insert        @controllers.tests.GhostRegistrationTestController.addRegistrationRecord
+DELETE        /test-only/non-resident/individual/register/remove        @controllers.tests.GhostRegistrationTestController.removeRegistrationRecord
 
-DELETE      /test-only/clear-down/all                           @controllers.ClearDownController.clearDown
+DELETE        /test-only/clear-down/all                                 @controllers.ClearDownController.clearDown
 
-->         /                          prod.Routes
+->            /                                                         prod.Routes
