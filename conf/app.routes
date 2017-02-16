@@ -4,7 +4,7 @@ PUT         /tax-enrolments/subscriptions/:subscriptionId/issuer            @con
 PUT         /tax-enrolments/subscriptions/:subscriptionId/subscriber        @controllers.stubs.TaxEnrolmentsController.subscribeSubscriber(subscriptionId: String)
 
 POST        /capital-gains-tax/individual/:nino/register                    @controllers.stubs.RegistrationController.registerBusinessPartner(nino: String)
-GET        /capital-gains-tax/tax-payers/:nino/subscription               @controllers.stubs.RegistrationController.getExistingSAP(nino: String)
+GET        /capital-gains-tax/registration/details?nino=:nino               @controllers.stubs.RegistrationController.getExistingSAP(nino: String)
 
 POST        /capital-gains-tax/non-resident/individual/register             @controllers.stubs.GhostRegistrationController.registerBusinessPartner
 
