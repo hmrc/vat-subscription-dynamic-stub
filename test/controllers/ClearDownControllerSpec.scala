@@ -17,23 +17,23 @@
 package controllers
 
 import org.scalatest.mock.MockitoSugar
-import repository.{BPMongoConnector, SubscriptionMongoConnector, TaxEnrolmentConnector}
+import repositories.{BusinessPartnerRepository, SubscriptionRepository, TaxEnrolmentSubscriberRepository}
 import uk.gov.hmrc.play.microservice.controller.BaseController
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 class ClearDownControllerSpec extends UnitSpec with BaseController with WithFakeApplication with MockitoSugar {
 
+  private val successful = Ok("Success")
+  private val failed = BadRequest("Could not delete data")
+
   def setupController(): ClearDownController = {
 
-    val mockRegistrationConnector = mock[BPMongoConnector]
-    val mockSubscriptionConnector = mock[SubscriptionMongoConnector]
-    val mockEnrolmentConnector = mock[TaxEnrolmentConnector]
+    val mockRegistrationConnector = mock[BusinessPartnerRepository]
+    val mockSubscriptionConnector = mock[SubscriptionRepository]
+    val mockEnrolmentConnector = mock[TaxEnrolmentSubscriberRepository]
 
     new ClearDownController(mockRegistrationConnector, mockSubscriptionConnector, mockEnrolmentConnector)
   }
-
-  private val successful = Ok("Success")
-  private val failed = BadRequest("Could not delete data")
 
   "Calling .checkForFailed" should {
 

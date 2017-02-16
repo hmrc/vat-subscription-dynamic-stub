@@ -16,10 +16,10 @@
 
 package controllers.tests
 
-import com.google.inject.{Inject, Singleton}
+import javax.inject.{Inject, Singleton}
 import models.SubscriberModel
 import play.api.mvc.{Action, AnyContent}
-import repository.SubscriptionMongoConnector
+import repositories.SubscriptionRepository
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -27,14 +27,14 @@ import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
 @Singleton
-class SubscriptionTestController @Inject()(subscriptionMongoConnector: SubscriptionMongoConnector) extends BaseController {
+class SubscriptionTestController @Inject()(repository: SubscriptionRepository) extends BaseController {
 
   val addSubscriptionRecord: Action[AnyContent] = Action.async { implicit request =>
     Try {
       val body = request.body.asJson
       val recordData = body.get.as[SubscriberModel]
 
-      subscriptionMongoConnector.repository.addEntry(recordData)
+      repository().addEntry(recordData)
     } match {
       case Success(_) => Future.successful(Ok("Success"))
       case Failure(_) => Future.successful(BadRequest("Could not store data"))
@@ -47,7 +47,7 @@ class SubscriptionTestController @Inject()(subscriptionMongoConnector: Subscript
       val body = request.body.asJson
       val recordData = body.get.as[String]
 
-      subscriptionMongoConnector.repository.removeBy(recordData)
+      repository().removeBy(recordData)
     } match {
       case Success(_) => Future.successful(Ok("Success"))
       case Failure(_) => Future.successful(BadRequest("Could not delete data"))

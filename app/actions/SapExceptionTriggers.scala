@@ -16,7 +16,7 @@
 
 package actions
 
-import com.google.inject.{Inject, Singleton}
+import javax.inject.{Inject, Singleton}
 import helpers.ErrorSafeId
 import play.api.libs.json.Json
 import play.api.mvc._
@@ -24,7 +24,7 @@ import play.api.mvc._
 import scala.concurrent.Future
 
 @Singleton
-class SAPExceptionTriggers @Inject()() {
+class SapExceptionTriggers @Inject()() {
 
   case class WithSapExceptionTriggers(sap: String) extends ActionBuilder[Request] {
     def invokeBlock[A](request: Request[A], block: (Request[A]) => Future[Result]): Future[Result] = {

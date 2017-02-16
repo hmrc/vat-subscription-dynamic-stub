@@ -16,16 +16,16 @@
 
 package controllers.stubs
 
-import actions.SAPExceptionTriggers
-import helpers.CGTRefHelper
+import actions.SapExceptionTriggers
+import helpers.CgtRefHelper
 import models.{SubscribeModel, SubscriberModel}
-import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import repository.{SubscriberMongoRepository, SubscriptionMongoConnector}
+import repositories.{CgtRepository, SubscriptionRepository}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 import scala.concurrent.Future
@@ -34,30 +34,31 @@ class SubscriptionControllerSpec extends UnitSpec with MockitoSugar with WithFak
 
   def setupController(findLatestVersionResult: Future[List[SubscriberModel]], addEntryResult: Future[Unit], ref: String): SubscriptionController = {
 
-    val mockRepository = mock[SubscriberMongoRepository[SubscriberModel, String]]
-    val mockConnector = mock[SubscriptionMongoConnector]
-    val mockCGTRefHelper = mock[CGTRefHelper]
-    def exceptionTriggersActions = fakeApplication.injector.instanceOf[SAPExceptionTriggers]
+    val mockCollection = mock[CgtRepository[SubscriberModel, String]]
+    val mockRepository = mock[SubscriptionRepository]
+    val mockCGTRefHelper = mock[CgtRefHelper]
 
-    when(mockConnector.repository)
-      .thenReturn(mockRepository)
+    def exceptionTriggersActions = fakeApplication.injector.instanceOf[SapExceptionTriggers]
 
-    when(mockRepository.addEntry(ArgumentMatchers.any())(ArgumentMatchers.any()))
+    when(mockRepository.apply())
+      .thenReturn(mockCollection)
+
+    when(mockCollection.addEntry(any())(any()))
       .thenReturn(addEntryResult)
 
-    when(mockRepository.findLatestVersionBy(ArgumentMatchers.any())(ArgumentMatchers.any()))
+    when(mockCollection.findLatestVersionBy(any())(any()))
       .thenReturn(Future.successful(findLatestVersionResult))
 
     when(mockCGTRefHelper.generateCGTReference())
       .thenReturn(ref)
 
-    new SubscriptionController(mockConnector, mockCGTRefHelper, exceptionTriggersActions)
+    new SubscriptionController(mockRepository, mockCGTRefHelper, exceptionTriggersActions)
   }
 
   "Calling subscribe" when {
 
     "a list with subscribers is returned" should {
-      val controller = setupController(Future.successful(List(SubscriberModel("123456789", "CGT123456"))), Future.successful(()), "CGT654321")
+      val controller = setupController(Future.successful(List(SubscriberModel("123456789", "CGT123456"))), Future.successful({}), "CGT654321")
       lazy val result = controller.subscribe("123456789")(FakeRequest("POST", "")
         .withJsonBody(Json.toJson(SubscribeModel("123456789"))))
 
@@ -77,7 +78,7 @@ class SubscriptionControllerSpec extends UnitSpec with MockitoSugar with WithFak
     }
 
     "a list with no subscribers is returned" should {
-      val controller = setupController(Future.successful(List()), Future.successful(()), "CGT654321")
+      val controller = setupController(Future.successful(List()), Future.successful({}), "CGT654321")
       lazy val result = controller.subscribe("123456789")(FakeRequest("POST", "")
         .withJsonBody(Json.toJson(SubscribeModel("397436038"))))
 
@@ -97,7 +98,7 @@ class SubscriptionControllerSpec extends UnitSpec with MockitoSugar with WithFak
     }
 
     "an error matching safe id is detected" should {
-      val controller = setupController(Future.successful(List(SubscriberModel("123456789", "CGT123456"))), Future.successful(()), "CGT654321")
+      val controller = setupController(Future.successful(List(SubscriberModel("123456789", "CGT123456"))), Future.successful({}), "CGT654321")
       lazy val result = controller.subscribe("404404404")(FakeRequest("POST", "")
         .withJsonBody(Json.toJson(SubscribeModel("404404404"))))
 

@@ -16,40 +16,40 @@
 
 package controllers.stubs
 
-import actions.SAPExceptionTriggers
-import com.google.inject.{Inject, Singleton}
-import helpers.CGTRefHelper
+import actions.SapExceptionTriggers
+import javax.inject.{Inject, Singleton}
+import helpers.CgtRefHelper
 import models.{SubscribeModel, SubscriberModel}
 import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent}
-import repository.SubscriptionMongoConnector
+import repositories.SubscriptionRepository
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class SubscriptionController @Inject()(subscriptionMongoConnector: SubscriptionMongoConnector,
-                                       cGTRefHelper: CGTRefHelper,
-                                       sAPExceptionTriggers: SAPExceptionTriggers
+class SubscriptionController @Inject()(repository: SubscriptionRepository,
+                                       cgtRefHelper: CgtRefHelper,
+                                       sapExceptionTriggers: SapExceptionTriggers
                                       ) extends BaseController {
 
   val subscribe: String => Action[AnyContent] = safeId => {
-    sAPExceptionTriggers.WithSapExceptionTriggers(safeId).async {
+    sapExceptionTriggers.WithSapExceptionTriggers(safeId).async {
       implicit request => {
 
         Logger.info("Received a call from the back end to subscribe an Individual")
 
         val body = request.body.asJson
         val subscriptionDetails = body.get.as[SubscribeModel]
-        val subscriber = subscriptionMongoConnector.repository.findLatestVersionBy(subscriptionDetails.sap)
+        val subscriber = repository().findLatestVersionBy(subscriptionDetails.sap)
 
         def getReference(subscriber: List[SubscriberModel]): Future[String] = {
           if (subscriber.isEmpty) {
-            val reference = cGTRefHelper.generateCGTReference()
-            subscriptionMongoConnector.repository.addEntry(SubscriberModel(safeId, reference))
-            Future.successful(cGTRefHelper.generateCGTReference())
+            val reference = cgtRefHelper.generateCGTReference()
+            repository().addEntry(SubscriberModel(safeId, reference))
+            Future.successful(cgtRefHelper.generateCGTReference())
           } else {
             Future.successful(subscriber.head.reference)
           }
