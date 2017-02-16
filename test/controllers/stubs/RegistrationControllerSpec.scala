@@ -112,4 +112,17 @@ class RegistrationControllerSpec extends UnitSpec with MockitoSugar with WithFak
       }
     }
   }
+
+  "Calling obtainDetails" when {
+    "supplied with a nino that is associated with a preexisting BP" should {
+      val controller = setupController(Future.successful(List(BusinessPartnerModel(Nino("AA123456A"), "123456789"))),
+        Future.successful({}), "")
+      lazy val result = controller.obtainDetails("AA123456A")(FakeRequest("POST", "")
+        .withJsonBody(Json.toJson(RegisterModel(Nino("AA123456A")))))
+
+      "return a status of 200" in {
+        status(result) shouldBe 200
+      }
+    }
+  }
 }
