@@ -64,19 +64,10 @@ class RegistrationControllerSpec extends UnitSpec with MockitoSugar with WithFak
       lazy val result = controller.registerBusinessPartner("AA123456A")(FakeRequest("POST", "")
         .withJsonBody(Json.toJson(RegisterModel(Nino("AA123456A")))))
 
-      "return a status of 200" in {
-        status(result) shouldBe 200
+      "return a status of 409/Conflicted" in {
+        status(result) shouldBe 409
       }
 
-      "return a type of Json" in {
-        contentType(result) shouldBe Some("application/json")
-      }
-
-      "return a valid SAP" in {
-        val data = contentAsString(result)
-        val json = Json.parse(data)
-        json.as[String] shouldBe "123456789"
-      }
     }
 
     "a list with no Business partners is returned" should {
