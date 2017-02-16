@@ -64,14 +64,21 @@ class RegistrationController @Inject()(repository: BusinessPartnerRepository,
 
             } else {
               Logger.warn("Found an existing entry with sap " + bp.head.sap)
-              Future.successful(bp.head.sap)
+              Future.successful("-1")
             }
+          }
+
+          def handleSap(sap: String) = {
+            if (sap == "-1")
+              Conflict
+            else
+              Ok(Json.toJson(sap))
           }
 
           for {
             bp <- businessPartner
             sap <- getReference(bp)
-          } yield Ok(Json.toJson(sap))
+          } yield handleSap(sap)
         }
       }
   }
