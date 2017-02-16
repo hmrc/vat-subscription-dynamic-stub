@@ -138,12 +138,14 @@ class RegistrationControllerSpec extends UnitSpec with MockitoSugar with WithFak
     "supplied with a nino where no associated BP exists" should {
       val controller = setupController(Future.successful(List()),
       Future.successful({}), "987654321")
-      lazy val result = controller.obtainDetails ("AA123456A")(FakeRequest("POST", "")
+      lazy val result = controller.obtainDetails("AA123456A")(FakeRequest("POST", "")
         .withJsonBody(Json.toJson(RegisterModel(Nino("AA123456A")))))
 
       "return a status of 400/bad request" in {
         status(result) shouldBe 400
       }
     }
+
+    //TODO: Add new test scenario for new error guard (no point retesting an error guard that's soon-to-be inapplicable)
   }
 }
