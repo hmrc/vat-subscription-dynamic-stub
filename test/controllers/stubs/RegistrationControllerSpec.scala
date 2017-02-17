@@ -82,12 +82,13 @@ class RegistrationControllerSpec extends UnitSpec with MockitoSugar with WithFak
     }
 
     "passing in a nino for an error scenario" should {
-      val controller = setupController(List(BusinessPartnerModel(Nino("AA123456A"), "CGT123456")), "CGT654321", Some(404))
+      val NOT_FOUND = 404
+      val controller = setupController(List(BusinessPartnerModel(Nino("AA123456A"), "CGT123456")), "CGT654321", Some(NOT_FOUND))
       lazy val result = controller.registerBusinessPartner("AA404404A")(FakeRequest("POST", "")
         .withJsonBody(Json.toJson(RegisterModel(Nino("AA404404A")))))
 
       "return a status of 404" in {
-        status(result) shouldBe 404
+        status(result) shouldBe NOT_FOUND
       }
 
       "return a type of Json" in {
@@ -104,8 +105,7 @@ class RegistrationControllerSpec extends UnitSpec with MockitoSugar with WithFak
 
   "Calling obtainDetails" when {
     "supplied with a nino that is associated with a preexisting BP" should {
-      val controller = setupController(Future.successful(List(BusinessPartnerModel(Nino("AA123456A"), "123456789"))),
-        Future.successful({}), "")
+      val controller = setupController(List(BusinessPartnerModel(Nino("AA123456A"), "123456789")), "")
       lazy val result = controller.getExistingSAP("AA123456A")(FakeRequest("POST", "")
         .withJsonBody(Json.toJson(RegisterModel(Nino("AA123456A")))))
 
@@ -124,14 +124,14 @@ class RegistrationControllerSpec extends UnitSpec with MockitoSugar with WithFak
       }
     }
 
-    "supplied with a nino where no associated BP exists" should {
-      val controller = setupController(Future.successful(List()),
-      Future.successful({}), "987654321")
+    "supplied with a nino that is associated with a preexisting BP BUT an internal error occurs" should {
+      val INTERNAL_ERROR = 500
+      val controller = setupController(List(BusinessPartnerModel(Nino("AA123456A"), "123456789")), "", Some(INTERNAL_ERROR))
       lazy val result = controller.getExistingSAP("AA123456A")(FakeRequest("POST", "")
         .withJsonBody(Json.toJson(RegisterModel(Nino("AA123456A")))))
 
-      "return a status of 400/bad request" in {
-        status(result) shouldBe 400
+      s"return a status of $INTERNAL_ERROR" in {
+        status(result) shouldBe INTERNAL_ERROR
       }
     }
 

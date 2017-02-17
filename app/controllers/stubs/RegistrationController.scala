@@ -16,11 +16,12 @@
 
 package controllers.stubs
 
-import actions.NinoExceptionTriggersActions
 import javax.inject.{Inject, Singleton}
 
+import actions.NinoExceptionTriggersActions
+import common.RouteIds
 import helpers.SapHelper
-import models.{BusinessPartnerModel, RegisterModel}
+import models.BusinessPartnerModel
 import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, Result}
@@ -38,7 +39,7 @@ class RegistrationController @Inject()(repository: BusinessPartnerRepository,
 
   val registerBusinessPartner: String => Action[AnyContent] = {
     nino =>
-      ninoExceptionTriggersActions.WithNinoExceptionTriggers(Nino(nino), Some("register-individual-user")).async {
+      ninoExceptionTriggersActions.WithNinoExceptionTriggers(Nino(nino), RouteIds.registerIndividual).async {
         implicit request => {
 
           Logger.warn("Received a call from the back end to register")
@@ -83,8 +84,8 @@ class RegistrationController @Inject()(repository: BusinessPartnerRepository,
 
   val getExistingSAP: String => Action[AnyContent] = {
     nino =>
-      ninoExceptionTriggersActions.WithNinoExceptionTriggers(Nino(nino)).async {
-            //TODO: Update with new error guard when completed
+      ninoExceptionTriggersActions.WithNinoExceptionTriggers(Nino(nino), RouteIds.getExistingSap).async {
+        //TODO: Update with new error guard when completed
         implicit request => {
 
           Logger.warn("Received a call from the back end to retrieve details/SAP for a preexisting business business partner")
