@@ -43,12 +43,9 @@ class RegistrationController @Inject()(repository: BusinessPartnerRepository,
 
           Logger.warn("Received a call from the back end to register")
 
-          val body = request.body.asJson
-          val registrationDetails = body.get.as[RegisterModel]
-
           Logger.warn("Opening a connection to mongo.")
 
-          val businessPartner = repository().findLatestVersionBy(registrationDetails.nino)
+          val businessPartner = repository().findLatestVersionBy(Nino(nino))
 
           Logger.warn("Promise of business partners established.")
 
@@ -60,7 +57,7 @@ class RegistrationController @Inject()(repository: BusinessPartnerRepository,
               Logger.warn("Created a new entry with sap")
               val sap = sAPHelper.generateSap()
               for {
-                _ <- repository().addEntry(BusinessPartnerModel(registrationDetails.nino, sap))
+                _ <- repository().addEntry(BusinessPartnerModel(Nino(nino), sap))
               } yield sap
 
             } else {
@@ -92,12 +89,9 @@ class RegistrationController @Inject()(repository: BusinessPartnerRepository,
 
           Logger.warn("Received a call from the back end to retrieve details/SAP for a preexisting business business partner")
 
-          val body = request.body.asJson
-          val registrationDetails = body.get.as[RegisterModel]
-
           Logger.warn("Opening connection to Mongo")
 
-          val businessPartner: Future[List[BusinessPartnerModel]] = repository().findLatestVersionBy(registrationDetails.nino)
+          val businessPartner: Future[List[BusinessPartnerModel]] = repository().findLatestVersionBy(Nino(nino))
 
           def getReference(bp: List[BusinessPartnerModel]): Future[String] = {
 
