@@ -27,6 +27,9 @@ DELETE        /test-only/resident/individuals/subscribe/remove          @control
 POST          /test-only/non-resident/individual/register/insert        @controllers.tests.GhostRegistrationTestController.addRegistrationRecord
 DELETE        /test-only/non-resident/individual/register/remove        @controllers.tests.GhostRegistrationTestController.removeRegistrationRecord
 
+POST          /test-only/exceptions/exception                           @controllers.tests.RouteExceptionTestController.addException
+DELETE        /test-only/exceptions/exception                           @controllers.tests.RouteExceptionTestController.removeException
+
 DELETE        /test-only/clear-down/all                                 @controllers.ClearDownController.clearDown
 
 ->            /                                                         prod.Routes
