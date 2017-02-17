@@ -17,8 +17,9 @@
 package controllers
 
 import javax.inject.{Inject, Singleton}
+
 import play.api.mvc.{Action, AnyContent, Result}
-import repositories.{BusinessPartnerRepository, SubscriptionRepository, TaxEnrolmentSubscriberRepository}
+import repositories.{BusinessPartnerRepository, RouteExceptionRepository, SubscriptionRepository, TaxEnrolmentSubscriberRepository}
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -28,7 +29,8 @@ import scala.util.{Failure, Success, Try}
 @Singleton
 class ClearDownController @Inject()(businessPartnerRepository: BusinessPartnerRepository,
                                     subscriptionRepository: SubscriptionRepository,
-                                    enrolmentSubscriberRepository: TaxEnrolmentSubscriberRepository)
+                                    enrolmentSubscriberRepository: TaxEnrolmentSubscriberRepository,
+                                    routeExceptionsRepository: RouteExceptionRepository)
   extends BaseController {
 
   private val clearResult: Future[Unit] => Future[Result] = clearAction =>
@@ -46,13 +48,15 @@ class ClearDownController @Inject()(businessPartnerRepository: BusinessPartnerRe
       val clearSubscribedUserRepository = clearSubscription
       val clearEnrolmentSubscribeRepository = clearEnrolmentSubscription
       val clearEnrolmentIssuerRepository = clearEnrolmentIssuer
+      val clearExceptionsRepository = clearExceptions
 
       for {
         clearedRegistered <- clearRegisteredUserRepository
         clearedSubscribed <- clearSubscribedUserRepository
         clearedEnrolmentSubscribed <- clearEnrolmentSubscribeRepository
         clearedEnrolmentIssuer <- clearEnrolmentIssuerRepository
-        checkClearDownResult <- checkSuccess(Seq(clearedRegistered, clearedSubscribed, clearedEnrolmentSubscribed, clearedEnrolmentIssuer))
+        clearedExceptions <- clearExceptionsRepository
+        checkClearDownResult <- checkSuccess(Seq(clearedRegistered, clearedSubscribed, clearedEnrolmentSubscribed, clearedExceptions, clearedEnrolmentIssuer))
       } yield Ok(checkClearDownResult.toString)
     }
   }
@@ -64,6 +68,8 @@ class ClearDownController @Inject()(businessPartnerRepository: BusinessPartnerRe
   def clearEnrolmentSubscription: Future[Result] = clearResult(enrolmentSubscriberRepository().removeAll())
 
   def clearEnrolmentIssuer: Future[Result] = clearResult(enrolmentSubscriberRepository().removeAll())
+
+  def clearExceptions: Future[Result] = clearResult(routeExceptionsRepository().removeAll())
 
   def checkSuccess(seq: Seq[Result]): Future[Boolean] = {
     //I'm sure there is a better way of doing this but... Can't think of it right now
