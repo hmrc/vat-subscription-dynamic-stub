@@ -17,9 +17,12 @@
 package common
 
 object RouteExceptionKeys {
-  val registerIndividual = "register-user"  //RegistrationController.registerBusinessPartner
+  val registerIndividual = "register-individual"  //RegistrationController.registerBusinessPartner
   val companySubscribe = "subscribe-company" //CompanySubscriptionController.subscribe
   val registerAgent = "register-agent"  //RegistrationController.registerAgent
   val registerGhost = "ghost-register-user" //GhostRegistrationController.registerBusinessPartner
   val subscribe = "subscribe" //SubscriptionController.subscribe
+  val taxEnrolmentSubscribe = "tax-enrolment-subscribe" //TaxEnrolmentsController.subscribe
+  val taxEnrolmentIssuer = "tax-enrolment-issuer" //TaxEnrolmentsController.issuer
+  val obtainDetails = "obtain-details" //RegistrationController.getExistingSAP
 }
