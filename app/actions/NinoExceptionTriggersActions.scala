@@ -17,31 +17,38 @@
 package actions
 
 import javax.inject.{Inject, Singleton}
-import helpers.ErrorNino
+
+import models.{RouteExceptionKeyModel, RouteExceptionModel}
+import play.api.http.Status
 import play.api.libs.json.Json
 import play.api.mvc.{ActionBuilder, Request, Result, Results}
+import repositories.RouteExceptionRepository
 import uk.gov.hmrc.domain.Nino
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class NinoExceptionTriggersActions @Inject()() {
+class NinoExceptionTriggersActions @Inject()(exceptionsRepository: RouteExceptionRepository) {
 
-  case class WithNinoExceptionTriggers(nino: Nino) extends ActionBuilder[Request] {
+  case class WithNinoExceptionTriggers(nino: Nino, routeId: Option[String]) extends ActionBuilder[Request] {
     def invokeBlock[A](request: Request[A], block: (Request[A]) => Future[Result]): Future[Result] = {
-      processException(nino, request, block)
+      processException(nino, routeId, request, block)
     }
 
-    def processException[A](nino: Nino, request: Request[A], block: (Request[A]) => Future[Result]): Future[Result] = {
-      nino match {
-        case Nino(ErrorNino.notFoundNino.nino) => Future.successful(Results.NotFound(Json.toJson("Not found error")))
-        case Nino(ErrorNino.badGateway.nino) => Future.successful(Results.BadGateway(Json.toJson("Bad gateway error")))
-        case Nino(ErrorNino.badRequest.nino) => Future.successful(Results.BadRequest(Json.toJson("Bad request error")))
-        case Nino(ErrorNino.internalServerError.nino) => Future.successful(Results.InternalServerError(Json.toJson("Internal server error")))
-        case Nino(ErrorNino.serviceUnavailable.nino) => Future.successful(Results.ServiceUnavailable(Json.toJson("Service unavailable error")))
-        case Nino(ErrorNino.timeout.nino) => Future.successful(Results.RequestTimeout(Json.toJson("Timeout error")))
-        case _ => block(request)
+    def processException[A](nino: Nino, routeId: Option[String], request: Request[A], block: (Request[A]) => Future[Result]): Future[Result] = {
+      val searchCriteria = RouteExceptionKeyModel(nino.nino, routeId)
+      exceptionsRepository().findLatestVersionBy(searchCriteria).flatMap { exceptions =>
+        exceptions.headOption.fold(block(request)) {
+          case RouteExceptionModel(_, _, Status.NOT_FOUND) => Future.successful(Results.NotFound(Json.toJson("Not found error")))
+          case RouteExceptionModel(_, _, Status.BAD_GATEWAY) => Future.successful(Results.BadGateway(Json.toJson("Bad gateway error")))
+          case RouteExceptionModel(_, _, Status.BAD_REQUEST) => Future.successful(Results.BadRequest(Json.toJson("Bad request error")))
+          case RouteExceptionModel(_, _, Status.INTERNAL_SERVER_ERROR) => Future.successful(Results.InternalServerError(Json.toJson("Internal server error")))
+          case RouteExceptionModel(_, _, Status.SERVICE_UNAVAILABLE) => Future.successful(Results.ServiceUnavailable(Json.toJson("Service unavailable error")))
+          case RouteExceptionModel(_, _, Status.REQUEST_TIMEOUT) => Future.successful(Results.RequestTimeout(Json.toJson("Timeout error")))
+        }
       }
     }
   }
+
 }

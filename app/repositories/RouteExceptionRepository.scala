@@ -31,7 +31,7 @@ class RouteExceptionRepository @Inject()() extends MongoDbConnection {
 
     override def findAllVersionsBy(key: RouteExceptionKeyModel)
                                   (implicit ec: ExecutionContext): Future[Map[RouteExceptionKeyModel, List[RouteExceptionModel]]] = {
-      find("document" -> key).map {
+      find("id" -> key.id, "routeId" -> key.routeId).map {
         exceptions =>
           exceptions.groupBy(ex => RouteExceptionKeyModel(ex.id, ex.routeId))
       }

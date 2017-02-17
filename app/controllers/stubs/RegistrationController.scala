@@ -38,7 +38,7 @@ class RegistrationController @Inject()(repository: BusinessPartnerRepository,
 
   val registerBusinessPartner: String => Action[AnyContent] = {
     nino =>
-      ninoExceptionTriggersActions.WithNinoExceptionTriggers(Nino(nino)).async {
+      ninoExceptionTriggersActions.WithNinoExceptionTriggers(Nino(nino), Some("register-individual-user")).async {
         implicit request => {
 
           Logger.warn("Received a call from the back end to register")
