@@ -64,19 +64,10 @@ class RegistrationControllerSpec extends UnitSpec with MockitoSugar with WithFak
       lazy val result = controller.registerBusinessPartner("AA123456A")(FakeRequest("POST", "")
         .withJsonBody(Json.toJson(RegisterModel(Nino("AA123456A")))))
 
-      "return a status of 200" in {
-        status(result) shouldBe 200
+      "return a status of 409/Conflicted" in {
+        status(result) shouldBe 409
       }
 
-      "return a type of Json" in {
-        contentType(result) shouldBe Some("application/json")
-      }
-
-      "return a valid SAP" in {
-        val data = contentAsString(result)
-        val json = Json.parse(data)
-        json.as[String] shouldBe "123456789"
-      }
     }
 
     "a list with no Business partners is returned" should {
@@ -120,5 +111,41 @@ class RegistrationControllerSpec extends UnitSpec with MockitoSugar with WithFak
         json.as[String] shouldBe "Not found error"
       }
     }
+  }
+
+  "Calling obtainDetails" when {
+    "supplied with a nino that is associated with a preexisting BP" should {
+      val controller = setupController(Future.successful(List(BusinessPartnerModel(Nino("AA123456A"), "123456789"))),
+        Future.successful({}), "")
+      lazy val result = controller.getExistingSAP("AA123456A")(FakeRequest("POST", "")
+        .withJsonBody(Json.toJson(RegisterModel(Nino("AA123456A")))))
+
+      "return a status of 200" in {
+        status(result) shouldBe 200
+      }
+
+      "return a type of Json" in {
+        contentType(result) shouldBe Some("application/json")
+      }
+
+      "return a valid SAP" in {
+        val data = contentAsString(result)
+        val json = Json.parse(data)
+        json.as[String] shouldBe "123456789"
+      }
+    }
+
+    "supplied with a nino where no associated BP exists" should {
+      val controller = setupController(Future.successful(List()),
+      Future.successful({}), "987654321")
+      lazy val result = controller.getExistingSAP("AA123456A")(FakeRequest("POST", "")
+        .withJsonBody(Json.toJson(RegisterModel(Nino("AA123456A")))))
+
+      "return a status of 400/bad request" in {
+        status(result) shouldBe 400
+      }
+    }
+
+    //TODO: Add new test scenario for new error guard (no point retesting an error guard that's soon-to-be inapplicable)
   }
 }
