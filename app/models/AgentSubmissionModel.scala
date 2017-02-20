@@ -22,5 +22,5 @@ case class AgentSubmissionModel (sap: String,
                                  arn: String)
 
 object AgentSubmissionModel {
-  val formats = Json.format[AgentSubmissionModel]
+  implicit val formats = Json.format[AgentSubmissionModel]
 }
