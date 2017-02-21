@@ -40,7 +40,7 @@ class CompanySubscriptionController @Inject()(subscriptionMongoConnector: Subscr
   private val noContactAddressMessage = "Body of request did not contain the expected values for the company submission model"
 
   def subscribe(): Action[AnyContent] = {
-    guardedActions.WithFullDetailsExceptionTriggers(RouteIds.companySubscribe).async {
+    guardedActions.CompanySubscriptionExceptionTriggers(RouteIds.companySubscribe).async {
       implicit request => {
 
         Logger.info("Received a call from the back end to subscribe a Company")
