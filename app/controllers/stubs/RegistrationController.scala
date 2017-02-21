@@ -16,11 +16,12 @@
 
 package controllers.stubs
 
-import actions.NinoExceptionTriggersActions
 import javax.inject.{Inject, Singleton}
 
+import actions.ExceptionTriggersActions
+import common.RouteIds
 import helpers.SapHelper
-import models.{BusinessPartnerModel, RegisterModel}
+import models.BusinessPartnerModel
 import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, Result}
@@ -33,12 +34,12 @@ import scala.concurrent.Future
 
 @Singleton
 class RegistrationController @Inject()(repository: BusinessPartnerRepository,
-                                       sAPHelper: SapHelper,
-                                       ninoExceptionTriggersActions: NinoExceptionTriggersActions) extends BaseController {
+                                       sapHelper: SapHelper,
+                                       guardedActions: ExceptionTriggersActions) extends BaseController {
 
   val registerBusinessPartner: String => Action[AnyContent] = {
     nino =>
-      ninoExceptionTriggersActions.WithNinoExceptionTriggers(Nino(nino)).async {
+      guardedActions.ExceptionTriggers(nino, RouteIds.registerIndividualWithNino).async {
         implicit request => {
 
           Logger.warn("Received a call from the back end to register")
@@ -55,7 +56,7 @@ class RegistrationController @Inject()(repository: BusinessPartnerRepository,
 
             if (bp.isEmpty) {
               Logger.warn("Created a new entry with sap")
-              val sap = sAPHelper.generateSap()
+              val sap = sapHelper.generateSap()
               for {
                 _ <- repository().addEntry(BusinessPartnerModel(Nino(nino), sap))
               } yield sap
@@ -83,8 +84,8 @@ class RegistrationController @Inject()(repository: BusinessPartnerRepository,
 
   val getExistingSAP: String => Action[AnyContent] = {
     nino =>
-      ninoExceptionTriggersActions.WithNinoExceptionTriggers(Nino(nino)).async {
-            //TODO: Update with new error guard when completed
+      guardedActions.ExceptionTriggers(nino, RouteIds.getExistingSap).async {
+        //TODO: Update with new error guard when completed
         implicit request => {
 
           Logger.warn("Received a call from the back end to retrieve details/SAP for a preexisting business business partner")

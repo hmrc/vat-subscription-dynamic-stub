@@ -16,35 +16,47 @@
 
 package controllers.stubs
 
-import actions.SapExceptionTriggers
+import actions.ExceptionTriggersActions
 import helpers.CgtRefHelper
-import models.{SubscribeModel, SubscriberModel}
+import models._
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import repositories.{CgtRepository, SubscriptionRepository}
+import repositories.{CgtRepository, RouteExceptionRepository, SubscriptionRepository}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 import scala.concurrent.Future
 
 class SubscriptionControllerSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
 
-  def setupController(findLatestVersionResult: Future[List[SubscriberModel]], addEntryResult: Future[Unit], ref: String): SubscriptionController = {
+  def setupController(findLatestVersionResult: List[SubscriberModel],
+                      ref: String,
+                      expectedExceptionCode: Option[Int] = None): SubscriptionController = {
 
     val mockCollection = mock[CgtRepository[SubscriberModel, String]]
     val mockRepository = mock[SubscriptionRepository]
     val mockCGTRefHelper = mock[CgtRefHelper]
+    val mockExceptionsCollection = mock[CgtRepository[RouteExceptionModel, RouteExceptionKeyModel]]
+    val mockExceptionsRepository = mock[RouteExceptionRepository]
+    val exceptionTriggersActions = new ExceptionTriggersActions(mockExceptionsRepository)
+    val expectedException = expectedExceptionCode.fold(List[RouteExceptionModel]()) {
+      code => List(RouteExceptionModel("", None, code))
+    }
 
-    def exceptionTriggersActions = fakeApplication.injector.instanceOf[SapExceptionTriggers]
+    when(mockExceptionsRepository.apply())
+      .thenReturn(mockExceptionsCollection)
+
+    when(mockExceptionsCollection.findLatestVersionBy(any())(any()))
+      .thenReturn(Future.successful(expectedException))
 
     when(mockRepository.apply())
       .thenReturn(mockCollection)
 
     when(mockCollection.addEntry(any())(any()))
-      .thenReturn(addEntryResult)
+      .thenReturn(Future.successful({}))
 
     when(mockCollection.findLatestVersionBy(any())(any()))
       .thenReturn(Future.successful(findLatestVersionResult))
@@ -57,8 +69,8 @@ class SubscriptionControllerSpec extends UnitSpec with MockitoSugar with WithFak
 
   "Calling subscribe" when {
 
-    "a list with subscribers is returned" should {
-      val controller = setupController(Future.successful(List(SubscriberModel("123456789", "CGT123456"))), Future.successful({}), "CGT654321")
+    "a CGT subscription already exists" should {
+      val controller = setupController(List(SubscriberModel("123456789", "CGT123456")), "CGT654321")
       lazy val result = controller.subscribe("123456789")(FakeRequest("POST", "")
         .withJsonBody(Json.toJson(SubscribeModel("123456789"))))
 
@@ -77,10 +89,10 @@ class SubscriptionControllerSpec extends UnitSpec with MockitoSugar with WithFak
       }
     }
 
-    "a list with no subscribers is returned" should {
-      val controller = setupController(Future.successful(List()), Future.successful({}), "CGT654321")
+    "no existing CGT subscription exists" should {
+      val controller = setupController(Nil, "CGT654321")
       lazy val result = controller.subscribe("123456789")(FakeRequest("POST", "")
-        .withJsonBody(Json.toJson(SubscribeModel("397436038"))))
+        .withJsonBody(Json.toJson(SubscribeModel("123456789"))))
 
       "return a status of 200" in {
         status(result) shouldBe 200
@@ -94,26 +106,6 @@ class SubscriptionControllerSpec extends UnitSpec with MockitoSugar with WithFak
         val data = contentAsString(result)
         val json = Json.parse(data)
         json.as[String] shouldBe "CGT654321"
-      }
-    }
-
-    "an error matching safe id is detected" should {
-      val controller = setupController(Future.successful(List(SubscriberModel("123456789", "CGT123456"))), Future.successful({}), "CGT654321")
-      lazy val result = controller.subscribe("404404404")(FakeRequest("POST", "")
-        .withJsonBody(Json.toJson(SubscribeModel("404404404"))))
-
-      "return a status of 404" in {
-        status(result) shouldBe 404
-      }
-
-      "return a type of Json" in {
-        contentType(result) shouldBe Some("application/json")
-      }
-
-      "return an error code" in {
-        val data = contentAsString(result)
-        val json = Json.parse(data)
-        json.as[String] shouldBe "Not found error"
       }
     }
   }

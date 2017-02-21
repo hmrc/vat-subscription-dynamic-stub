@@ -16,8 +16,10 @@
 
 package controllers.stubs
 
-import actions.SapExceptionTriggers
 import javax.inject.{Inject, Singleton}
+
+import actions.ExceptionTriggersActions
+import common.RouteIds
 import helpers.CgtRefHelper
 import models.{SubscribeModel, SubscriberModel}
 import play.api.Logger
@@ -32,11 +34,11 @@ import scala.concurrent.Future
 @Singleton
 class SubscriptionController @Inject()(repository: SubscriptionRepository,
                                        cgtRefHelper: CgtRefHelper,
-                                       sapExceptionTriggers: SapExceptionTriggers
+                                       guardedActions: ExceptionTriggersActions
                                       ) extends BaseController {
 
   val subscribe: String => Action[AnyContent] = safeId => {
-    sapExceptionTriggers.WithSapExceptionTriggers(safeId).async {
+    guardedActions.ExceptionTriggers(safeId, RouteIds.subscribe).async {
       implicit request => {
 
         Logger.info("Received a call from the back end to subscribe an Individual")

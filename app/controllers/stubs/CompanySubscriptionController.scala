@@ -17,7 +17,10 @@
 package controllers.stubs
 
 import javax.inject.{Inject, Singleton}
-import helpers.{CgtRefHelper, CompanyErrorSafeId}
+
+import actions.ExceptionTriggersActions
+import common.RouteIds
+import helpers.CgtRefHelper
 import models.{CompanySubmissionModel, SubscriberModel}
 import play.api.Logger
 import play.api.libs.json.Json
@@ -30,48 +33,22 @@ import scala.concurrent.Future
 
 @Singleton
 class CompanySubscriptionController @Inject()(subscriptionMongoConnector: SubscriptionRepository,
-                                              cGTRefHelper: CgtRefHelper
-                                             ) extends BaseController {
+                                              cGTRefHelper: CgtRefHelper,
+                                              guardedActions: ExceptionTriggersActions)
+  extends BaseController {
 
+  private val noContactAddressMessage = "Body of request did not contain the expected values for the company submission model"
 
   def subscribe(): Action[AnyContent] = {
-    Action.async {
+    guardedActions.CompanySubscriptionExceptionTriggers(RouteIds.companySubscribe).async {
       implicit request => {
+
         Logger.info("Received a call from the back end to subscribe a Company")
-        val companySubmissionModel = request.body.asJson.get.as[CompanySubmissionModel]
-        returnBody(companySubmissionModel)
+        val model = request.body.asJson.get.as[CompanySubmissionModel]
+
+        if (model.contactAddress.isDefined) returnSubscriptionReference(model.sap.get)
+        else Future.successful(Results.BadRequest(Json.toJson(noContactAddressMessage)))
       }
-    }
-  }
-
-  def returnBody(model: CompanySubmissionModel): Future[Result] = {
-
-    if (validateBody(model)) {
-      checkExceptionTriggers(model.sap.get) match {
-        case Some(response) => Future.successful(response)
-        case _ => returnSubscriptionReference(model.sap.get)
-      }
-    }
-    else Future.successful(Results.BadRequest(Json.toJson("Body of request did not contain the expected values for the company submission model")))
-  }
-
-  def validateBody(model: CompanySubmissionModel): Boolean = {
-    Logger.info("Checking the supplied CompanySubmissionModel has all fields defined")
-    model.sap.isDefined && model.registeredAddress.isDefined && model.contactAddress.isDefined
-  }
-
-  def checkExceptionTriggers(sap: String): Option[Result] = {
-    Logger.info("Checking the supplied sap against the company exception trigger sap's")
-    sap match {
-      case CompanyErrorSafeId.notFound.sap => Some(Results.NotFound(Json.toJson("Not found error")))
-      case CompanyErrorSafeId.badRequest.sap => Some(Results.BadRequest(Json.toJson("Bad request error")))
-      case CompanyErrorSafeId.badGateway.sap => Some(Results.BadGateway(Json.toJson("Bad gateway error")))
-      case CompanyErrorSafeId.internalServerError.sap => Some(Results.InternalServerError(Json.toJson("Internal server error")))
-      case CompanyErrorSafeId.serviceUnavailable.sap => Some(Results.ServiceUnavailable(Json.toJson("Service unavailable error")))
-      case CompanyErrorSafeId.timeout.sap => Some(Results.RequestTimeout(Json.toJson("Timeout error")))
-      case _ =>
-        Logger.info("No exceptions triggered from the supplied sap of: " + sap)
-        None
     }
   }
 

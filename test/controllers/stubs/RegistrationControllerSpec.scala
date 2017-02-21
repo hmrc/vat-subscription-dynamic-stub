@@ -16,16 +16,16 @@
 
 package controllers.stubs
 
-import actions.NinoExceptionTriggersActions
+import actions.ExceptionTriggersActions
 import helpers.SapHelper
-import models.{BusinessPartnerModel, RegisterModel}
-import org.mockito.ArgumentMatchers
+import models.{BusinessPartnerModel, RegisterModel, RouteExceptionKeyModel, RouteExceptionModel}
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import repositories.{BusinessPartnerRepository, CgtRepository}
+import repositories.{BusinessPartnerRepository, CgtRepository, RouteExceptionRepository}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
@@ -33,34 +33,45 @@ import scala.concurrent.Future
 
 class RegistrationControllerSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
 
-  def setupController(findLatestVersionResult: Future[List[BusinessPartnerModel]], addEntryResult: Future[Unit], sap: String): RegistrationController = {
+  def setupController(existingBusinessPartners: List[BusinessPartnerModel],
+                      sap: String,
+                      expectedExceptionCode: Option[Int] = None): RegistrationController = {
 
     val mockCollection = mock[CgtRepository[BusinessPartnerModel, Nino]]
     val mockRepository = mock[BusinessPartnerRepository]
     val mockSAPHelper = mock[SapHelper]
+    val mockExceptionsCollection = mock[CgtRepository[RouteExceptionModel, RouteExceptionKeyModel]]
+    val mockExceptionsRepository = mock[RouteExceptionRepository]
+    val exceptionTriggersActions = new ExceptionTriggersActions(mockExceptionsRepository)
+    val expectedException = expectedExceptionCode.fold(List[RouteExceptionModel]()) {
+      code => List(RouteExceptionModel("", None, code))
+    }
 
-    def exceptionTriggersActions() = fakeApplication.injector.instanceOf[NinoExceptionTriggersActions]
+    when(mockExceptionsRepository.apply())
+      .thenReturn(mockExceptionsCollection)
+
+    when(mockExceptionsCollection.findLatestVersionBy(any())(any()))
+      .thenReturn(Future.successful(expectedException))
 
     when(mockRepository.apply())
       .thenReturn(mockCollection)
 
-    when(mockCollection.addEntry(ArgumentMatchers.any())(ArgumentMatchers.any()))
-      .thenReturn(addEntryResult)
+    when(mockCollection.addEntry(any())(any()))
+      .thenReturn(Future.successful({}))
 
-    when(mockCollection.findLatestVersionBy(ArgumentMatchers.any())(ArgumentMatchers.any()))
-      .thenReturn(Future.successful(findLatestVersionResult))
+    when(mockCollection.findLatestVersionBy(any())(any()))
+      .thenReturn(Future.successful(existingBusinessPartners))
 
     when(mockSAPHelper.generateSap())
       .thenReturn(sap)
 
-    new RegistrationController(mockRepository, mockSAPHelper, exceptionTriggersActions())
+    new RegistrationController(mockRepository, mockSAPHelper, exceptionTriggersActions)
   }
 
   "Calling registerBusinessPartner" when {
 
-    "a list with business partners is returned" should {
-      val controller = setupController(Future.successful(List(BusinessPartnerModel(Nino("AA123456A"), "123456789"))),
-        Future.successful({}), "")
+    "the nino has no corresponding business partner" should {
+      val controller = setupController(List(BusinessPartnerModel(Nino("AA123456A"), "123456789")), "")
       lazy val result = controller.registerBusinessPartner("AA123456A")(FakeRequest("POST", "")
         .withJsonBody(Json.toJson(RegisterModel(Nino("AA123456A")))))
 
@@ -70,35 +81,14 @@ class RegistrationControllerSpec extends UnitSpec with MockitoSugar with WithFak
 
     }
 
-    "a list with no Business partners is returned" should {
-      val controller = setupController(Future.successful(List()),
-        Future.successful({}), "987654321")
-      lazy val result = controller.registerBusinessPartner("AA123456A")(FakeRequest("POST", "")
-        .withJsonBody(Json.toJson(RegisterModel(Nino("AA123456A")))))
-
-      "return a status of 200" in {
-        status(result) shouldBe 200
-      }
-
-      "return a type of Json" in {
-        contentType(result) shouldBe Some("application/json")
-      }
-
-      "return a valid SAP" in {
-        val data = contentAsString(result)
-        val json = Json.parse(data)
-        json.as[String] shouldBe "987654321"
-      }
-    }
-
     "passing in a nino for an error scenario" should {
-      val controller = setupController(Future.successful(List(BusinessPartnerModel(Nino("AA123456A"), "CGT123456"))),
-        Future.successful({}), "CGT654321")
+      val NOT_FOUND = 404
+      val controller = setupController(List(BusinessPartnerModel(Nino("AA123456A"), "CGT123456")), "CGT654321", Some(NOT_FOUND))
       lazy val result = controller.registerBusinessPartner("AA404404A")(FakeRequest("POST", "")
         .withJsonBody(Json.toJson(RegisterModel(Nino("AA404404A")))))
 
       "return a status of 404" in {
-        status(result) shouldBe 404
+        status(result) shouldBe NOT_FOUND
       }
 
       "return a type of Json" in {
@@ -115,8 +105,7 @@ class RegistrationControllerSpec extends UnitSpec with MockitoSugar with WithFak
 
   "Calling obtainDetails" when {
     "supplied with a nino that is associated with a preexisting BP" should {
-      val controller = setupController(Future.successful(List(BusinessPartnerModel(Nino("AA123456A"), "123456789"))),
-        Future.successful({}), "")
+      val controller = setupController(List(BusinessPartnerModel(Nino("AA123456A"), "123456789")), "")
       lazy val result = controller.getExistingSAP("AA123456A")(FakeRequest("POST", "")
         .withJsonBody(Json.toJson(RegisterModel(Nino("AA123456A")))))
 
@@ -135,14 +124,14 @@ class RegistrationControllerSpec extends UnitSpec with MockitoSugar with WithFak
       }
     }
 
-    "supplied with a nino where no associated BP exists" should {
-      val controller = setupController(Future.successful(List()),
-      Future.successful({}), "987654321")
+    "supplied with a nino that is associated with a preexisting BP BUT an internal error occurs" should {
+      val INTERNAL_ERROR = 500
+      val controller = setupController(List(BusinessPartnerModel(Nino("AA123456A"), "123456789")), "", Some(INTERNAL_ERROR))
       lazy val result = controller.getExistingSAP("AA123456A")(FakeRequest("POST", "")
         .withJsonBody(Json.toJson(RegisterModel(Nino("AA123456A")))))
 
-      "return a status of 400/bad request" in {
-        status(result) shouldBe 400
+      s"return a status of $INTERNAL_ERROR" in {
+        status(result) shouldBe INTERNAL_ERROR
       }
     }
 

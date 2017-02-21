@@ -16,9 +16,10 @@
 
 package controllers.stubs
 
-import actions.FullDetailsExceptionTriggersActions
+import actions.ExceptionTriggersActions
 import javax.inject.{Inject, Singleton}
 
+import common.RouteIds
 import helpers.SapHelper
 import models.{FullDetailsModel, NonResidentBusinessPartnerModel}
 import play.api.libs.json.Json
@@ -32,10 +33,11 @@ import scala.concurrent.Future
 @Singleton
 class GhostRegistrationController @Inject()(repository: NonResidentBusinessPartnerRepository,
                                             sapHelper: SapHelper,
-                                            fullDetailsExceptionTriggersActions: FullDetailsExceptionTriggersActions) extends BaseController {
+                                            guardedActions: ExceptionTriggersActions)
+  extends BaseController {
 
   val registerBusinessPartner: Action[AnyContent] = {
-    fullDetailsExceptionTriggersActions.WithFullDetailsExceptionTriggers().async {
+    guardedActions.WithFullDetailsExceptionTriggers(RouteIds.registerIndividualWithoutNino).async {
       implicit request => {
 
         val body = request.body.asJson
