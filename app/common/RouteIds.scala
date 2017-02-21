@@ -17,10 +17,10 @@
 package common
 
 object RouteIds {
-  val registerIndividual = Some("register-individual")  //RegistrationController.registerBusinessPartner
+  val registerIndividualWithNino = Some("register-individual-with-nino")  //RegistrationController.registerBusinessPartner
+  val registerIndividualWithoutNino = Some("register-individual-without-nino")  //RegistrationController.registerBusinessPartner
   val companySubscribe = Some("subscribe-company") //CompanySubscriptionController.subscribe
   val registerAgent = Some("register-agent")  //RegistrationController.registerAgent
-  val registerGhost = Some("ghost-register-user") //GhostRegistrationController.registerBusinessPartner
   val subscribe = Some("subscribe") //SubscriptionController.subscribe
   val taxEnrolmentSubscribe = Some("tax-enrolment-subscribe") //TaxEnrolmentsController.subscribe
   val taxEnrolmentIssuer = Some("tax-enrolment-issuer") //TaxEnrolmentsController.issuer

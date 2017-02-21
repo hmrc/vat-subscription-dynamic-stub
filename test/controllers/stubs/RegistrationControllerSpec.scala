@@ -16,7 +16,7 @@
 
 package controllers.stubs
 
-import actions.NinoExceptionTriggersActions
+import actions.ExceptionTriggersActions
 import helpers.SapHelper
 import models.{BusinessPartnerModel, RegisterModel, RouteExceptionKeyModel, RouteExceptionModel}
 import org.mockito.ArgumentMatchers._
@@ -42,7 +42,7 @@ class RegistrationControllerSpec extends UnitSpec with MockitoSugar with WithFak
     val mockSAPHelper = mock[SapHelper]
     val mockExceptionsCollection = mock[CgtRepository[RouteExceptionModel, RouteExceptionKeyModel]]
     val mockExceptionsRepository = mock[RouteExceptionRepository]
-    val exceptionTriggersActions = new NinoExceptionTriggersActions(mockExceptionsRepository)
+    val exceptionTriggersActions = new ExceptionTriggersActions(mockExceptionsRepository)
     val expectedException = expectedExceptionCode.fold(List[RouteExceptionModel]()) {
       code => List(RouteExceptionModel("", None, code))
     }
