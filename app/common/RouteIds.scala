@@ -17,13 +17,13 @@
 package common
 
 object RouteIds {
-  val registerIndividualWithNino = Some("register-individual-with-nino")  //RegistrationController.registerBusinessPartner
-  val registerIndividualWithoutNino = Some("register-individual-without-nino")  //RegistrationController.registerBusinessPartner
-  val companySubscribe = Some("subscribe-company") //CompanySubscriptionController.subscribe
-  val registerAgent = Some("register-agent")  //RegistrationController.registerAgent
-  val subscribe = Some("subscribe") //SubscriptionController.subscribe
-  val taxEnrolmentSubscribe = Some("tax-enrolment-subscribe") //TaxEnrolmentsController.subscribe
-  val taxEnrolmentIssuer = Some("tax-enrolment-issuer") //TaxEnrolmentsController.issuer
-  val obtainDetails = Some("obtain-details") //RegistrationController.getExistingSAP
-  val getExistingSap = Some("get-existing-sap") //RegistrationController.getExistingSap
+  val registerIndividualWithNino = "register-individual-with-nino"  //RegistrationController.registerBusinessPartner
+  val registerIndividualWithoutNino = "register-individual-without-nino"  //RegistrationController.registerBusinessPartner
+  val companySubscribe = "subscribe-company" //CompanySubscriptionController.subscribe
+  val registerAgent = "register-agent"  //RegistrationController.registerAgent
+  val subscribe = "subscribe" //SubscriptionController.subscribe
+  val taxEnrolmentSubscribe = "tax-enrolment-subscribe" //TaxEnrolmentsController.subscribe
+  val taxEnrolmentIssuer = "tax-enrolment-issuer" //TaxEnrolmentsController.issuer
+  val obtainDetails = "obtain-details" //RegistrationController.getExistingSAP
+  val getExistingSap = "get-existing-sap" //RegistrationController.getExistingSap
 }

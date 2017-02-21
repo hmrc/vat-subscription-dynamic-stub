@@ -18,13 +18,13 @@ package models
 
 import play.api.libs.json.{Json, OFormat}
 
-case class RouteExceptionKeyModel(id: String, routeId: Option[String] = None)
+case class RouteExceptionKeyModel(id: String, routeId: String)
 
 object RouteExceptionKeyModel {
   implicit val formats: OFormat[RouteExceptionKeyModel] = Json.format[RouteExceptionKeyModel]
 }
 
-case class RouteExceptionModel(id: String, routeId: Option[String] = None, httpCode: Int)
+case class RouteExceptionModel(id: String, routeId: String, httpCode: Int)
 
 object RouteExceptionModel {
   implicit val formats: OFormat[RouteExceptionModel] = Json.format[RouteExceptionModel]

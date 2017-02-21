@@ -44,7 +44,7 @@ class RegistrationControllerSpec extends UnitSpec with MockitoSugar with WithFak
     val mockExceptionsRepository = mock[RouteExceptionRepository]
     val exceptionTriggersActions = new ExceptionTriggersActions(mockExceptionsRepository)
     val expectedException = expectedExceptionCode.fold(List[RouteExceptionModel]()) {
-      code => List(RouteExceptionModel("", None, code))
+      code => List(RouteExceptionModel("", "", code))
     }
 
     when(mockExceptionsRepository.apply())
