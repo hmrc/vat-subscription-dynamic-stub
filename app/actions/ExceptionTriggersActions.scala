@@ -37,7 +37,7 @@ class ExceptionTriggersActions @Inject()(exceptionsRepository: RouteExceptionRep
         case RouteExceptionModel(_, _, Status.NOT_FOUND) => Future.successful(Results.NotFound(Json.toJson("Not found error")))
         case RouteExceptionModel(_, _, Status.BAD_GATEWAY) => Future.successful(Results.BadGateway(Json.toJson("Bad gateway error")))
         case RouteExceptionModel(_, _, Status.BAD_REQUEST) => Future.successful(Results.BadRequest(Json.toJson("Bad request error")))
-        case RouteExceptionModel(_, _, Status.CONFLICT) => Future.successful(Results.BadRequest(Json.toJson("Conflict request error")))
+        case RouteExceptionModel(_, _, Status.CONFLICT) => Future.successful(Results.Conflict(Json.toJson("Conflict request error")))
         case RouteExceptionModel(_, _, Status.INTERNAL_SERVER_ERROR) => Future.successful(Results.InternalServerError(Json.toJson("Internal server error")))
         case RouteExceptionModel(_, _, Status.SERVICE_UNAVAILABLE) => Future.successful(Results.ServiceUnavailable(Json.toJson("Service unavailable error")))
         case RouteExceptionModel(_, _, Status.REQUEST_TIMEOUT) => Future.successful(Results.RequestTimeout(Json.toJson("Timeout error")))
