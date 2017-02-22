@@ -30,7 +30,7 @@ import scala.concurrent.Future
 @Singleton
 class ExceptionTriggersActions @Inject()(exceptionsRepository: RouteExceptionRepository) {
 
-  private def processException[A](id: String, routeId: Option[String], request: Request[A], block: (Request[A]) => Future[Result]): Future[Result] = {
+  private def processException[A](id: String, routeId: String, request: Request[A], block: (Request[A]) => Future[Result]): Future[Result] = {
     val searchCriteria = RouteExceptionKeyModel(id, routeId)
     exceptionsRepository().findLatestVersionBy(searchCriteria).flatMap { exceptions =>
       exceptions.headOption.fold(block(request)) {
@@ -46,13 +46,13 @@ class ExceptionTriggersActions @Inject()(exceptionsRepository: RouteExceptionRep
     }
   }
 
-  case class ExceptionTriggers(id: String, routeId: Option[String]) extends ActionBuilder[Request] {
+  case class ExceptionTriggers(id: String, routeId: String) extends ActionBuilder[Request] {
     def invokeBlock[A](request: Request[A], block: (Request[A]) => Future[Result]): Future[Result] = {
       processException(id, routeId, request, block)
     }
   }
 
-  case class WithFullDetailsExceptionTriggers(routeId: Option[String]) extends ActionBuilder[Request] {
+  case class WithFullDetailsExceptionTriggers(routeId: String) extends ActionBuilder[Request] {
     def invokeBlock[A](request: Request[A], block: (Request[A]) => Future[Result]): Future[Result] = {
       val details = request.asInstanceOf[Request[AnyContent]].body.asJson.get.as[FullDetailsModel]
       val uniqueId = s"${details.firstName} ${details.lastName}"
@@ -60,7 +60,7 @@ class ExceptionTriggersActions @Inject()(exceptionsRepository: RouteExceptionRep
     }
   }
 
-  case class CompanySubscriptionExceptionTriggers(routeId: Option[String]) extends ActionBuilder[Request] {
+  case class CompanySubscriptionExceptionTriggers(routeId: String) extends ActionBuilder[Request] {
     def invokeBlock[A](request: Request[A], block: (Request[A]) => Future[Result]): Future[Result] = {
       val details = request.asInstanceOf[Request[AnyContent]].body.asJson.get.as[CompanySubmissionModel]
       details.sap.fold (Future.successful(Results.BadRequest(Json.toJson("SAP not specified")))) {
