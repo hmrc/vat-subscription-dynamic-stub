@@ -17,7 +17,9 @@
 package controllers.stubs
 
 import javax.inject.Singleton
-import models.{EnrolmentIssuerRequestModel, EnrolmentSubscriberRequestModel, Identifier}
+
+import actions.ExceptionTriggersActions
+import models._
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
@@ -31,14 +33,20 @@ import scala.concurrent.Future
 @Singleton
 class TaxEnrolmentsControllerSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
 
-  def setupController(addEntryResult: Future[Unit]): TaxEnrolmentsController = {
+  def setupController(addEntryResult: Future[Unit], expectedExceptionCode: Option[Int] = None): TaxEnrolmentsController = {
     val mockIssuerCollection = mock[CgtRepository[EnrolmentIssuerRequestModel, Identifier]]
     val mockIssuerRepository = mock[TaxEnrolmentIssuerRepository]
 
     val mockSubscriberCollection = mock[CgtRepository[EnrolmentSubscriberRequestModel, String]]
     val mockSubscriberRepository = mock[TaxEnrolmentSubscriberRepository]
 
-    new TaxEnrolmentsController(mockSubscriberRepository, mockIssuerRepository)
+    val mockExceptionsCollection = mock[CgtRepository[RouteExceptionModel, RouteExceptionKeyModel]]
+    val mockExceptionRepository = mock[RouteExceptionRepository]
+    val exceptionTriggerActions = new ExceptionTriggersActions(mockExceptionRepository)
+    val expectedException = expectedExceptionCode.fold(List[RouteExceptionModel]()) {
+      code => List(RouteExceptionModel("", "", code))
+    }
+
 
     when(mockIssuerRepository.apply()).thenReturn(mockIssuerCollection)
     when(mockSubscriberRepository.apply()).thenReturn(mockSubscriberCollection)
@@ -49,7 +57,13 @@ class TaxEnrolmentsControllerSpec extends UnitSpec with MockitoSugar with WithFa
     when(mockSubscriberCollection.addEntry(any())(any()))
       .thenReturn(addEntryResult)
 
-    new TaxEnrolmentsController(mockSubscriberRepository, mockIssuerRepository)
+    when(mockExceptionRepository.apply())
+          .thenReturn(mockExceptionsCollection)
+
+    when(mockExceptionsCollection.findLatestVersionBy(any())(any()))
+          .thenReturn(Future.successful(expectedException))
+
+    new TaxEnrolmentsController(mockSubscriberRepository, mockIssuerRepository, exceptionTriggerActions)
   }
 
   "Calling .subscribeIssue" when {

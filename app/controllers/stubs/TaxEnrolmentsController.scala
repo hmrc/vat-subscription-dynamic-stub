@@ -17,6 +17,9 @@
 package controllers.stubs
 
 import javax.inject.{Inject, Singleton}
+
+import actions.ExceptionTriggersActions
+import common.RouteIds
 import models.{EnrolmentIssuerRequestModel, EnrolmentSubscriberRequestModel}
 import play.api.Logger
 import play.api.mvc.{Action, AnyContent}
@@ -29,10 +32,27 @@ import scala.util.{Failure, Success, Try}
 
 @Singleton
 class TaxEnrolmentsController @Inject()(subscriberRepository: TaxEnrolmentSubscriberRepository,
-                                        issuerRepository: TaxEnrolmentIssuerRepository)
+                                        issuerRepository: TaxEnrolmentIssuerRepository,
+                                        guardedActions: ExceptionTriggersActions)
   extends BaseController {
 
-  def subscribeIssuer(subscriptionId: String): Action[AnyContent] = Action.async {
+//  def subscribeIssuer(subscriptionId: String): Action[AnyContent] = Action.async {
+//    implicit request =>
+//
+//      Logger.warn("Received a call from the back end to make an enrolment issuer request")
+//
+//      Try {
+//        val body = request.body.asJson
+//        val recordData = body.get.as[EnrolmentIssuerRequestModel]
+//
+//        issuerRepository().addEntry(recordData)
+//      } match {
+//        case Success(_) => Future.successful(NoContent)
+//        case Failure(_) => Future.successful(BadRequest)
+//      }
+//  }
+
+  def subscribeIssuer(subscriptionId: String): Action[AnyContent] = guardedActions.ExceptionTriggers(subscriptionId, RouteIds.taxEnrolmentIssuer) {
     implicit request =>
 
       Logger.warn("Received a call from the back end to make an enrolment issuer request")
@@ -43,12 +63,12 @@ class TaxEnrolmentsController @Inject()(subscriberRepository: TaxEnrolmentSubscr
 
         issuerRepository().addEntry(recordData)
       } match {
-        case Success(_) => Future.successful(NoContent)
-        case Failure(_) => Future.successful(BadRequest)
+        case Success(_) => NoContent
+        case Failure(_) => BadRequest
       }
   }
 
-  def subscribeSubscriber(subscriptionId: String): Action[AnyContent] = Action.async {
+  def subscribeSubscriber(subscriptionId: String): Action[AnyContent] = guardedActions.ExceptionTriggers(subscriptionId, RouteIds.taxEnrolmentSubscribe) {
 
     implicit request =>
 
@@ -59,8 +79,8 @@ class TaxEnrolmentsController @Inject()(subscriberRepository: TaxEnrolmentSubscr
         val recordData = body.get.as[EnrolmentSubscriberRequestModel]
         subscriberRepository().addEntry(recordData)
       } match {
-        case Success(_) => Future.successful(NoContent)
-        case Failure(_) => Future.successful(BadRequest)
+        case Success(_) => NoContent
+        case Failure(_) => BadRequest
       }
   }
 
