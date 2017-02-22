@@ -85,7 +85,6 @@ class RegistrationController @Inject()(repository: BusinessPartnerRepository,
   val getExistingSAP: String => Action[AnyContent] = {
     nino =>
       guardedActions.ExceptionTriggers(nino, RouteIds.getExistingSap).async {
-        //TODO: Update with new error guard when completed
         implicit request => {
 
           Logger.warn("Received a call from the back end to retrieve details/SAP for a preexisting business business partner")
