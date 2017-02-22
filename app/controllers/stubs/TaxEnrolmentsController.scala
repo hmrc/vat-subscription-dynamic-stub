@@ -48,7 +48,7 @@ class TaxEnrolmentsController @Inject()(subscriberRepository: TaxEnrolmentSubscr
         issuerRepository().addEntry(recordData)
       } match {
         case Success(_) => NoContent
-        case Failure(exception) => BadRequest(exception.getMessage)
+        case Failure(exception) => BadRequest()
       }
   }
 
