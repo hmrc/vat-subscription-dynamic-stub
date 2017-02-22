@@ -36,22 +36,6 @@ class TaxEnrolmentsController @Inject()(subscriberRepository: TaxEnrolmentSubscr
                                         guardedActions: ExceptionTriggersActions)
   extends BaseController {
 
-//  def subscribeIssuer(subscriptionId: String): Action[AnyContent] = Action.async {
-//    implicit request =>
-//
-//      Logger.warn("Received a call from the back end to make an enrolment issuer request")
-//
-//      Try {
-//        val body = request.body.asJson
-//        val recordData = body.get.as[EnrolmentIssuerRequestModel]
-//
-//        issuerRepository().addEntry(recordData)
-//      } match {
-//        case Success(_) => Future.successful(NoContent)
-//        case Failure(_) => Future.successful(BadRequest)
-//      }
-//  }
-
   def subscribeIssuer(subscriptionId: String): Action[AnyContent] = guardedActions.ExceptionTriggers(subscriptionId, RouteIds.taxEnrolmentIssuer) {
     implicit request =>
 
@@ -64,7 +48,7 @@ class TaxEnrolmentsController @Inject()(subscriberRepository: TaxEnrolmentSubscr
         issuerRepository().addEntry(recordData)
       } match {
         case Success(_) => NoContent
-        case Failure(_) => BadRequest
+        case Failure(exception) => BadRequest(exception.getMessage)
       }
   }
 
