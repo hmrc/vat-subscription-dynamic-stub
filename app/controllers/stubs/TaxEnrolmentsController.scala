@@ -27,7 +27,6 @@ import repositories.{TaxEnrolmentIssuerRepository, TaxEnrolmentSubscriberReposit
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
 @Singleton
@@ -48,7 +47,7 @@ class TaxEnrolmentsController @Inject()(subscriberRepository: TaxEnrolmentSubscr
         issuerRepository().addEntry(recordData)
       } match {
         case Success(_) => NoContent
-        case Failure(exception) => BadRequest()
+        case Failure(exception) => BadRequest
       }
   }
 
