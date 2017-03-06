@@ -14,14 +14,23 @@
  * limitations under the License.
  */
 
-package helpers
+package models
 
-import javax.inject.{Inject, Singleton}
+import uk.gov.hmrc.play.test.UnitSpec
 
-import scala.concurrent.forkjoin.ThreadLocalRandom
+class CompanySubmissionModelSpec extends UnitSpec {
 
-@Singleton
-class SapHelper @Inject()() {
-  def generateSap(): String = ThreadLocalRandom.current().nextInt(10000000, 99999999).toString +
-    ThreadLocalRandom.current().nextInt(1000000, 9999999).toString
+  "Creating a company submission model" which {
+
+    "has an invalid sap" should {
+      val sap = Some("123456789")
+      lazy val ex = intercept[Exception] {
+        CompanySubmissionModel(sap, None, None)
+      }
+
+      "throw an exception" in {
+        ex.getMessage shouldBe s"requirement failed: SAP:$sap is not valid."
+      }
+    }
+  }
 }
