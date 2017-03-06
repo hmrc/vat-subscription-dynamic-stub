@@ -49,7 +49,7 @@ class SubscriptionTestControllerSpec extends UnitSpec with MockitoSugar with Wit
 
     "return a status of 200 with valid Json" in {
       lazy val result = controller.addSubscriptionRecord(FakeRequest("POST", "")
-        .withJsonBody(Json.toJson(SubscriberModel("123456789", "CGT123456"))))
+        .withJsonBody(Json.toJson(SubscriberModel("123456789098765", "CGT123456"))))
 
       status(result) shouldBe 200
     }
@@ -66,7 +66,7 @@ class SubscriptionTestControllerSpec extends UnitSpec with MockitoSugar with Wit
 
     "return a status of 200 with valid Json" in {
       lazy val result = controller.removeSubscriptionRecord(FakeRequest("POST", "")
-        .withJsonBody(Json.toJson("123456789")))
+        .withJsonBody(Json.toJson("123456789098765")))
 
       status(result) shouldBe 200
     }

@@ -18,8 +18,14 @@ package models
 
 import play.api.libs.json.{Json, OFormat}
 
-case class SubscriberModel (sap: String, reference: String)
+case class SubscriberModel(sap: String, reference: String) {
+  require(SubscriberModel.validateSAP(sap), s"SAP:$sap is not valid.")
+}
 
 object SubscriberModel {
   implicit val formats: OFormat[SubscriberModel] = Json.format[SubscriberModel]
+
+  def validateSAP(sap: String): Boolean = {
+    sap.length.equals(15)
+  }
 }
