@@ -44,10 +44,11 @@ class TaxEnrolmentsController @Inject()(subscriberRepository: TaxEnrolmentSubscr
         val body = request.body.asJson
         val recordData = body.get.as[EnrolmentIssuerRequestModel]
 
+        Logger.warn(s"Successfully read request body as $recordData")
         issuerRepository().addEntry(recordData)
       } match {
         case Success(_) => NoContent
-        case Failure(exception) => BadRequest
+        case Failure(exception) => BadRequest(exception.getMessage)
       }
   }
 
@@ -60,10 +61,12 @@ class TaxEnrolmentsController @Inject()(subscriberRepository: TaxEnrolmentSubscr
       Try {
         val body = request.body.asJson
         val recordData = body.get.as[EnrolmentSubscriberRequestModel]
+
+        Logger.warn(s"Successfully read request body as $recordData")
         subscriberRepository().addEntry(recordData)
       } match {
         case Success(_) => NoContent
-        case Failure(_) => BadRequest
+        case Failure(exception) => BadRequest(exception.getMessage)
       }
   }
 
