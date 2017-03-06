@@ -16,11 +16,27 @@
 
 package models
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class AgentSubmissionModel (sap: String,
-                                 arn: String)
+                                 arn: String) {
+  require(AgentSubmissionModel.validateARN(arn), s"ARN:$arn is not valid.")
+  require(AgentSubmissionModel.validateSAP(sap), s"SAP:$sap is not valid.")
+}
 
 object AgentSubmissionModel {
-  implicit val formats = Json.format[AgentSubmissionModel]
+  implicit val formats: OFormat[AgentSubmissionModel] = Json.format[AgentSubmissionModel]
+
+  def validateARN(arn: String): Boolean = {
+    val regex = "[A-Z]ARN[0-9]{7}".r
+
+    arn match {
+      case regex(_*) => true
+      case _ => false
+    }
+  }
+
+  def validateSAP(sap: String): Boolean = {
+    sap.length.equals(15)
+  }
 }
