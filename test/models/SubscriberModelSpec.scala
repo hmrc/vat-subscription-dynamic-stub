@@ -16,16 +16,21 @@
 
 package models
 
-import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.play.test.UnitSpec
 
-case class SubscriberModel(sap: String, reference: String) {
-  require(SubscriberModel.validateSAP(sap), s"SAP:$sap is not valid.")
-}
+class SubscriberModelSpec extends UnitSpec {
 
-object SubscriberModel {
-  implicit val formats: OFormat[SubscriberModel] = Json.format[SubscriberModel]
+  "Creating a SubscribeIndividualModel" should {
 
-  def validateSAP(sap: String): Boolean = {
-    sap.length.equals(15)
+    "has an invalid sap" should {
+      val sap = "123456789"
+      lazy val ex = intercept[Exception] {
+        SubscriberModel(sap, "")
+      }
+
+      "throw an exception" in {
+        ex.getMessage shouldBe s"requirement failed: SAP:$sap is not valid."
+      }
+    }
   }
 }

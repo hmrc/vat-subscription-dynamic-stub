@@ -22,5 +22,6 @@ import scala.concurrent.forkjoin.ThreadLocalRandom
 
 @Singleton
 class SapHelper @Inject()() {
-  def generateSap(): String = ThreadLocalRandom.current().nextInt(100000000, 999999999).toString
+  def generateSap(): String = ThreadLocalRandom.current().nextInt(10000000, 99999999).toString +
+    ThreadLocalRandom.current().nextInt(1000000, 9999999).toString
 }
