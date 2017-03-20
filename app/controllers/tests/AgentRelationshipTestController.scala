@@ -23,6 +23,7 @@ import play.api.mvc.{Action, AnyContent}
 import repositories.AgentClientRelationshipRepository
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 

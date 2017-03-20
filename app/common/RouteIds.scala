@@ -26,4 +26,5 @@ object RouteIds {
   val taxEnrolmentIssuer = "tax-enrolment-issuer" //TaxEnrolmentsController.issuer
   val obtainDetails = "obtain-details" //RegistrationController.getExistingSAP
   val getExistingSap = "get-existing-sap" //RegistrationController.getExistingSap
+  val createRelationship = "create-agent-client-relationship"
 }
