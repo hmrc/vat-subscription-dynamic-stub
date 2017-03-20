@@ -27,6 +27,9 @@ DELETE        /test-only/resident/individuals/subscribe/remove          @control
 POST          /test-only/non-resident/individual/register/insert        @controllers.tests.GhostRegistrationTestController.addRegistrationRecord
 DELETE        /test-only/non-resident/individual/register/remove        @controllers.tests.GhostRegistrationTestController.removeRegistrationRecord
 
+POST          /test-only/agent/subscribe/client/insert                  @controllers.tests.AgentRelationshipTestController.addAgentClientRelationshipRecord
+DELETE        /test-only/agent/subscribe/client/remove                  @controllers.tests.AgentRelationshipTestController.removeAgentClientRelationshipRecord
+
 POST          /test-only/exceptions/exception                           @controllers.tests.RouteExceptionTestController.addException
 DELETE        /test-only/exceptions/exception                           @controllers.tests.RouteExceptionTestController.removeException
 

@@ -66,6 +66,11 @@ abstract class NonResidentBusinessPartnerRepositoryBase
   extends ReactiveRepository[NonResidentBusinessPartnerModel, BSONObjectID]("nonResidentBusinessPartners", mongo, formats)
     with CgtRepository[NonResidentBusinessPartnerModel, FullDetailsModel]
 
+abstract class AgentClientRelationshipRepositoryBase
+(implicit mongo: () => DB, formats: Format[AgentClientSubmissionModel], manifest: Manifest[AgentClientSubmissionModel])
+  extends ReactiveRepository[AgentClientSubmissionModel, BSONObjectID]("agentClientRelationships", mongo, formats)
+    with CgtRepository[AgentClientSubmissionModel, RelationshipModel]
+
 abstract class RouteExceptionRepositoryBase
 (implicit mongo: () => DB, formats: Format[RouteExceptionModel], manifest: Manifest[RouteExceptionModel])
   extends ReactiveRepository[RouteExceptionModel, BSONObjectID]("routeExceptions", mongo, formats)
