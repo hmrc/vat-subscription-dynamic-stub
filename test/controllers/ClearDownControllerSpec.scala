@@ -17,7 +17,7 @@
 package controllers
 
 import org.scalatest.mock.MockitoSugar
-import repositories.{BusinessPartnerRepository, RouteExceptionRepository, SubscriptionRepository, TaxEnrolmentSubscriberRepository}
+import repositories._
 import uk.gov.hmrc.play.microservice.controller.BaseController
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
@@ -31,9 +31,11 @@ class ClearDownControllerSpec extends UnitSpec with BaseController with WithFake
     val mockRegistrationConnector = mock[BusinessPartnerRepository]
     val mockSubscriptionConnector = mock[SubscriptionRepository]
     val mockEnrolmentConnector = mock[TaxEnrolmentSubscriberRepository]
+    val mockAgentRelationshipConnector = mock[AgentClientRelationshipRepository]
     val mockExceptionsRepository = mock[RouteExceptionRepository]
 
-    new ClearDownController(mockRegistrationConnector, mockSubscriptionConnector, mockEnrolmentConnector, mockExceptionsRepository)
+    new ClearDownController(mockRegistrationConnector, mockSubscriptionConnector,
+      mockEnrolmentConnector, mockAgentRelationshipConnector, mockExceptionsRepository)
   }
 
   "Calling .checkForFailed" should {
