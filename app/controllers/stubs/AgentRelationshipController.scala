@@ -36,7 +36,7 @@ class AgentRelationshipController @Inject()(repository: AgentClientRelationshipR
 
   def createAgentClientRelationship(arn: String): Action[AnyContent] = {
 
-    guardedActions.WithFullDetailsExceptionTriggers(RouteIds.createRelationship).async {
+    guardedActions.AgentExceptionTriggers(RouteIds.createRelationship, arn).async {
       implicit request => {
         Try {
           val body = request.body.asJson.get

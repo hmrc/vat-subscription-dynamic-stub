@@ -11,4 +11,4 @@ POST        /capital-gains-tax/non-resident/individual/register             @con
 POST        /capital-gains-tax/individual/:safeId/subscribe                 @controllers.stubs.SubscriptionController.subscribe(safeId: String)
 POST        /capital-gains-tax/non-resident/organisation/subscribe          @controllers.stubs.CompanySubscriptionController.subscribe
 
-POST        /gg/agent/:arn/client-list                                      @controllers.stubs.AgentRelationshipController.createAgentClientRelationship(arn: String)
+POST        /agent/:arn/client-list                                      @controllers.stubs.AgentRelationshipController.createAgentClientRelationship(arn: String)
