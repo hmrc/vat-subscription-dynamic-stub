@@ -74,7 +74,7 @@ class GhostRegistrationControllerSpec extends UnitSpec with MockitoSugar with Wi
 
     "existing business partner exist" should {
 
-      val fullDetailsModel = FullDetailsModel("Daniel", "Dorito", "25 Big House", None, "New York", None, "NY1 1NY", "United States of America")
+      val fullDetailsModel = FullDetailsModel("Daniel", "Dorito", "25 Big House", "New York", None, None, None, "United States of America")
       val controller = setupController(List(NonResidentBusinessPartnerModel(fullDetailsModel, "123456789")), "")
       lazy val result = controller.registerBusinessPartner()(FakeRequest("POST", "").withJsonBody(Json.toJson(fullDetailsModel)))
 
@@ -84,7 +84,7 @@ class GhostRegistrationControllerSpec extends UnitSpec with MockitoSugar with Wi
     }
 
     "no existing business partner exists" should {
-      val fullDetailsModel = FullDetailsModel("Michael", "Dorito", "25 Big House", None, "New York", None, "NY1 1NY", "United States of America")
+      val fullDetailsModel = FullDetailsModel("Michael", "Dorito", "25 Big House", "New York", None, None, None, "United States of America")
       val controller = setupController(Nil, "1234567890")
       lazy val result = controller.registerBusinessPartner()(FakeRequest("POST", "").withJsonBody(Json.toJson(fullDetailsModel)))
 
