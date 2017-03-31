@@ -22,7 +22,7 @@ import actions.ExceptionTriggersActions
 import common.RouteIds
 import models.{AgentClientSubmissionModel, RelationshipModel}
 import play.api.mvc.{Action, AnyContent}
-import repositories.AgentClientRelationshipRepository
+import repositories.{AgentClientRelationshipRepository, DesAgentClientRelationshipRepository}
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -31,6 +31,7 @@ import scala.util.{Failure, Success, Try}
 
 @Singleton
 class AgentRelationshipController @Inject()(repository: AgentClientRelationshipRepository,
+                                            desRepository: DesAgentClientRelationshipRepository,
                                             guardedActions: ExceptionTriggersActions
                                            ) extends BaseController {
 
@@ -47,6 +48,21 @@ class AgentRelationshipController @Inject()(repository: AgentClientRelationshipR
           val modelToStore = AgentClientSubmissionModel(relationshipModel, serviceName)
 
           repository().addEntry(modelToStore)
+        } match {
+          case Success(_) => Future.successful(NoContent)
+          case Failure(e) => Future.successful(BadRequest(s"${e.getMessage}"))
+        }
+      }
+    }
+  }
+
+  def createDesAgentClientRelationship: Action[AnyContent] = {
+    guardedActions.DesAgentExceptionTriggers(RouteIds.createDesRelationship).async {
+      implicit request => {
+        Try {
+          val model = request.body.asJson.get.as[RelationshipModel]
+
+          desRepository().addEntry(model)
         } match {
           case Success(_) => Future.successful(NoContent)
           case Failure(e) => Future.successful(BadRequest(s"${e.getMessage}"))

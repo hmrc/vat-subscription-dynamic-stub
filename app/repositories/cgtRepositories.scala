@@ -75,3 +75,8 @@ abstract class RouteExceptionRepositoryBase
 (implicit mongo: () => DB, formats: Format[RouteExceptionModel], manifest: Manifest[RouteExceptionModel])
   extends ReactiveRepository[RouteExceptionModel, BSONObjectID]("routeExceptions", mongo, formats)
     with CgtRepository[RouteExceptionModel, RouteExceptionKeyModel]
+
+abstract class DesAgentClientRelationshipRepositoryBase
+(implicit mongo: () => DB, formats: Format[RelationshipModel], manifest: Manifest[SubscriberModel])
+  extends ReactiveRepository[RelationshipModel, BSONObjectID]("subscribers", mongo, formats)
+    with CgtRepository[RelationshipModel, String]
