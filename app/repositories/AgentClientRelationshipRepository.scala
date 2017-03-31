@@ -29,7 +29,7 @@ class AgentClientRelationshipRepository @Inject()() extends MongoDbConnection {
 
   lazy val repository = new AgentClientRelationshipRepositoryBase {
 
-    override def findAllVersionsBy(o: RelationshipModel)(implicit ec: ExecutionContext):
+    override def findAllVersionsBy(o: String)(implicit ec: ExecutionContext):
     Future[Map[RelationshipModel, List[AgentClientSubmissionModel]]] = {
       val allEntries = find("arn" -> o.arn)
       allEntries.map {

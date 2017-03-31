@@ -56,8 +56,17 @@ class AgentRelationshipController @Inject()(repository: AgentClientRelationshipR
   }
 
   def createDesAgentClickRelationship: Action[AnyContent] = {
-    guardedActions.AgentExceptionTriggers(RouteIds.createDesRelationship, ).async {
+    guardedActions.DesAgentExceptionTriggers(RouteIds.createDesRelationship).async {
+      implicit request => {
+        Try {
+          val model = request.body.asJson.get.as[RelationshipModel]
 
+          repository().addEntry(model)
+        } match {
+          case Success(_) => Future.successful(NoContent)
+          case Failure(e) => Future.successful(BadRequest(s"${e.getMessage}"))
+        }
+      }
     }
   }
 }
