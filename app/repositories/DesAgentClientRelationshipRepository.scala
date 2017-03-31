@@ -18,7 +18,7 @@ package repositories
 
 import javax.inject.Inject
 
-import models.{AgentClientSubmissionModel, RelationshipModel, SubscriberModel}
+import models.RelationshipModel
 import play.modules.reactivemongo.MongoDbConnection
 import reactivemongo.api.commands._
 
