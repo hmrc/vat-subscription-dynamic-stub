@@ -56,7 +56,7 @@ class AgentRelationshipController @Inject()(repository: AgentClientRelationshipR
     }
   }
 
-  def createDesAgentClickRelationship: Action[AnyContent] = {
+  def createDesAgentClientRelationship: Action[AnyContent] = {
     guardedActions.DesAgentExceptionTriggers(RouteIds.createDesRelationship).async {
       implicit request => {
         Try {
