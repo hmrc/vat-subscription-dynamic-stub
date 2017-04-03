@@ -18,7 +18,7 @@ package actions
 
 import javax.inject.{Inject, Singleton}
 
-import models.{CompanySubmissionModel, FullDetailsModel, RouteExceptionKeyModel, RouteExceptionModel}
+import models._
 import play.api.http.Status
 import play.api.libs.json._
 import play.api.mvc._
@@ -72,6 +72,14 @@ class ExceptionTriggersActions @Inject()(exceptionsRepository: RouteExceptionRep
   case class AgentExceptionTriggers(routeId: String, arn: String) extends ActionBuilder[Request] {
     def invokeBlock[A](request: Request[A], block: (Request[A]) => Future[Result]): Future[Result] = {
       processException(arn, routeId, request, block)
+    }
+  }
+
+  case class DesAgentExceptionTriggers(routeId: String) extends ActionBuilder[Request] {
+    def invokeBlock[A](request: Request[A], block: (Request[A] => Future[Result])): Future[Result] = {
+      val relationshipModel = request.asInstanceOf[Request[AnyContent]].body.asJson.get.as[RelationshipModel]
+      val uniqueId = relationshipModel.arn
+      processException(uniqueId, routeId, request, block)
     }
   }
 

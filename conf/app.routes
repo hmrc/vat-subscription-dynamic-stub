@@ -12,3 +12,4 @@ POST        /capital-gains-tax/individual/:safeId/subscribe                 @con
 POST        /capital-gains-tax/non-resident/organisation/subscribe          @controllers.stubs.CompanySubscriptionController.subscribe
 
 POST        /agent/:arn/create-relationship                                 @controllers.stubs.AgentRelationshipController.createAgentClientRelationship(arn: String)
+POST        /capital-gains-tax/create-relationship                          @controllers.stubs.AgentRelationshipController.createDesAgentClientRelationship

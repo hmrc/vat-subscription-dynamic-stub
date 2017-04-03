@@ -30,6 +30,9 @@ DELETE        /test-only/non-resident/individual/register/remove        @control
 POST          /test-only/agent/subscribe/client/insert                  @controllers.tests.AgentRelationshipTestController.addAgentClientRelationshipRecord
 DELETE        /test-only/agent/subscribe/client/remove                  @controllers.tests.AgentRelationshipTestController.removeAgentClientRelationshipRecord
 
+POST          /test-only/agent/subscribe/client/des/insert              @controllers.tests.DesAgentClientRelationshipTestController.addDesAgentClientRelationshipRecord
+DELETE        /test-only/agent/subscribe/client/des/remove              @controllers.tests.DesAgentClientRelationshipTestController.removeDesAgentClientRelationshipRecord
+
 POST          /test-only/exceptions/exception                           @controllers.tests.RouteExceptionTestController.addException
 DELETE        /test-only/exceptions/exception                           @controllers.tests.RouteExceptionTestController.removeException
 

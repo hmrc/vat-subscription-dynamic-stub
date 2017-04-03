@@ -27,4 +27,5 @@ object RouteIds {
   val obtainDetails = "obtain-details" //RegistrationController.getExistingSAP
   val getExistingSap = "get-existing-sap" //RegistrationController.getExistingSap
   val createRelationship = "agent-client-relationship" //AgentRelationshipController.createAgentClientRelationship
+  val createDesRelationship = "des-agent-client-relationship" //AgentRelationshipController.createDesAgentClientRelationship
 }
