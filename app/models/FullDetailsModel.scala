@@ -21,10 +21,10 @@ import play.api.libs.json.{Json, OFormat}
 case class FullDetailsModel(firstName: String,
                             lastName: String,
                             addressLineOne: String,
-                            addressLineTwo: Option[String],
-                            townOrCity: String,
+                            addressLineTwo: String,
+                            townOrCity: Option[String],
                             county: Option[String],
-                            postCode: String,
+                            postCode: Option[String],
                             country: String)
 
 object FullDetailsModel {

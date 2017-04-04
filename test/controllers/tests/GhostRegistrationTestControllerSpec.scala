@@ -45,7 +45,7 @@ class GhostRegistrationTestControllerSpec extends UnitSpec with MockitoSugar wit
     new GhostRegistrationTestController(mockRepository)
   }
 
-  val fullDetailsModel = FullDetailsModel("Daniel", "Dorito", "25 Big House", None, "New York", None, "NY1 1NY", "United States of America")
+  val fullDetailsModel = FullDetailsModel("Daniel", "Dorito", "25 Big House", "New York", None, None, None, "United States of America")
 
   "Calling .addRegistrationRecord" should {
 
