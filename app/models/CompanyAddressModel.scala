@@ -19,12 +19,12 @@ package models
 import play.api.libs.json.Json
 
 case class CompanyAddressModel(
-                                addressLine1: Option[String],
-                                addressLine2: Option[String],
-                                addressLine3: Option[String],
-                                addressLine4: Option[String],
+                                line1: Option[String],
+                                line2: Option[String],
+                                line3: Option[String],
+                                line4: Option[String],
                                 postCode: Option[String],
-                                country: Option[String]
+                                countryCode: Option[String]
                               )
 
 object CompanyAddressModel {
