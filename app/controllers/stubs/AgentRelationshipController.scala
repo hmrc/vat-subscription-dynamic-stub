@@ -21,6 +21,7 @@ import javax.inject.{Inject, Singleton}
 import actions.ExceptionTriggersActions
 import common.RouteIds
 import models.{AgentClientSubmissionModel, RelationshipModel}
+import play.api.Logger
 import play.api.mvc.{Action, AnyContent}
 import repositories.{AgentClientRelationshipRepository, DesAgentClientRelationshipRepository}
 import uk.gov.hmrc.play.microservice.controller.BaseController
@@ -36,7 +37,7 @@ class AgentRelationshipController @Inject()(repository: AgentClientRelationshipR
                                            ) extends BaseController {
 
   def createAgentClientRelationship(arn: String): Action[AnyContent] = {
-
+    Logger.info("Received request to make Agent-Client relationship on GG")
     guardedActions.AgentExceptionTriggers(RouteIds.createRelationship, arn).async {
       implicit request => {
         Try {
@@ -49,14 +50,21 @@ class AgentRelationshipController @Inject()(repository: AgentClientRelationshipR
 
           repository().addEntry(modelToStore)
         } match {
-          case Success(_) => Future.successful(NoContent)
-          case Failure(e) => Future.successful(BadRequest(s"${e.getMessage}"))
+          case Success(_) => {
+            Logger.info("Created Agent-Client relationship on GG")
+            Future.successful(NoContent)
+          }
+          case Failure(e) => {
+            Logger.warn("Bad Request made creating Agent-Client relationship on GG")
+            Future.successful(BadRequest(s"${e.getMessage}"))
+          }
         }
       }
     }
   }
 
   def createDesAgentClientRelationship: Action[AnyContent] = {
+    Logger.info("Received request to make Agent-Client relationship on DES")
     guardedActions.DesAgentExceptionTriggers(RouteIds.createDesRelationship).async {
       implicit request => {
         Try {
@@ -64,8 +72,14 @@ class AgentRelationshipController @Inject()(repository: AgentClientRelationshipR
 
           desRepository().addEntry(model)
         } match {
-          case Success(_) => Future.successful(NoContent)
-          case Failure(e) => Future.successful(BadRequest(s"${e.getMessage}"))
+          case Success(_) => {
+            Logger.info("Created Agent-Client relationship on DES")
+            Future.successful(NoContent)
+          }
+          case Failure(e) => {
+            Logger.warn("Bad Request made creating Agent-Client relationship on DES")
+            Future.successful(BadRequest(s"${e.getMessage}"))
+          }
         }
       }
     }
