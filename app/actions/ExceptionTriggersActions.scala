@@ -23,6 +23,7 @@ import play.api.http.Status
 import play.api.libs.json._
 import play.api.mvc._
 import repositories.RouteExceptionRepository
+import Status._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -34,16 +35,21 @@ class ExceptionTriggersActions @Inject()(exceptionsRepository: RouteExceptionRep
     val searchCriteria = RouteExceptionKeyModel(id, routeId)
     exceptionsRepository().findLatestVersionBy(searchCriteria).flatMap { exceptions =>
       exceptions.headOption.fold(block(request)) {
-        case RouteExceptionModel(_, _, Status.NOT_FOUND) => Future.successful(Results.NotFound(Json.toJson("Not found error")))
-        case RouteExceptionModel(_, _, Status.BAD_GATEWAY) => Future.successful(Results.BadGateway(Json.toJson("Bad gateway error")))
-        case RouteExceptionModel(_, _, Status.BAD_REQUEST) => Future.successful(Results.BadRequest(Json.toJson("Bad request error")))
-        case RouteExceptionModel(_, _, Status.CONFLICT) => Future.successful(Results.Conflict(Json.toJson("Conflict request error")))
-        case RouteExceptionModel(_, _, Status.INTERNAL_SERVER_ERROR) => Future.successful(Results.InternalServerError(Json.toJson("Internal server error")))
-        case RouteExceptionModel(_, _, Status.SERVICE_UNAVAILABLE) => Future.successful(Results.ServiceUnavailable(Json.toJson("Service unavailable error")))
-        case RouteExceptionModel(_, _, Status.REQUEST_TIMEOUT) => Future.successful(Results.RequestTimeout(Json.toJson("Timeout error")))
-        case RouteExceptionModel(_, _, httpCode) => Future.successful(new Results.Status(httpCode)(Json.toJson("Not successful")))
+        case RouteExceptionModel(_, _, NOT_FOUND) => constructResponse(NOT_FOUND, "Not found error")
+        case RouteExceptionModel(_, _, BAD_GATEWAY) => constructResponse(BAD_GATEWAY, "Bad gateway error")
+        case RouteExceptionModel(_, _, BAD_REQUEST) => constructResponse(BAD_REQUEST, "Bad request error")
+        case RouteExceptionModel(_, _, CONFLICT) => constructResponse(CONFLICT, "Conflict request error")
+        case RouteExceptionModel(_, _, INTERNAL_SERVER_ERROR) => constructResponse(INTERNAL_SERVER_ERROR, "Internal server error")
+        case RouteExceptionModel(_, _, SERVICE_UNAVAILABLE) => constructResponse(SERVICE_UNAVAILABLE, "Service unavailable error")
+        case RouteExceptionModel(_, _, REQUEST_TIMEOUT) => constructResponse(REQUEST_TIMEOUT, "Timeout error")
+        case RouteExceptionModel(_, _, httpCode) => constructResponse(httpCode, "Not successful")
       }
     }
+  }
+
+  def constructResponse(code: Int, reason: String): Future[Result] = {
+    val body: JsObject = Json.obj("code" -> code.toString, "reason" -> reason)
+    Future.successful(Results.Status(code)(body))
   }
 
   case class ExceptionTriggers(id: String, routeId: String) extends ActionBuilder[Request] {
