@@ -22,7 +22,7 @@ import models.{BusinessPartnerModel, RegisterModel, RouteExceptionKeyModel, Rout
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
-import play.api.libs.json.{JsObject, JsValue, Json}
+import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.{BusinessPartnerRepository, CgtRepository, RouteExceptionRepository}
