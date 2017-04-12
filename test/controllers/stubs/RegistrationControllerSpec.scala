@@ -22,7 +22,7 @@ import models.{BusinessPartnerModel, RegisterModel, RouteExceptionKeyModel, Rout
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
-import play.api.libs.json.Json
+import play.api.libs.json.{JsObject, JsValue, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.{BusinessPartnerRepository, CgtRepository, RouteExceptionRepository}
@@ -70,7 +70,7 @@ class RegistrationControllerSpec extends UnitSpec with MockitoSugar with WithFak
 
   "Calling registerBusinessPartner" when {
 
-    "the nino has no corresponding business partner" should {
+    "the nino has a corresponding business partner" should {
       val controller = setupController(List(BusinessPartnerModel(Nino("AA123456A"), "123456789")), "")
       lazy val result = controller.registerBusinessPartner("AA123456A")(FakeRequest("POST", "")
         .withJsonBody(Json.toJson(RegisterModel(Nino("AA123456A")))))
@@ -101,6 +101,25 @@ class RegistrationControllerSpec extends UnitSpec with MockitoSugar with WithFak
         json.as[String] shouldBe "Not found error"
       }
     }
+
+    "nino has no corresponding business partners" should {
+      val controller = setupController(List.empty, "123456789")
+      lazy val result = controller.registerBusinessPartner("AA123456B")(FakeRequest("POST", "")
+        .withJsonBody(Json.toJson(RegisterModel(Nino("AA123456B")))))
+
+      "return a status of 200" in {
+        status(result) shouldBe 200
+      }
+
+      "return a type of Json" in {
+        contentType(result) shouldBe Some("application/json")
+      }
+
+      "return a generated sap" in {
+        val data = contentAsJson(result)
+        data shouldEqual Json.obj("safeId" -> "123456789")
+      }
+    }
   }
 
   "Calling obtainDetails" when {
@@ -118,9 +137,8 @@ class RegistrationControllerSpec extends UnitSpec with MockitoSugar with WithFak
       }
 
       "return a valid SAP" in {
-        val data = contentAsString(result)
-        val json = Json.parse(data)
-        json.as[String] shouldBe "123456789"
+        val data = contentAsJson(result)
+        data shouldEqual Json.obj("safeId" -> "123456789")
       }
     }
 
