@@ -80,3 +80,8 @@ abstract class DesAgentClientRelationshipRepositoryBase
 (implicit mongo: () => DB, formats: Format[RelationshipModel], manifest: Manifest[SubscriberModel])
   extends ReactiveRepository[RelationshipModel, BSONObjectID]("subscribers", mongo, formats)
     with CgtRepository[RelationshipModel, String]
+
+abstract class SchemaRepositoryBase
+(implicit mongo: () => DB, formats: Format[SchemaModel], manifest: Manifest[SchemaModel])
+  extends ReactiveRepository[SchemaModel, BSONObjectID]("schemas", mongo, formats)
+    with CgtRepository[SchemaModel, SchemaKeyModel]

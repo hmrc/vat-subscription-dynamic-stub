@@ -36,6 +36,8 @@ DELETE        /test-only/agent/subscribe/client/des/remove              @control
 POST          /test-only/exceptions/exception                           @controllers.tests.RouteExceptionTestController.addException
 DELETE        /test-only/exceptions/exception                           @controllers.tests.RouteExceptionTestController.removeException
 
+POST          /test-only/schemas/schema                                 @controllers.tests.SchemaTestController.addSchema
+
 DELETE        /test-only/clear-down/all                                 @controllers.ClearDownController.clearDown
 
 ->            /                                                         prod.Routes
