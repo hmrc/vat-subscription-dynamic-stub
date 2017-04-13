@@ -19,7 +19,6 @@ package controllers.tests
 import javax.inject.{Inject, Singleton}
 
 import models.SchemaModel
-import play.api.Logger
 import play.api.libs.json.JsValue
 import play.api.mvc.{Action, AnyContent}
 import repositories.SchemaRepository
@@ -38,8 +37,6 @@ class SchemaTestController @Inject()(repository: SchemaRepository) extends BaseC
           val body = request.body.asJson
           val document = body.get.as[JsValue]
           val model = SchemaModel(routeId, document)
-
-          Logger.warn(model.toString)
 
           repository().addEntry(model)
         } match {
