@@ -18,7 +18,7 @@ package repositories
 
 import javax.inject.{Inject, Singleton}
 
-import models.{SchemaKeyModel, SchemaModel}
+import models.SchemaModel
 import play.modules.reactivemongo.MongoDbConnection
 import reactivemongo.api.commands._
 
@@ -33,8 +33,8 @@ class SchemaRepository @Inject()() extends MongoDbConnection {
       removeAll(WriteConcern.Acknowledged).map { _ => }
     }
 
-    override def removeBy(criteria: SchemaKeyModel)(implicit ec: ExecutionContext): Future[Unit] = {
-      remove("id" -> criteria.id).map { _ => }
+    override def removeBy(routeId: String)(implicit ec: ExecutionContext): Future[Unit] = {
+      remove("routeId" -> routeId).map { _ => }
     }
 
     override def addEntry(document: SchemaModel)(implicit ec: ExecutionContext): Future[Unit] = {
@@ -48,22 +48,22 @@ class SchemaRepository @Inject()() extends MongoDbConnection {
       Future.successful({})
     }
 
-    override def findLatestVersionBy(key: SchemaKeyModel)(implicit ec: ExecutionContext): Future[List[SchemaModel]] = {
-      findAllVersionsBy(key).map {
+    override def findLatestVersionBy(routeId: String)(implicit ec: ExecutionContext): Future[List[SchemaModel]] = {
+      findAllVersionsBy(routeId).map {
         _.values.toList.map {
           _.head
         }
       }
     }
 
-    override def findAllVersionsBy(key: SchemaKeyModel)
-                                  (implicit ec: ExecutionContext): Future[Map[SchemaKeyModel, List[SchemaModel]]] = {
-      find("id" -> key.id, "routeId" -> key.routeId).map {
+    override def findAllVersionsBy(routeId: String)
+                                  (implicit ec: ExecutionContext): Future[Map[String, List[SchemaModel]]] = {
+      find("routeId" -> routeId).map {
         schemas =>
-          schemas.groupBy(schema => SchemaKeyModel(schema.id, schema.routeId))
+          schemas.groupBy(_.routeId)
       }
     }
   }
 
-  def apply(): CgtRepository[SchemaModel, SchemaKeyModel] = repository
+  def apply(): CgtRepository[SchemaModel, String] = repository
 }

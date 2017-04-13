@@ -31,7 +31,8 @@ class ClearDownController @Inject()(businessPartnerRepository: BusinessPartnerRe
                                     subscriptionRepository: SubscriptionRepository,
                                     enrolmentSubscriberRepository: TaxEnrolmentSubscriberRepository,
                                     agentClientRelationshipRepository: AgentClientRelationshipRepository,
-                                    routeExceptionsRepository: RouteExceptionRepository)
+                                    routeExceptionsRepository: RouteExceptionRepository,
+                                    schemaRepository: SchemaRepository)
   extends BaseController {
 
   private val clearResult: Future[Unit] => Future[Result] = clearAction =>
@@ -51,6 +52,7 @@ class ClearDownController @Inject()(businessPartnerRepository: BusinessPartnerRe
       val clearEnrolmentIssuerRepository = clearEnrolmentIssuer
       val clearAgentClientRepository = clearAgentClientRelationships
       val clearExceptionsRepository = clearExceptions
+      val clearSchemaRepository = clearSchemas
 
       for {
         clearedRegistered <- clearRegisteredUserRepository
@@ -59,8 +61,10 @@ class ClearDownController @Inject()(businessPartnerRepository: BusinessPartnerRe
         clearedEnrolmentIssuer <- clearEnrolmentIssuerRepository
         clearedAgentRelationships <- clearAgentClientRepository
         clearedExceptions <- clearExceptionsRepository
+        clearedSchemas <- clearSchemaRepository
         checkClearDownResult <- checkSuccess(
-          Seq(clearedRegistered, clearedSubscribed, clearedEnrolmentSubscribed, clearedExceptions, clearedAgentRelationships, clearedEnrolmentIssuer))
+          Seq(clearedRegistered, clearedSubscribed, clearedEnrolmentSubscribed, clearedExceptions,
+              clearedAgentRelationships, clearedEnrolmentIssuer, clearedSchemas))
       } yield Ok(checkClearDownResult.toString)
     }
   }
@@ -76,6 +80,8 @@ class ClearDownController @Inject()(businessPartnerRepository: BusinessPartnerRe
   def clearAgentClientRelationships: Future[Result] = clearResult(agentClientRelationshipRepository().removeAll())
 
   def clearExceptions: Future[Result] = clearResult(routeExceptionsRepository().removeAll())
+
+  def clearSchemas: Future[Result] = clearResult(schemaRepository().removeAll())
 
   def checkSuccess(seq: Seq[Result]): Future[Boolean] = {
     Future.successful(seq.forall(_.header.status == 200))

@@ -18,7 +18,9 @@ package controllers.tests
 
 import javax.inject.{Inject, Singleton}
 
-import models.{SchemaKeyModel, SchemaModel}
+import models.SchemaModel
+import play.api.Logger
+import play.api.libs.json.JsValue
 import play.api.mvc.{Action, AnyContent}
 import repositories.SchemaRepository
 import uk.gov.hmrc.play.microservice.controller.BaseController
@@ -30,28 +32,32 @@ import scala.util.{Failure, Success, Try}
 @Singleton
 class SchemaTestController @Inject()(repository: SchemaRepository) extends BaseController {
 
-  val addSchema: Action[AnyContent] = Action.async { implicit request =>
-    Try {
-      val body = request.body.asJson
-      val document = body.get.as[SchemaModel]
+  val addSchema: String => Action[AnyContent] = { routeId =>
+    Action.async { implicit request =>
+        Try {
+          val body = request.body.asJson
+          val document = body.get.as[JsValue]
+          val model = SchemaModel(routeId, document)
 
-      repository().addEntry(document)
-    } match {
-      case Success(_) => Future.successful(Ok("Success"))
-      case Failure(_) => Future.successful(BadRequest("Could not store data"))
+          Logger.warn(model.toString)
+
+          repository().addEntry(model)
+        } match {
+          case Success(_) => Future.successful(Ok("Success"))
+          case Failure(_) => Future.successful(BadRequest("Could not store data"))
+        }
     }
   }
 
-  val removeSchema: Action[AnyContent] = Action.async { implicit request =>
-    Try {
-      val body = request.body.asJson
-      val document = body.get.as[SchemaKeyModel]
-
-      repository().removeBy(document)
-    } match {
-      case Success(_) => Future.successful(Ok("Success"))
-      case Failure(ex) => ex.printStackTrace()
-        Future.successful(BadRequest("Could not delete data"))
+  val removeSchema: String => Action[AnyContent] = { routeId =>
+    Action.async { implicit request =>
+      Try {
+        repository().removeBy(routeId)
+      } match {
+        case Success(_) => Future.successful(Ok("Success"))
+        case Failure(ex) => ex.printStackTrace()
+          Future.successful(BadRequest("Could not delete data"))
+      }
     }
   }
 }

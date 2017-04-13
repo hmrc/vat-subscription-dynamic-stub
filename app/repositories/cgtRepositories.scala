@@ -84,4 +84,4 @@ abstract class DesAgentClientRelationshipRepositoryBase
 abstract class SchemaRepositoryBase
 (implicit mongo: () => DB, formats: Format[SchemaModel], manifest: Manifest[SchemaModel])
   extends ReactiveRepository[SchemaModel, BSONObjectID]("schemas", mongo, formats)
-    with CgtRepository[SchemaModel, SchemaKeyModel]
+    with CgtRepository[SchemaModel, String]
