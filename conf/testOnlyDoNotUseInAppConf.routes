@@ -37,6 +37,7 @@ POST          /test-only/exceptions/exception                           @control
 DELETE        /test-only/exceptions/exception                           @controllers.tests.RouteExceptionTestController.removeException
 
 POST          /test-only/schemas/schema                                 @controllers.tests.SchemaTestController.addSchema
+DELETE        /test-only/schemas/schema                                 @controllers.tests.SchemaTestController.removeSchema
 
 DELETE        /test-only/clear-down/all                                 @controllers.ClearDownController.clearDown
 

@@ -18,7 +18,7 @@ package controllers.tests
 
 import javax.inject.{Inject, Singleton}
 
-import models.SchemaModel
+import models.{SchemaKeyModel, SchemaModel}
 import play.api.mvc.{Action, AnyContent}
 import repositories.SchemaRepository
 import uk.gov.hmrc.play.microservice.controller.BaseController
@@ -39,6 +39,19 @@ class SchemaTestController @Inject()(repository: SchemaRepository) extends BaseC
     } match {
       case Success(_) => Future.successful(Ok("Success"))
       case Failure(_) => Future.successful(BadRequest("Could not store data"))
+    }
+  }
+
+  val removeSchema: Action[AnyContent] = Action.async { implicit request =>
+    Try {
+      val body = request.body.asJson
+      val document = body.get.as[SchemaKeyModel]
+
+      repository().removeBy(document)
+    } match {
+      case Success(_) => Future.successful(Ok("Success"))
+      case Failure(ex) => ex.printStackTrace()
+        Future.successful(BadRequest("Could not delete data"))
     }
   }
 }
