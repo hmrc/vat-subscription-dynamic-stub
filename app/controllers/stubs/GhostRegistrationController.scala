@@ -16,9 +16,9 @@
 
 package controllers.stubs
 
-import actions.ExceptionTriggersActions
 import javax.inject.{Inject, Singleton}
 
+import actions.ExceptionTriggersActions
 import common.RouteIds
 import helpers.SapHelper
 import models.{FullDetailsModel, NonResidentBusinessPartnerModel}
@@ -58,7 +58,10 @@ class GhostRegistrationController @Inject()(repository: NonResidentBusinessPartn
         for {
           bp <- businessPartner
           sap <- getReference(bp)
-        } yield Ok(Json.toJson(sap))
+        } yield Ok(Json.obj(
+          "sapNumber" -> sap,
+          "safeId" -> sap
+        ))
       }
     }
   }
