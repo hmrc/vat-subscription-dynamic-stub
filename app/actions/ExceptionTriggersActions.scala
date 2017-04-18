@@ -23,12 +23,13 @@ import play.api.http.Status
 import play.api.libs.json._
 import play.api.mvc._
 import repositories.RouteExceptionRepository
+import utils.SchemaValidation
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class ExceptionTriggersActions @Inject()(exceptionsRepository: RouteExceptionRepository) {
+class ExceptionTriggersActions @Inject()(schemaValidation: SchemaValidation, exceptionsRepository: RouteExceptionRepository) {
 
   private def processException[A](id: String, routeId: String, request: Request[A], block: (Request[A]) => Future[Result]): Future[Result] = {
     val searchCriteria = RouteExceptionKeyModel(id, routeId)
@@ -46,9 +47,30 @@ class ExceptionTriggersActions @Inject()(exceptionsRepository: RouteExceptionRep
     }
   }
 
+  private def processJson[A](routeId: String, request: Request[A], block: (Request[A]) => Future[Result]): Future[Result] = {
+    def handleJsonValidity(flag: Boolean): Future[Result] = {
+      if(flag) block(request)
+      else Future.successful(Results.BadRequest(Json.toJson("JSON request body does not meet schema requirements")))
+    }
+
+    val json = Json.toJson(request)
+    val validJsonFlag = schemaValidation.validateJson(routeId, json)
+
+    for {
+      flag <- validJsonFlag
+      result <- handleJsonValidity(flag)
+    } yield result
+  }
+
   case class ExceptionTriggers(id: String, routeId: String) extends ActionBuilder[Request] {
     def invokeBlock[A](request: Request[A], block: (Request[A]) => Future[Result]): Future[Result] = {
       processException(id, routeId, request, block)
+    }
+  }
+
+  case class VaidJson(routeId: String) extends ActionBuilder[Request] {
+    def invokeBlock[A](request: Request[A], block: (Request[A]) => Future[Result]): Future[Result] = {
+      processJson(routeId, request, block)
     }
   }
 
