@@ -33,7 +33,7 @@ import scala.concurrent.Future
 
 @Singleton
 class CompanySubscriptionController @Inject()(subscriptionMongoConnector: SubscriptionRepository,
-                                              cGTRefHelper: CgtRefHelper,
+                                              cgtRefHelper: CgtRefHelper,
                                               guardedActions: ExceptionTriggersActions)
   extends BaseController {
 
@@ -54,7 +54,7 @@ class CompanySubscriptionController @Inject()(subscriptionMongoConnector: Subscr
 
     def getReference(subscriber: List[SubscriberModel]): Future[String] = {
       if (subscriber.isEmpty) {
-        val reference = cGTRefHelper.generateCGTReference()
+        val reference = cgtRefHelper.generateCGTReference()
         Logger.info("Generating a new entry ")
         subscriptionMongoConnector.repository.addEntry(SubscriberModel(sap, reference))
         Future.successful(reference)
@@ -66,6 +66,10 @@ class CompanySubscriptionController @Inject()(subscriptionMongoConnector: Subscr
     for {
       checkSubscribers <- subscriber
       reference <- getReference(checkSubscribers)
-    } yield Ok(Json.toJson(reference))
+    } yield Ok(Json.obj(
+      "subscriptionCGT" -> Json.obj(
+        "referenceNumber" -> reference
+      )
+    ))
   }
 }
