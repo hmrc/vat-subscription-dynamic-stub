@@ -22,9 +22,11 @@ import actions.ExceptionTriggersActions
 import common.RouteIds
 import models.{AgentClientSubmissionModel, RelationshipModel}
 import play.api.Logger
-import play.api.mvc.{Action, AnyContent}
+import play.api.libs.json.Json
+import play.api.mvc.{Action, AnyContent, Result}
 import repositories.{AgentClientRelationshipRepository, DesAgentClientRelationshipRepository}
 import uk.gov.hmrc.play.microservice.controller.BaseController
+import utils.SchemaValidation
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -33,8 +35,10 @@ import scala.util.{Failure, Success, Try}
 @Singleton
 class AgentRelationshipController @Inject()(repository: AgentClientRelationshipRepository,
                                             desRepository: DesAgentClientRelationshipRepository,
-                                            guardedActions: ExceptionTriggersActions
-                                           ) extends BaseController {
+                                            guardedActions: ExceptionTriggersActions,
+                                            schemaValidation: SchemaValidation) extends BaseController {
+
+  val invalidJsonBodySub = Json.toJson("")
 
   def createAgentClientRelationship(arn: String): Action[AnyContent] = {
     Logger.info("Received request to make Agent-Client relationship on GG")
@@ -67,21 +71,26 @@ class AgentRelationshipController @Inject()(repository: AgentClientRelationshipR
     Logger.info("Received request to make Agent-Client relationship on DES")
     guardedActions.DesAgentExceptionTriggers(RouteIds.createDesRelationship).async {
       implicit request => {
-        Try {
-          val model = request.body.asJson.get.as[RelationshipModel]
 
-          desRepository().addEntry(model)
-        } match {
-          case Success(_) => {
-            Logger.info("Created Agent-Client relationship on DES")
-            Future.successful(NoContent)
+        val body = request.body.asJson
+        val validJsonFlag = schemaValidation.validateJson(RouteIds.createDesRelationship, body.getOrElse(invalidJsonBodySub))
+
+        def handleJsonValidity(flag: Boolean): Result = {
+          if (flag) {
+            val model = request.body.asJson.get.as[RelationshipModel]
+
+            desRepository().addEntry(model)
+
+            NoContent
           }
-          case Failure(e) => {
-            Logger.warn("Bad Request made creating Agent-Client relationship on DES")
-            Future.successful(BadRequest(s"${e.getMessage}"))
+          else {
+            BadRequest("JSON request body inconsistent with requirements of schema for DES Agent Client Relationship creation")
           }
+        }
+
+        validJsonFlag.map(x => handleJsonValidity(x))
+
         }
       }
     }
-  }
 }

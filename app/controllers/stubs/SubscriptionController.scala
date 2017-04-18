@@ -24,9 +24,10 @@ import helpers.CgtRefHelper
 import models.{SubscribeModel, SubscriberModel}
 import play.api.Logger
 import play.api.libs.json.Json
-import play.api.mvc.{Action, AnyContent}
+import play.api.mvc.{Action, AnyContent, Result}
 import repositories.SubscriptionRepository
 import uk.gov.hmrc.play.microservice.controller.BaseController
+import utils.SchemaValidation
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -34,8 +35,10 @@ import scala.concurrent.Future
 @Singleton
 class SubscriptionController @Inject()(repository: SubscriptionRepository,
                                        cgtRefHelper: CgtRefHelper,
-                                       guardedActions: ExceptionTriggersActions
-                                      ) extends BaseController {
+                                       guardedActions: ExceptionTriggersActions,
+                                       schemaValidation: SchemaValidation) extends BaseController {
+
+  val invalidJsonBodySub = Json.toJson("")
 
   val subscribe: String => Action[AnyContent] = safeId => {
     guardedActions.ExceptionTriggers(safeId, RouteIds.subscribe).async {
@@ -44,23 +47,37 @@ class SubscriptionController @Inject()(repository: SubscriptionRepository,
         Logger.info("Received a call from the back end to subscribe an Individual")
 
         val body = request.body.asJson
-        val subscriptionDetails = body.get.as[SubscribeModel]
-        val subscriber = repository().findLatestVersionBy(subscriptionDetails.sap)
+        val validJsonFlag = schemaValidation.validateJson(RouteIds.subscribe, body.getOrElse(invalidJsonBodySub))
 
-        def getReference(subscriber: List[SubscriberModel]): Future[String] = {
-          if (subscriber.isEmpty) {
-            val reference = cgtRefHelper.generateCGTReference()
-            repository().addEntry(SubscriberModel(safeId, reference))
-            Future.successful(cgtRefHelper.generateCGTReference())
-          } else {
-            Future.successful(subscriber.head.reference)
+        def handleJsonValidity(flag: Boolean): Future[Result] = {
+
+          if (flag){
+          val subscriptionDetails = body.get.as[SubscribeModel]
+          val subscriber = repository().findLatestVersionBy(subscriptionDetails.sap)
+
+          def getReference(subscriber: List[SubscriberModel]): Future[String] = {
+            if (subscriber.isEmpty) {
+              val reference = cgtRefHelper.generateCGTReference()
+              repository().addEntry(SubscriberModel(safeId, reference))
+              Future.successful(cgtRefHelper.generateCGTReference())
+            } else {
+              Future.successful(subscriber.head.reference)
+            }
           }
-        }
 
+          for {
+            checkSubscribers <- subscriber
+            reference <- getReference(checkSubscribers)
+          } yield Ok(Json.toJson(reference))
+        }
+        else {
+          Future.successful(BadRequest("JSON Body failure to validate against requirements of schema for individual subscription"))
+        }
+      }
         for {
-          checkSubscribers <- subscriber
-          reference <- getReference(checkSubscribers)
-        } yield Ok(Json.toJson(reference))
+          flag <- validJsonFlag
+          result <- handleJsonValidity(flag)
+        } yield result
       }
     }
   }

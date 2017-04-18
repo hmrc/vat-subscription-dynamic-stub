@@ -21,7 +21,7 @@ import javax.inject.{Inject, Singleton}
 
 import common.RouteIds
 import helpers.SapHelper
-import models.{EnrolmentIssuerRequestModel, FullDetailsModel, NonResidentBusinessPartnerModel}
+import models.{FullDetailsModel, NonResidentBusinessPartnerModel}
 import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, Result}
@@ -36,8 +36,7 @@ import scala.concurrent.Future
 class GhostRegistrationController @Inject()(repository: NonResidentBusinessPartnerRepository,
                                             sapHelper: SapHelper,
                                             guardedActions: ExceptionTriggersActions,
-                                            schemaValidation: SchemaValidation)
-  extends BaseController {
+                                            schemaValidation: SchemaValidation) extends BaseController {
 
   val invalidJsonBodySub = Json.toJson("")
 
@@ -71,14 +70,15 @@ class GhostRegistrationController @Inject()(repository: NonResidentBusinessPartn
               sap <- getReference(bp)
             } yield Ok(Json.toJson(sap))
           }
-            else {
-              Future.successful(BadRequest("Request body's JSON failed to validate against the non-UTR individual registration schema"))
-            }
+          else {
+            Future.successful(BadRequest("Request body's JSON failed to validate against the non-UTR individual registration schema"))
           }
+        }
         for {
           flag <- validJsonFlag
           result <- handleJsonValidity(flag)
         } yield result
       }
+    }
   }
 }
