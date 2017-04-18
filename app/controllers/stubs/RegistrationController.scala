@@ -28,6 +28,7 @@ import play.api.mvc.{Action, AnyContent, Result}
 import repositories.BusinessPartnerRepository
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.play.microservice.controller.BaseController
+import utils.SchemaValidation
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -35,7 +36,8 @@ import scala.concurrent.Future
 @Singleton
 class RegistrationController @Inject()(repository: BusinessPartnerRepository,
                                        sapHelper: SapHelper,
-                                       guardedActions: ExceptionTriggersActions) extends BaseController {
+                                       guardedActions: ExceptionTriggersActions,
+                                       schemaValidation: SchemaValidation) extends BaseController {
 
   //TODO: use SchemaValidation.validateJson() to validate schema before checking mongo for SAP
   val registerBusinessPartner: String => Action[AnyContent] = {

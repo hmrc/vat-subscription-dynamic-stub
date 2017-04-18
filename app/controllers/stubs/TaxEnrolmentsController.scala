@@ -61,7 +61,6 @@ class TaxEnrolmentsController @Inject()(subscriberRepository: TaxEnrolmentSubscr
           BadRequest("Json does not conform to schema")
         }
       }
-
       flag.map { x => handleJsonValidity(x) }
     }
   }
