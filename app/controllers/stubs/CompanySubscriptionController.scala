@@ -27,6 +27,7 @@ import play.api.libs.json.Json
 import play.api.mvc._
 import repositories.SubscriptionRepository
 import uk.gov.hmrc.play.microservice.controller.BaseController
+import utils.SchemaValidation
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -34,20 +35,37 @@ import scala.concurrent.Future
 @Singleton
 class CompanySubscriptionController @Inject()(subscriptionMongoConnector: SubscriptionRepository,
                                               cGTRefHelper: CgtRefHelper,
-                                              guardedActions: ExceptionTriggersActions)
+                                              guardedActions: ExceptionTriggersActions,
+                                              schemaValidation: SchemaValidation)
   extends BaseController {
 
   private val noContactAddressMessage = "Body of request did not contain the expected values for the company submission model"
+
+  val invalidJsonBodySub = Json.toJson("not valid json")
 
   def subscribe(): Action[AnyContent] = {
     guardedActions.CompanySubscriptionExceptionTriggers(RouteIds.companySubscribe).async {
       implicit request => {
 
         Logger.info("Received a call from the back end to subscribe a Company")
-        val model = request.body.asJson.get.as[CompanySubmissionModel]
+        val body = request.body.asJson
+        val validJsonFlag = schemaValidation.validateJson(RouteIds.companySubscribe, body.getOrElse(invalidJsonBodySub))
 
-        if (model.contactAddress.isDefined) returnSubscriptionReference(model.sap.get)
-        else Future.successful(Results.BadRequest(Json.toJson(noContactAddressMessage)))
+        def handleJsonValidity(flag: Boolean): Future[Result] = {
+          if(flag) {
+            val model = request.body.asJson.get.as[CompanySubmissionModel]
+
+            if (model.contactAddress.isDefined) returnSubscriptionReference(model.sap.get)
+            else Future.successful(Results.BadRequest(Json.toJson(noContactAddressMessage)))
+          }
+          else {
+            Future.successful(BadRequest("Invalid JSON body for the organisation subscription schema"))
+          }
+        }
+        for {
+          flag <- validJsonFlag
+          result <- handleJsonValidity(flag)
+        } yield result
       }
     }
   }

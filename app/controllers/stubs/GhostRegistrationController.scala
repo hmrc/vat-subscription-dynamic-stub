@@ -38,7 +38,7 @@ class GhostRegistrationController @Inject()(repository: NonResidentBusinessPartn
                                             guardedActions: ExceptionTriggersActions,
                                             schemaValidation: SchemaValidation) extends BaseController {
 
-  val invalidJsonBodySub = Json.toJson("")
+  val invalidJsonBodySub = Json.toJson("not valid json")
 
   val registerBusinessPartner: Action[AnyContent] = {
     guardedActions.WithFullDetailsExceptionTriggers(RouteIds.registerIndividualWithoutNino).async {

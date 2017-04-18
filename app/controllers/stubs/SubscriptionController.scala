@@ -50,25 +50,24 @@ class SubscriptionController @Inject()(repository: SubscriptionRepository,
         val validJsonFlag = schemaValidation.validateJson(RouteIds.subscribe, body.getOrElse(invalidJsonBodySub))
 
         def handleJsonValidity(flag: Boolean): Future[Result] = {
-
           if (flag){
-          val subscriptionDetails = body.get.as[SubscribeModel]
-          val subscriber = repository().findLatestVersionBy(subscriptionDetails.sap)
+            val subscriptionDetails = body.get.as[SubscribeModel]
+            val subscriber = repository().findLatestVersionBy(subscriptionDetails.sap)
 
-          def getReference(subscriber: List[SubscriberModel]): Future[String] = {
-            if (subscriber.isEmpty) {
-              val reference = cgtRefHelper.generateCGTReference()
-              repository().addEntry(SubscriberModel(safeId, reference))
-              Future.successful(cgtRefHelper.generateCGTReference())
-            } else {
-              Future.successful(subscriber.head.reference)
+            def getReference(subscriber: List[SubscriberModel]): Future[String] = {
+              if (subscriber.isEmpty) {
+                val reference = cgtRefHelper.generateCGTReference()
+                repository().addEntry(SubscriberModel(safeId, reference))
+                Future.successful(cgtRefHelper.generateCGTReference())
+              } else {
+                Future.successful(subscriber.head.reference)
+              }
             }
-          }
 
-          for {
-            checkSubscribers <- subscriber
-            reference <- getReference(checkSubscribers)
-          } yield Ok(Json.toJson(reference))
+            for {
+              checkSubscribers <- subscriber
+              reference <- getReference(checkSubscribers)
+            } yield Ok(Json.toJson(reference))
         }
         else {
           Future.successful(BadRequest("JSON Body failure to validate against requirements of schema for individual subscription"))
