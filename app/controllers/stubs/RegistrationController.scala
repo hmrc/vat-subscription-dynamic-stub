@@ -36,10 +36,8 @@ import scala.concurrent.Future
 @Singleton
 class RegistrationController @Inject()(repository: BusinessPartnerRepository,
                                        sapHelper: SapHelper,
-                                       guardedActions: ExceptionTriggersActions,
-                                       schemaValidation: SchemaValidation) extends BaseController {
+                                       guardedActions: ExceptionTriggersActions) extends BaseController {
 
-  //TODO: use SchemaValidation.validateJson() to validate schema before checking mongo for SAP
   val registerBusinessPartner: String => Action[AnyContent] = {
     nino =>
       guardedActions.ExceptionTriggers(nino, RouteIds.registerIndividualWithNino).async {

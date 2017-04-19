@@ -17,6 +17,7 @@
 package controllers.stubs
 
 import actions.ExceptionTriggersActions
+import common.RouteIds
 import helpers.CgtRefHelper
 import models._
 import org.mockito.ArgumentMatchers._
@@ -25,8 +26,9 @@ import org.scalatest.mock.MockitoSugar
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import repositories.{CgtRepository, RouteExceptionRepository, SubscriptionRepository}
+import repositories.{CgtRepository, RouteExceptionRepository, SchemaRepository, SubscriptionRepository}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import utils.{SchemaValidation, Schemas}
 
 import scala.concurrent.Future
 
@@ -41,6 +43,7 @@ class SubscriptionControllerSpec extends UnitSpec with MockitoSugar with WithFak
     val mockCGTRefHelper = mock[CgtRefHelper]
     val mockExceptionsCollection = mock[CgtRepository[RouteExceptionModel, RouteExceptionKeyModel]]
     val mockExceptionsRepository = mock[RouteExceptionRepository]
+    val mockSchemaRepository = mock[SchemaRepository]
     val exceptionTriggersActions = new ExceptionTriggersActions(mockExceptionsRepository)
     val expectedException = expectedExceptionCode.fold(List[RouteExceptionModel]()) {
       code => List(RouteExceptionModel("", "", code))
@@ -64,7 +67,12 @@ class SubscriptionControllerSpec extends UnitSpec with MockitoSugar with WithFak
     when(mockCGTRefHelper.generateCGTReference())
       .thenReturn(ref)
 
-    new SubscriptionController(mockRepository, mockCGTRefHelper, exceptionTriggersActions)
+    when(mockSchemaRepository().findLatestVersionBy(any())(any()))
+      .thenReturn(Future.successful(List(SchemaModel(RouteIds.subscribe, Json.toJson(Schemas.subscriptionCreateIndvOrgSchema)))))
+
+    val schemaValidation = new SchemaValidation(mockSchemaRepository)
+
+    new SubscriptionController(mockRepository, mockCGTRefHelper, exceptionTriggersActions, schemaValidation)
   }
 
   "Calling subscribe" when {

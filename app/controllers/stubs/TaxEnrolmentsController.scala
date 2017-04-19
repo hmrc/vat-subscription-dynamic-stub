@@ -35,33 +35,26 @@ import scala.util.{Failure, Success, Try}
 @Singleton
 class TaxEnrolmentsController @Inject()(subscriberRepository: TaxEnrolmentSubscriberRepository,
                                         issuerRepository: TaxEnrolmentIssuerRepository,
-                                        guardedActions: ExceptionTriggersActions,
-                                        schemaValidation: SchemaValidation)
+                                        guardedActions: ExceptionTriggersActions)
   extends BaseController {
 
   val invalidJsonBodySub = Json.toJson("")
 
-  def subscribeIssuer(subscriptionId: String): Action[AnyContent] = guardedActions.ExceptionTriggers(subscriptionId, RouteIds.taxEnrolmentIssuer).async {
+  def subscribeIssuer(subscriptionId: String): Action[AnyContent] = guardedActions.ExceptionTriggers(subscriptionId, RouteIds.taxEnrolmentIssuer) {
     implicit request => {
 
       Logger.warn("Received a call from the back end to make an enrolment issuer request")
 
-      val body = request.body.asJson
-      val flag = schemaValidation.validateJson(RouteIds.taxEnrolmentIssuer, body.getOrElse(invalidJsonBodySub))
+      Try {
+        val body = request.body.asJson
+        val recordData = body.get.as[EnrolmentIssuerRequestModel]
 
-      def handleJsonValidity(flag: Boolean): Result = {
-        if (flag) {
-          val recordData = body.get.as[EnrolmentIssuerRequestModel]
-
-          Logger.warn(s"Successfully read request body as $recordData")
-          issuerRepository().addEntry(recordData)
-          NoContent
-        }
-        else {
-          BadRequest("Json does not conform to schema")
-        }
+        Logger.warn(s"Successfully read request body as $recordData")
+        issuerRepository().addEntry(recordData)
+      } match {
+        case Success(_) => NoContent
+        case Failure(exception) => BadRequest(exception.getMessage)
       }
-      flag.map { x => handleJsonValidity(x) }
     }
   }
 

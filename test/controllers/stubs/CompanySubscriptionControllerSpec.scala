@@ -19,6 +19,7 @@ package controllers.stubs
 import javax.inject.Inject
 
 import actions.ExceptionTriggersActions
+import common.RouteIds
 import helpers.CgtRefHelper
 import models._
 import org.mockito.ArgumentMatchers._
@@ -26,8 +27,9 @@ import org.mockito.Mockito.when
 import org.scalatest.mock.MockitoSugar
 import play.api.libs.json.Json
 import play.api.test.Helpers._
-import repositories.{CgtRepository, RouteExceptionRepository, SubscriptionRepository}
+import repositories.{CgtRepository, RouteExceptionRepository, SchemaRepository, SubscriptionRepository}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import utils.{SchemaValidation, Schemas}
 
 import scala.concurrent.Future
 
@@ -55,6 +57,7 @@ class CompanySubscriptionControllerSpec @Inject()(companySubscriptionController:
     val mockRepository = mock[SubscriptionRepository]
     val mockCgtRefHelper = mock[CgtRefHelper]
     val mockExceptionsCollection = mock[CgtRepository[RouteExceptionModel, RouteExceptionKeyModel]]
+    val mockSchemaRepository = mock[SchemaRepository]
     val mockExceptionsRepository = mock[RouteExceptionRepository]
     val exceptionTriggersActions = new ExceptionTriggersActions(mockExceptionsRepository)
     val expectedException = expectedExceptionCode.fold(List[RouteExceptionModel]()) {
@@ -79,7 +82,12 @@ class CompanySubscriptionControllerSpec @Inject()(companySubscriptionController:
     when(mockCgtRefHelper.generateCGTReference())
       .thenReturn(ref)
 
-    new CompanySubscriptionController(mockRepository, mockCgtRefHelper, exceptionTriggersActions)
+    when(mockSchemaRepository().findLatestVersionBy(any())(any()))
+      .thenReturn(Future.successful(List(SchemaModel(RouteIds.companySubscribe, Json.toJson(Schemas.subscriptionCreateIndvOrgSchema)))))
+
+    val schemaValidation = new SchemaValidation(mockSchemaRepository)
+
+    new CompanySubscriptionController(mockRepository, mockCgtRefHelper, exceptionTriggersActions, schemaValidation)
   }
 
   "Calling .returnSubscriptionReference" when {

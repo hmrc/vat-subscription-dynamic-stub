@@ -62,6 +62,7 @@ class CompanySubscriptionController @Inject()(subscriptionMongoConnector: Subscr
             Future.successful(BadRequest("Invalid JSON body for the organisation subscription schema"))
           }
         }
+
         for {
           flag <- validJsonFlag
           result <- handleJsonValidity(flag)
