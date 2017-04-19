@@ -71,8 +71,7 @@ class SubscriptionControllerSpec extends UnitSpec with MockitoSugar with WithFak
 
     "a CGT subscription already exists" should {
       val controller = setupController(List(SubscriberModel("123456789098765", "CGT123456")), "CGT654321")
-      lazy val result = controller.subscribe("123456789098765")(FakeRequest("POST", "")
-        .withJsonBody(Json.toJson(SubscribeModel("123456789098765"))))
+      lazy val result = controller.subscribe("123456789098765")(FakeRequest("POST", ""))
 
       "return a status of 200" in {
         status(result) shouldBe 200
@@ -85,14 +84,13 @@ class SubscriptionControllerSpec extends UnitSpec with MockitoSugar with WithFak
       "return a valid CGT Reference" in {
         val data = contentAsString(result)
         val json = Json.parse(data)
-        json.as[String] shouldBe "CGT123456"
+        (json \ "subscriptionCGT" \ "referenceNumber").as[String] shouldBe "CGT123456"
       }
     }
 
     "no existing CGT subscription exists" should {
       val controller = setupController(Nil, "CGT654321")
-      lazy val result = controller.subscribe("123456789098765")(FakeRequest("POST", "")
-        .withJsonBody(Json.toJson(SubscribeModel("123456789098765"))))
+      lazy val result = controller.subscribe("123456789098765")(FakeRequest("POST", ""))
 
       "return a status of 200" in {
         status(result) shouldBe 200
@@ -105,7 +103,7 @@ class SubscriptionControllerSpec extends UnitSpec with MockitoSugar with WithFak
       "return a valid CGT Reference" in {
         val data = contentAsString(result)
         val json = Json.parse(data)
-        json.as[String] shouldBe "CGT654321"
+        (json \ "subscriptionCGT" \ "referenceNumber").as[String] shouldBe "CGT654321"
       }
     }
   }
