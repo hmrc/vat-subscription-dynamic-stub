@@ -21,7 +21,7 @@ import javax.inject.{Inject, Singleton}
 import actions.ExceptionTriggersActions
 import common.RouteIds
 import helpers.CgtRefHelper
-import models.{SubscribeModel, SubscriberModel}
+import models.SubscriberModel
 import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent}
@@ -43,9 +43,7 @@ class SubscriptionController @Inject()(repository: SubscriptionRepository,
 
         Logger.info("Received a call from the back end to subscribe an Individual")
 
-        val body = request.body.asJson
-        val subscriptionDetails = body.get.as[SubscribeModel]
-        val subscriber = repository().findLatestVersionBy(subscriptionDetails.sap)
+        val subscriber = repository().findLatestVersionBy(safeId)
 
         def getReference(subscriber: List[SubscriberModel]): Future[String] = {
           if (subscriber.isEmpty) {
@@ -60,7 +58,11 @@ class SubscriptionController @Inject()(repository: SubscriptionRepository,
         for {
           checkSubscribers <- subscriber
           reference <- getReference(checkSubscribers)
-        } yield Ok(Json.toJson(reference))
+        } yield Ok(Json.obj(
+          "subscriptionCGT" -> Json.obj(
+            "referenceNumber" -> reference
+          )
+        ))
       }
     }
   }
