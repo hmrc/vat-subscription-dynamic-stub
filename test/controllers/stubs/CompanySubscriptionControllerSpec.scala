@@ -26,6 +26,7 @@ import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito.when
 import org.scalatest.mock.MockitoSugar
 import play.api.libs.json.Json
+import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.{CgtRepository, RouteExceptionRepository, SchemaRepository, SubscriptionRepository}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
@@ -129,6 +130,15 @@ class CompanySubscriptionControllerSpec extends UnitSpec with MockitoSugar with 
         val data = contentAsString(result)
         val json = Json.parse(data)
         (json \ "subscriptionCGT" \ "referenceNumber").as[String] shouldBe "CGT654321"
+      }
+    }
+
+    "an invalid payload is sent due to insufficient length of SAP" should {
+      lazy val controller = setupController(List(SubscriberModel("123456789ABCDEF", "CGT123456")), "CGT123456")
+      lazy val result = await(controller.subscribe("123456789ABC")(FakeRequest("POST", "").withJsonBody(Json.toJson(companySubmissionModel))))
+
+      "return a status of 400" in {
+        status(result) shouldBe 400
       }
     }
   }

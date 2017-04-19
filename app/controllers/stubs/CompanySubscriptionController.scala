@@ -60,7 +60,6 @@ class CompanySubscriptionController @Inject()(subscriptionRepository: Subscripti
           flag <- validJsonFlag
           result <- handleJsonValidity(flag)
         } yield result
-        returnSubscriptionReference(sap)
       }
     }
   }

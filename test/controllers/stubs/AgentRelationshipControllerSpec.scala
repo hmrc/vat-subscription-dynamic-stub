@@ -70,7 +70,7 @@ class AgentRelationshipControllerSpec extends UnitSpec with MockitoSugar with Wi
 
 "Calling createDesAgentClientRelationship" when {
   val validRelationshipModel = RelationshipModel("AARN1274392", "123456789ABCDEF")
-  val invalidRelationshipModel = RelationshipModel("2ARN132", "CGT123421")
+  val invalidRelationshipModel = RelationshipModel("$$$$$", "CGT123421")
   val controller = setupController()
 
   "a valid relationship json payload is sent" should {
