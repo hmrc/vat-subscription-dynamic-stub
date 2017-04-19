@@ -21,110 +21,354 @@ import play.api.libs.json.Json
 object TestSchemas {
 
   lazy val subscriptionCreateIndvOrgSchema = Json.parse("""{
-                                              "$schema": "http://json-schema.org/draft-04/schema#",
-                                              "title": "Subscription Create",
-                                              "description": "JSON representation of finding Subscription Create",
-                                              "type": "object",
-                                              "oneOf": [{
-                                                      "$ref": "#/definitions/successResponse"
-                                                  },
-                                                  {
-                                                      "$ref": "#/definitions/failureResponse"
-                                                  }
-                                              ],
-                                              "definitions": {
-
-                                                  "successResponse": {
-
-
-                                                      "type": "object",
-
-                                                      "properties": {
-
-                                                          "processingDate": {
-                                                              "type": "string",
-                                                              "pattern": "^(((19|20)([2468][048]|[13579][26]|0[48])|2000)[-]02[-]29|((19|20)[0-9]{2}[-](0[469]|11)[-](0[1-9]|[11][0-9]|30)|(19|20)[0-9]{2}[-](0[13578]|1[02])[-](0[1-9]|[12][0-9]|3[01])|(19|20)[0-9]{2}[-]02[-](0[1-9]|1[0-9]|2[0-8])))$",
-                                                              "description": "YYYY-MM-DD"
-                                                          },
-                                                          "subscriptionCGT": {
-                                                              "type": "object",
-                                                              "properties": {
-                                                                  "referenceNumber": {
-                                                                      "type": "string",
-                                                                      "pattern": "^[A-Za-z0-9]{15}$"
-                                                                  }
-                                                              },
-                                                              "additionalProperties": false,
-                                                              "required": [
-                                                                  "referenceNumber"
-                                                              ]
-                                                          }
-                                                      },
-                                                      "additionalProperties": false
-                                                  },
-                                                  "failureResponse": {
-                                                      "description": "DES Error Response Schema",
-                                                      "type": "object",
-                                                      "oneOf": [{
-                                                              "$ref": "#/definitions/failureResponseElement"
-                                                          },
-                                                          {
-                                                              "$ref": "#/definitions/failureResponseArray"
-                                                          }
-                                                      ]
-                                                  },
-                                                  "failureResponseArray": {
-                                                      "type": "object",
-                                                      "properties": {
-                                                          "failures": {
-                                                              "type": "array",
-                                                              "minItems": 2,
-                                                              "uniqueItems": true,
-                                                              "items": {
-                                                                  "$ref": "#/definitions/failureResponseElement"
-                                                              }
-                                                          }
-                                                      },
-                                                      "additionalProperties": false
-                                                  },
-                                                  "failureResponseElement": {
-                                                      "type": "object",
-                                                      "properties": {
-                                                          "code": {
-                                                              "type": "string",
-                                                              "enum": [
-                                                                  "INVALID_NINO",
-                                                                  "INVALID_SAFEID",
-                                                                  "INVALID_SCHEMA",
-                                                                  "REQUIRED_ID_MISSING",
-                                                                  "INVALID_REQUEST",
-                                                                  "DUPLICATE_SUBMISSION",
-                                                                  "MATCH_NOT_FOUND",
-                                                                  "INACTIVE_SUBSCRIPTION",
-                                                                  "INACTIVE_DATA_FOR_PROCESSING",
-                                                                  "SYSTEM_ERROR",
-                                                                  "INVALID_ACKNOWLEDGEMENTREFERENCE",
-                                                                  "UNKNOWN_ERROR",
-                                                                  "SERVER_ERROR",
-                                                                  "SERVICE_UNAVAILABLE"
-                                                              ],
-                                                              "description": "Keys for all the errors returned. Custom per API"
-                                                          },
-                                                          "reason": {
-                                                              "type": "string",
-                                                              "minLength": 1,
-                                                              "maxLength": 80,
-                                                              "description": "A simple description for the failure"
-                                                          }
-                                                      },
-                                                      "required": [
-                                                          "code",
-                                                         "reason"
-                                                      ],
-                                                      "additionalProperties": false
-                                                  }
-                                              }
-                                          }""")
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Subscription Create Schema",
+    "description": "JSON representation of Subscription Create Payload",
+    "type": "object",
+    "properties": {
+      "addressDetail": {
+      "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+      "line1": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9 \\-,.&'\\/]{1,35}$"
+    },
+      "line2": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9 \\-,.&'\\/]{1,35}$"
+    },
+      "line3": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9 \\-,.&'\\/]{1,35}$"
+    },
+      "line4": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9 \\-,.&'\\/]{1,35}$"
+    },
+      "postalCode": {
+      "type": "string",
+      "pattern": "^[A-Z]{1,2}[0-9][0-9A-Z]?\\s?[0-9][A-Z]{2}$|BFPO\\s?[0-9]{1,5}$"
+    },
+      "countryCode": {
+      "type": "string",
+      "enum": [
+      "GB"
+      ]
+    }
+    },
+      "additionalProperties": false,
+      "required": [
+      "line1",
+      "line2",
+      "countryCode",
+      "postalCode"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+      "line1": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9 \\-,.&'\\/]{1,35}$"
+    },
+      "line2": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9 \\-,.&'\\/]{1,35}$"
+    },
+      "line3": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9 \\-,.&'\\/]{1,35}$"
+    },
+      "line4": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9 \\-,.&'\\/]{1,35}$"
+    },
+      "postalCode": {
+      "type": "string",
+      "pattern": "^[A-Z]{1,2}[0-9][0-9A-Z]?\\s?[0-9][A-Z]{2}$|BFPO\\s?[0-9]{1,5}$"
+    },
+      "countryCode": {
+      "$ref": "#/definitions/countryCodes"
+    }
+    },
+      "additionalProperties": false,
+      "required": [
+      "line1",
+      "line2",
+      "countryCode"
+      ]
+    }
+      ]
+    }
+    },
+    "additionalProperties": false,
+    "definitions": {
+      "countryCodes": {
+      "type": "string",
+      "enum": [
+      "AD",
+      "AE",
+      "AF",
+      "AG",
+      "AI",
+      "AL",
+      "AM",
+      "AN",
+      "AO",
+      "AQ",
+      "AR",
+      "AS",
+      "AT",
+      "AU",
+      "AW",
+      "AX",
+      "AZ",
+      "BA",
+      "BB",
+      "BD",
+      "BE",
+      "BF",
+      "BG",
+      "BH",
+      "BI",
+      "BJ",
+      "BL",
+      "BM",
+      "BN",
+      "BO",
+      "BQ",
+      "BR",
+      "BS",
+      "BT",
+      "BV",
+      "BW",
+      "BY",
+      "BZ",
+      "CA",
+      "CC",
+      "CD",
+      "CF",
+      "CG",
+      "CH",
+      "CI",
+      "CK",
+      "CL",
+      "CM",
+      "CN",
+      "CO",
+      "CR",
+      "CS",
+      "CU",
+      "CV",
+      "CW",
+      "CX",
+      "CY",
+      "CZ",
+      "DE",
+      "DJ",
+      "DK",
+      "DM",
+      "DO",
+      "DZ",
+      "EC",
+      "EE",
+      "EG",
+      "EH",
+      "ER",
+      "ES",
+      "ET",
+      "EU",
+      "FC",
+      "FI",
+      "FJ",
+      "FK",
+      "FM",
+      "FO",
+      "FR",
+      "GA",
+      "GB",
+      "GD",
+      "GE",
+      "GF",
+      "GG",
+      "GH",
+      "GI",
+      "GL",
+      "GM",
+      "GN",
+      "GP",
+      "GQ",
+      "GR",
+      "GS",
+      "GT",
+      "GU",
+      "GW",
+      "GY",
+      "HK",
+      "HM",
+      "HN",
+      "HR",
+      "HT",
+      "HU",
+      "ID",
+      "IE",
+      "IL",
+      "IM",
+      "IN",
+      "IO",
+      "IQ",
+      "IR",
+      "IS",
+      "IT",
+      "JE",
+      "JM",
+      "JO",
+      "JP",
+      "KE",
+      "KG",
+      "KH",
+      "KI",
+      "KM",
+      "KN",
+      "KP",
+      "KR",
+      "KW",
+      "KY",
+      "KZ",
+      "LA",
+      "LB",
+      "LC",
+      "LI",
+      "LK",
+      "LR",
+      "LS",
+      "LT",
+      "LU",
+      "LV",
+      "LY",
+      "MA",
+      "MC",
+      "MD",
+      "ME",
+      "MF",
+      "MG",
+      "MH",
+      "MK",
+      "ML",
+      "MM",
+      "MN",
+      "MO",
+      "MP",
+      "MQ",
+      "MR",
+      "MS",
+      "MT",
+      "MU",
+      "MV",
+      "MW",
+      "MX",
+      "MY",
+      "MZ",
+      "NA",
+      "NC",
+      "NE",
+      "NF",
+      "NG",
+      "NI",
+      "NL",
+      "NO",
+      "NP",
+      "NR",
+      "NT",
+      "NU",
+      "NZ",
+      "OM",
+      "OR",
+      "PA",
+      "PE",
+      "PF",
+      "PG",
+      "PH",
+      "PK",
+      "PL",
+      "PM",
+      "PN",
+      "PR",
+      "PS",
+      "PT",
+      "PW",
+      "PY",
+      "QA",
+      "RE",
+      "RO",
+      "RS",
+      "RU",
+      "RW",
+      "SA",
+      "SB",
+      "SC",
+      "SD",
+      "SE",
+      "SG",
+      "SH",
+      "SI",
+      "SJ",
+      "SK",
+      "SL",
+      "SM",
+      "SN",
+      "SO",
+      "SR",
+      "SS",
+      "ST",
+      "SV",
+      "SX",
+      "SY",
+      "SZ",
+      "TC",
+      "TD",
+      "TF",
+      "TG",
+      "TH",
+      "TJ",
+      "TK",
+      "TL",
+      "TM",
+      "TN",
+      "TO",
+      "TP",
+      "TR",
+      "TT",
+      "TV",
+      "TW",
+      "TZ",
+      "UA",
+      "UG",
+      "UM",
+      "UN",
+      "US",
+      "UY",
+      "UZ",
+      "VA",
+      "VC",
+      "VE",
+      "VG",
+      "VI",
+      "VN",
+      "VU",
+      "WF",
+      "WS",
+      "YE",
+      "YT",
+      "ZA",
+      "ZM",
+      "ZW"
+      ]
+    }
+    }
+  }""")
   lazy val registrationGhostSchema = Json.parse("""{
                                       "$schema": "http://json-schema.org/draft-04/schema#",
                                       "title": "Register without UTR",

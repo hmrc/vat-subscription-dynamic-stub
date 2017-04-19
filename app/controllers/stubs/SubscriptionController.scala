@@ -46,11 +46,6 @@ class SubscriptionController @Inject()(repository: SubscriptionRepository,
 
         Logger.info("Received a call from the back end to subscribe an Individual")
 
-        val body = request.body.asJson
-        val validJsonFlag = schemaValidation.validateJson(RouteIds.subscribe, body.getOrElse(invalidJsonBodySub))
-
-        def handleJsonValidity(flag: Boolean): Future[Result] = {
-          if (flag){
             val subscriber = repository().findLatestVersionBy(safeId)
 
             def getReference(subscriber: List[SubscriberModel]): Future[String] = {
@@ -72,15 +67,6 @@ class SubscriptionController @Inject()(repository: SubscriptionRepository,
               )
             ))
         }
-        else {
-          Future.successful(BadRequest("JSON Body failure to validate against requirements of schema for individual subscription"))
-        }
-      }
-        for {
-          flag <- validJsonFlag
-          result <- handleJsonValidity(flag)
-        } yield result
-      }
     }
   }
 }
