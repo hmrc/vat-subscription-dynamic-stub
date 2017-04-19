@@ -28,7 +28,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.{CgtRepository, RouteExceptionRepository, SchemaRepository, SubscriptionRepository}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
-import utils.{SchemaValidation, Schemas}
+import utils.{SchemaValidation, TestSchemas}
 
 import scala.concurrent.Future
 
@@ -44,6 +44,7 @@ class SubscriptionControllerSpec extends UnitSpec with MockitoSugar with WithFak
     val mockExceptionsCollection = mock[CgtRepository[RouteExceptionModel, RouteExceptionKeyModel]]
     val mockExceptionsRepository = mock[RouteExceptionRepository]
     val mockSchemaRepository = mock[SchemaRepository]
+    val mockSchemaCollection = mock[CgtRepository[SchemaModel, String]]
     val exceptionTriggersActions = new ExceptionTriggersActions(mockExceptionsRepository)
     val expectedException = expectedExceptionCode.fold(List[RouteExceptionModel]()) {
       code => List(RouteExceptionModel("", "", code))
@@ -67,8 +68,11 @@ class SubscriptionControllerSpec extends UnitSpec with MockitoSugar with WithFak
     when(mockCGTRefHelper.generateCGTReference())
       .thenReturn(ref)
 
+    when(mockSchemaRepository.apply())
+      .thenReturn(mockSchemaCollection)
+
     when(mockSchemaRepository().findLatestVersionBy(any())(any()))
-      .thenReturn(Future.successful(List(SchemaModel(RouteIds.subscribe, Json.toJson(Schemas.subscriptionCreateIndvOrgSchema)))))
+      .thenReturn(Future.successful(List(SchemaModel(RouteIds.subscribe, TestSchemas.subscriptionCreateIndvOrgSchema))))
 
     val schemaValidation = new SchemaValidation(mockSchemaRepository)
 

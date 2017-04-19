@@ -29,7 +29,7 @@ import play.api.libs.json.Json
 import play.api.test.Helpers._
 import repositories.{CgtRepository, RouteExceptionRepository, SchemaRepository, SubscriptionRepository}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
-import utils.{SchemaValidation, Schemas}
+import utils.{SchemaValidation, TestSchemas}
 
 import scala.concurrent.Future
 
@@ -83,7 +83,7 @@ class CompanySubscriptionControllerSpec @Inject()(companySubscriptionController:
       .thenReturn(ref)
 
     when(mockSchemaRepository().findLatestVersionBy(any())(any()))
-      .thenReturn(Future.successful(List(SchemaModel(RouteIds.companySubscribe, Json.toJson(Schemas.subscriptionCreateIndvOrgSchema)))))
+      .thenReturn(Future.successful(List(SchemaModel(RouteIds.companySubscribe, TestSchemas.subscriptionCreateIndvOrgSchema))))
 
     val schemaValidation = new SchemaValidation(mockSchemaRepository)
 

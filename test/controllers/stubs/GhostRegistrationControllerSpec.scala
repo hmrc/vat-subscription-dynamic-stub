@@ -30,7 +30,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.{CgtRepository, NonResidentBusinessPartnerRepository, RouteExceptionRepository, SchemaRepository}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
-import utils.{SchemaValidation, Schemas}
+import utils.{SchemaValidation, TestSchemas}
 
 import scala.concurrent.Future
 
@@ -47,6 +47,7 @@ class GhostRegistrationControllerSpec extends UnitSpec with MockitoSugar with Wi
     val mockExceptionsCollection = mock[CgtRepository[RouteExceptionModel, RouteExceptionKeyModel]]
     val mockExceptionsRepository = mock[RouteExceptionRepository]
     val mockSchemaRepository = mock[SchemaRepository]
+    val mockSchemaCollection = mock[CgtRepository[SchemaModel, String]]
     val exceptionTriggersActions = new ExceptionTriggersActions(mockExceptionsRepository)
     val expectedException = expectedExceptionCode.fold(List[RouteExceptionModel]()) {
       code => List(RouteExceptionModel("", "", code))
@@ -70,8 +71,11 @@ class GhostRegistrationControllerSpec extends UnitSpec with MockitoSugar with Wi
     when(mockSAPHelper.generateSap())
       .thenReturn(sap)
 
+    when(mockSchemaRepository.apply())
+      .thenReturn(mockSchemaCollection)
+
     when(mockSchemaRepository().findLatestVersionBy(any())(any()))
-      .thenReturn(Future.successful(List(SchemaModel(RouteIds.registerIndividualWithoutNino, Json.toJson(Schemas.registrationGhostSchema)))))
+      .thenReturn(Future.successful(List(SchemaModel(RouteIds.registerIndividualWithoutNino, TestSchemas.registrationGhostSchema))))
 
     val schemaValidation = new SchemaValidation(mockSchemaRepository)
 
