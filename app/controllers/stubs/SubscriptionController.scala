@@ -51,8 +51,7 @@ class SubscriptionController @Inject()(repository: SubscriptionRepository,
 
         def handleJsonValidity(flag: Boolean): Future[Result] = {
           if (flag){
-            val subscriptionDetails = body.get.as[SubscribeModel]
-            val subscriber = repository().findLatestVersionBy(subscriptionDetails.sap)
+            val subscriber = repository().findLatestVersionBy(safeId)
 
             def getReference(subscriber: List[SubscriberModel]): Future[String] = {
               if (subscriber.isEmpty) {
@@ -67,7 +66,11 @@ class SubscriptionController @Inject()(repository: SubscriptionRepository,
             for {
               checkSubscribers <- subscriber
               reference <- getReference(checkSubscribers)
-            } yield Ok(Json.toJson(reference))
+            } yield Ok(Json.obj(
+              "subscriptionCGT" -> Json.obj(
+                "referenceNumber" -> reference
+              )
+            ))
         }
         else {
           Future.successful(BadRequest("JSON Body failure to validate against requirements of schema for individual subscription"))
