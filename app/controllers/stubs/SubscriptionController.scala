@@ -21,10 +21,10 @@ import javax.inject.{Inject, Singleton}
 import actions.ExceptionTriggersActions
 import common.RouteIds
 import helpers.CgtRefHelper
-import models.{SubscribeModel, SubscriberModel}
+import models.SubscriberModel
 import play.api.Logger
 import play.api.libs.json.Json
-import play.api.mvc.{Action, AnyContent, Result}
+import play.api.mvc.{Action, AnyContent}
 import repositories.SubscriptionRepository
 import uk.gov.hmrc.play.microservice.controller.BaseController
 import utils.SchemaValidation
@@ -37,8 +37,6 @@ class SubscriptionController @Inject()(repository: SubscriptionRepository,
                                        cgtRefHelper: CgtRefHelper,
                                        guardedActions: ExceptionTriggersActions,
                                        schemaValidation: SchemaValidation) extends BaseController {
-
-  val invalidJsonBodySub = Json.toJson("")
 
   val subscribe: String => Action[AnyContent] = safeId => {
     guardedActions.ExceptionTriggers(safeId, RouteIds.subscribe).async {
