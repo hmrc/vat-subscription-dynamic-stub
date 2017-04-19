@@ -40,11 +40,11 @@ object FullDetailsModel {
     randomChars + nanoTime
   }
 
-  val asModel: JsValue => FullDetailsModel = json => FullDetailsModel(
+  implicit val asModel: JsValue => FullDetailsModel = json => FullDetailsModel(
     firstName = (json \ "individual" \ "firstName").as[String],
     lastName = (json \ "individual" \ "lastName").as[String],
-    addressLineOne = (json \ "individual" \ "addressLine1").as[String],
-    addressLineTwo = (json \ "individual" \ "addressLine2").as[String],
+    addressLineOne = (json \ "address" \ "addressLine1").as[String],
+    addressLineTwo = (json \ "address" \ "addressLine2").as[String],
     townOrCity =  (json \ "address" \ "addressLine3").asOpt[String],
     county = (json \ "address" \ "addressLine4").asOpt[String],
     postCode =  (json \ "address" \ "postalCode").asOpt[String],

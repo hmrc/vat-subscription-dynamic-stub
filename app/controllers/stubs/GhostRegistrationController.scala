@@ -49,7 +49,7 @@ class GhostRegistrationController @Inject()(repository: NonResidentBusinessPartn
 
         def handleJsonValidity(flag: Boolean): Future[Result] = {
           if (flag) {
-            val registrationDetails = body.get.as[FullDetailsModel]
+            val registrationDetails = FullDetailsModel.asModel(body.get)
 
             Logger.info(s"Successfully read request body as $registrationDetails")
 

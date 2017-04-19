@@ -60,7 +60,7 @@ class ExceptionTriggersActions @Inject()(exceptionsRepository: RouteExceptionRep
 
   case class WithFullDetailsExceptionTriggers(routeId: String) extends ActionBuilder[Request] {
     def invokeBlock[A](request: Request[A], block: (Request[A]) => Future[Result]): Future[Result] = {
-      val details = request.asInstanceOf[Request[AnyContent]].body.asJson.get.as[FullDetailsModel]
+      val details: FullDetailsModel = request.asInstanceOf[Request[AnyContent]].body.asJson.get
       val uniqueId = s"${details.firstName} ${details.lastName}"
       processException(uniqueId, routeId, request, block)
     }
