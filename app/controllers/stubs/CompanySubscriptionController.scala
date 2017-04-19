@@ -33,7 +33,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class CompanySubscriptionController @Inject()(subscriptionMongoConnector: SubscriptionRepository,
+class CompanySubscriptionController @Inject()(subscriptionRepository: SubscriptionRepository,
                                               cgtRefHelper:  CgtRefHelper,
                                               guardedActions: ExceptionTriggersActions,
                                               schemaValidation: SchemaValidation)
@@ -49,7 +49,6 @@ class CompanySubscriptionController @Inject()(subscriptionMongoConnector: Subscr
 
         def handleJsonValidity(flag: Boolean): Future[Result] = {
           if(flag) {
-            val model = request.body.asJson.get.as[CompanySubmissionModel]
             returnSubscriptionReference(sap)
           }
           else {
@@ -67,13 +66,13 @@ class CompanySubscriptionController @Inject()(subscriptionMongoConnector: Subscr
   }
 
   def returnSubscriptionReference(sap: String): Future[Result] = {
-    val subscriber = subscriptionMongoConnector.repository.findLatestVersionBy(sap)
+    val subscriber = subscriptionRepository.apply().findLatestVersionBy(sap)
 
     def getReference(subscriber: List[SubscriberModel]): Future[String] = {
       if (subscriber.isEmpty) {
         val reference = cgtRefHelper.generateCGTReference()
         Logger.info("Generating a new entry ")
-        subscriptionMongoConnector.repository.addEntry(SubscriberModel(sap, reference))
+        subscriptionRepository.apply().addEntry(SubscriberModel(sap, reference))
         Future.successful(reference)
       } else {
         Future.successful(subscriber.head.reference)

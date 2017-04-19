@@ -33,8 +33,7 @@ import utils.{SchemaValidation, TestSchemas}
 
 import scala.concurrent.Future
 
-class CompanySubscriptionControllerSpec @Inject()(companySubscriptionController: CompanySubscriptionController)
-  extends UnitSpec with MockitoSugar with WithFakeApplication {
+class CompanySubscriptionControllerSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
 
   val companyAddressModel = CompanyAddressModel(
     Some("Line one"),
@@ -55,6 +54,7 @@ class CompanySubscriptionControllerSpec @Inject()(companySubscriptionController:
     val mockCgtRefHelper = mock[CgtRefHelper]
     val mockExceptionsCollection = mock[CgtRepository[RouteExceptionModel, RouteExceptionKeyModel]]
     val mockSchemaRepository = mock[SchemaRepository]
+    val mockSchemaCollection = mock[CgtRepository[SchemaModel, String]]
     val mockExceptionsRepository = mock[RouteExceptionRepository]
     val exceptionTriggersActions = new ExceptionTriggersActions(mockExceptionsRepository)
     val expectedException = expectedExceptionCode.fold(List[RouteExceptionModel]()) {
@@ -79,6 +79,9 @@ class CompanySubscriptionControllerSpec @Inject()(companySubscriptionController:
     when(mockCgtRefHelper.generateCGTReference())
       .thenReturn(ref)
 
+    when(mockSchemaRepository.apply())
+      .thenReturn(mockSchemaCollection)
+
     when(mockSchemaRepository().findLatestVersionBy(any())(any()))
       .thenReturn(Future.successful(List(SchemaModel(RouteIds.companySubscribe, TestSchemas.subscriptionCreateIndvOrgSchema))))
 
@@ -91,8 +94,8 @@ class CompanySubscriptionControllerSpec @Inject()(companySubscriptionController:
 
     "there is an entry in the database for the supplied sap already" should {
 
-      val controller = setupController(List(SubscriberModel("123456789", "CGT123456")), "CGT123456")
-      lazy val result = controller.returnSubscriptionReference("123456789")
+      lazy val controller = setupController(List(SubscriberModel("123456789ABCDEF", "CGT123456")), "CGT123456")
+      lazy val result = controller.returnSubscriptionReference("123456789ABCDEF")
 
       "return a status of 200" in {
         status(result) shouldBe 200
@@ -105,14 +108,14 @@ class CompanySubscriptionControllerSpec @Inject()(companySubscriptionController:
       "return a valid CGT Reference" in {
         val data = contentAsString(result)
         val json = Json.parse(data)
-        json.as[String] shouldBe "CGT123456"
+        (json \ "subscriptionCGT" \ "referenceNumber").as[String] shouldBe "CGT123456"
       }
     }
 
     "there is no entry in the database for the supplied sap already" should {
 
       val controller = setupController(Nil, "CGT654321")
-      lazy val result = controller.returnSubscriptionReference("123456789")
+      lazy val result = controller.returnSubscriptionReference("123456789ABCDEF")
 
       "return a status of 200" in {
         status(result) shouldBe 200
@@ -125,7 +128,7 @@ class CompanySubscriptionControllerSpec @Inject()(companySubscriptionController:
       "return a valid CGT Reference" in {
         val data = contentAsString(result)
         val json = Json.parse(data)
-        json.as[String] shouldBe "CGT654321"
+        (json \ "subscriptionCGT" \ "referenceNumber").as[String] shouldBe "CGT654321"
       }
     }
   }
