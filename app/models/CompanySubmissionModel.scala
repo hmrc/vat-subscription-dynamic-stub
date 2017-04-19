@@ -18,21 +18,9 @@ package models
 
 import play.api.libs.json.{Json, OFormat}
 
-case class CompanySubmissionModel(
-                                   sap: Option[String],
-                                   contactAddress: Option[CompanyAddressModel],
-                                   registeredAddress: Option[CompanyAddressModel]
-                                 ) {
-  require(CompanySubmissionModel.validateSAP(sap), s"SAP:$sap is not valid.")
+case class CompanySubmissionModel(addressDetail: CompanyAddressModel) {
 }
 
 object CompanySubmissionModel {
   implicit val formats: OFormat[CompanySubmissionModel] = Json.format[CompanySubmissionModel]
-
-  def validateSAP(sap: Option[String]): Boolean = {
-    sap match {
-      case Some(data) => data.length.equals(15)
-      case _ => true
-    }
-  }
 }

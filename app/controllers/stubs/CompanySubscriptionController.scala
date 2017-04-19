@@ -34,29 +34,23 @@ import scala.concurrent.Future
 
 @Singleton
 class CompanySubscriptionController @Inject()(subscriptionMongoConnector: SubscriptionRepository,
-                                              cGTRefHelper: CgtRefHelper,
+                                              cgtRefHelper:  CgtRefHelper,
                                               guardedActions: ExceptionTriggersActions,
                                               schemaValidation: SchemaValidation)
   extends BaseController {
 
-  private val noContactAddressMessage = "Body of request did not contain the expected values for the company submission model"
-
-  val invalidJsonBodySub = Json.toJson("not valid json")
-
-  def subscribe(): Action[AnyContent] = {
-    guardedActions.CompanySubscriptionExceptionTriggers(RouteIds.companySubscribe).async {
+  def subscribe(sap: String): Action[AnyContent] = {
+    guardedActions.CompanySubscriptionExceptionTriggers(RouteIds.companySubscribe, sap).async {
       implicit request => {
 
         Logger.info("Received a call from the back end to subscribe a Company")
         val body = request.body.asJson
-        val validJsonFlag = schemaValidation.validateJson(RouteIds.companySubscribe, body.getOrElse(invalidJsonBodySub))
+        val validJsonFlag = schemaValidation.validateJson(RouteIds.companySubscribe, body.getOrElse(Json.toJson("invalid json")))
 
         def handleJsonValidity(flag: Boolean): Future[Result] = {
           if(flag) {
             val model = request.body.asJson.get.as[CompanySubmissionModel]
-
-            if (model.contactAddress.isDefined) returnSubscriptionReference(model.sap.get)
-            else Future.successful(Results.BadRequest(Json.toJson(noContactAddressMessage)))
+            returnSubscriptionReference(sap)
           }
           else {
             Future.successful(BadRequest("Invalid JSON body for the organisation subscription schema"))
@@ -67,6 +61,7 @@ class CompanySubscriptionController @Inject()(subscriptionMongoConnector: Subscr
           flag <- validJsonFlag
           result <- handleJsonValidity(flag)
         } yield result
+        returnSubscriptionReference(sap)
       }
     }
   }
@@ -76,7 +71,7 @@ class CompanySubscriptionController @Inject()(subscriptionMongoConnector: Subscr
 
     def getReference(subscriber: List[SubscriberModel]): Future[String] = {
       if (subscriber.isEmpty) {
-        val reference = cGTRefHelper.generateCGTReference()
+        val reference = cgtRefHelper.generateCGTReference()
         Logger.info("Generating a new entry ")
         subscriptionMongoConnector.repository.addEntry(SubscriberModel(sap, reference))
         Future.successful(reference)
@@ -88,6 +83,10 @@ class CompanySubscriptionController @Inject()(subscriptionMongoConnector: Subscr
     for {
       checkSubscribers <- subscriber
       reference <- getReference(checkSubscribers)
-    } yield Ok(Json.toJson(reference))
+    } yield Ok(Json.obj(
+      "subscriptionCGT" -> Json.obj(
+        "referenceNumber" -> reference
+      )
+    ))
   }
 }

@@ -112,7 +112,7 @@ class GhostRegistrationControllerSpec extends UnitSpec with MockitoSugar with Wi
       "return a valid SAP" in {
         val data = contentAsString(result)
         val json = Json.parse(data)
-        json.as[String] shouldBe "1234567890"
+        (json \ "sapNumber").as[String] shouldBe "1234567890"
       }
     }
   }

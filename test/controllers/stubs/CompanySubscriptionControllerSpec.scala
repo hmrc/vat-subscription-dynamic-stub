@@ -44,10 +44,7 @@ class CompanySubscriptionControllerSpec @Inject()(companySubscriptionController:
     Some("Country"),
     Some("Postcode")
   )
-  val noSapCompanySubmissionModel = CompanySubmissionModel(None, Some(companyAddressModel), Some(companyAddressModel))
-  val noRegAddressCompanySubmissionModel = CompanySubmissionModel(Some("dummySap"), None, Some(companyAddressModel))
-  val noCorAddressCompanySubmissionModel = CompanySubmissionModel(Some("dummySap"), Some(companyAddressModel), None)
-  val companySubmissionModel = CompanySubmissionModel(Some("dummySap"), Some(companyAddressModel), Some(companyAddressModel))
+  val companySubmissionModel = CompanySubmissionModel(companyAddressModel)
 
   def setupController(findLatestVersionResult: List[SubscriberModel],
                       ref: String,

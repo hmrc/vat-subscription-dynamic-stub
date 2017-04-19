@@ -66,12 +66,9 @@ class ExceptionTriggersActions @Inject()(exceptionsRepository: RouteExceptionRep
     }
   }
 
-  case class CompanySubscriptionExceptionTriggers(routeId: String) extends ActionBuilder[Request] {
+  case class CompanySubscriptionExceptionTriggers(routeId: String, sap: String) extends ActionBuilder[Request] {
     def invokeBlock[A](request: Request[A], block: (Request[A]) => Future[Result]): Future[Result] = {
-      val details = request.asInstanceOf[Request[AnyContent]].body.asJson.get.as[CompanySubmissionModel]
-      details.sap.fold(Future.successful(Results.BadRequest(Json.toJson("SAP not specified")))) {
-        id => processException(details.sap.getOrElse(id), routeId, request, block)
-      }
+      processException(sap, routeId, request, block)
     }
   }
 
