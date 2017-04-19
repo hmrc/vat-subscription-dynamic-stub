@@ -70,7 +70,7 @@ class RegistrationControllerSpec extends UnitSpec with MockitoSugar with WithFak
 
   "Calling registerBusinessPartner" when {
 
-    "the nino has no corresponding business partner" should {
+    "the nino has a corresponding business partner" should {
       val controller = setupController(List(BusinessPartnerModel(Nino("AA123456A"), "123456789")), "")
       lazy val result = controller.registerBusinessPartner("AA123456A")(FakeRequest("POST", "")
         .withJsonBody(Json.toJson(RegisterModel(Nino("AA123456A")))))
@@ -78,17 +78,15 @@ class RegistrationControllerSpec extends UnitSpec with MockitoSugar with WithFak
       "return a status of 409/Conflicted" in {
         status(result) shouldBe 409
       }
-
     }
 
     "passing in a nino for an error scenario" should {
-      val NOT_FOUND = 404
       val controller = setupController(List(BusinessPartnerModel(Nino("AA123456A"), "CGT123456")), "CGT654321", Some(NOT_FOUND))
       lazy val result = controller.registerBusinessPartner("AA404404A")(FakeRequest("POST", "")
         .withJsonBody(Json.toJson(RegisterModel(Nino("AA404404A")))))
 
       "return a status of 404" in {
-        status(result) shouldBe NOT_FOUND
+        status(result) shouldBe 404
       }
 
       "return a type of Json" in {
@@ -96,9 +94,27 @@ class RegistrationControllerSpec extends UnitSpec with MockitoSugar with WithFak
       }
 
       "return an error code" in {
-        val data = contentAsString(result)
-        val json = Json.parse(data)
-        json.as[String] shouldBe "Not found error"
+        val data = contentAsJson(result)
+        data shouldEqual Json.obj("code" -> "404", "reason" -> "Not found error")
+      }
+    }
+
+    "nino has no corresponding business partners" should {
+      val controller = setupController(List.empty, "123456789")
+      lazy val result = controller.registerBusinessPartner("AA123456B")(FakeRequest("POST", "")
+        .withJsonBody(Json.toJson(RegisterModel(Nino("AA123456B")))))
+
+      "return a status of 200" in {
+        status(result) shouldBe 200
+      }
+
+      "return a type of Json" in {
+        contentType(result) shouldBe Some("application/json")
+      }
+
+      "return a generated sap" in {
+        val data = contentAsJson(result)
+        data shouldEqual Json.obj("safeId" -> "123456789")
       }
     }
   }
@@ -118,20 +134,27 @@ class RegistrationControllerSpec extends UnitSpec with MockitoSugar with WithFak
       }
 
       "return a valid SAP" in {
-        val data = contentAsString(result)
-        val json = Json.parse(data)
-        json.as[String] shouldBe "123456789"
+        val data = contentAsJson(result)
+        data shouldEqual Json.obj("safeId" -> "123456789")
       }
     }
 
     "supplied with a nino that is associated with a preexisting BP BUT an internal error occurs" should {
-      val INTERNAL_ERROR = 500
-      val controller = setupController(List(BusinessPartnerModel(Nino("AA123456A"), "123456789")), "", Some(INTERNAL_ERROR))
+      val controller = setupController(List(BusinessPartnerModel(Nino("AA123456A"), "123456789")), "", Some(INTERNAL_SERVER_ERROR))
       lazy val result = controller.getExistingSAP("AA123456A")(FakeRequest("POST", "")
         .withJsonBody(Json.toJson(RegisterModel(Nino("AA123456A")))))
 
-      s"return a status of $INTERNAL_ERROR" in {
-        status(result) shouldBe INTERNAL_ERROR
+      "return a status of 500" in {
+        status(result) shouldBe 500
+      }
+
+      "return a type of Json" in {
+        contentType(result) shouldBe Some("application/json")
+      }
+
+      "return an error code" in {
+        val data = contentAsJson(result)
+        data shouldEqual Json.obj("code" -> "500", "reason" -> "Internal server error")
       }
     }
 

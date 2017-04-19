@@ -72,7 +72,9 @@ class RegistrationController @Inject()(repository: BusinessPartnerRepository,
             if (sap == "-1")
               Conflict
             else
-              Ok(Json.toJson(sap))
+              Ok(Json.obj(
+                "safeId" -> sap
+              ))
           }
 
           for {
@@ -111,7 +113,9 @@ class RegistrationController @Inject()(repository: BusinessPartnerRepository,
             if (sap == "-1")
               BadRequest
             else
-              Ok(Json.toJson(sap))
+              Ok(Json.obj(
+                "safeId" -> sap
+              ))
           }
 
           for {
