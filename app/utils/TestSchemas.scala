@@ -927,4 +927,80 @@ object TestSchemas {
                                       }
                                   }""")
 
+  lazy val agentRelationshipCreateSchema = Json.parse(
+    """{
+      "$schema": "http://json-schema.org/draft-04/schema#",
+      "title": "Digital to ETMP ROSM Agent Relationship Create / Update ",
+      "description": "Digital to ETMP ROSM Agent Relationship Create / Update ",
+      "type": "object",
+      "properties": {
+        "acknowledgmentReference": {
+        "type": "string",
+        "pattern": "^\\S{1,32}$"
+      },
+        "refNumber": {
+        "type": "string",
+        "pattern": "^[0-9A-Za-z]{15}$"
+      },
+        "agentReferenceNumber": {
+        "type": "string",
+        "pattern": "^[A-Z](ARN)[0-9]{7}$"
+      },
+        "regime": {
+        "type": "string",
+        "pattern": "^[A-Z]{3,10}$"
+      },
+        "authorisation": {
+        "oneOf": [{
+        "$ref": "#/definitions/authorise"
+      },
+      {
+        "$ref": "#/definitions/deauthorise"
+      }
+        ]
+      }
+      },
+      "required": [
+      "refNumber",
+      "agentReferenceNumber",
+      "regime",
+      "authorisation"
+      ],
+      "definitions": {
+        "authorise": {
+        "type": "object",
+        "properties": {
+        "action": {
+        "type": "string",
+        "enum": [
+        "Authorise"
+        ]
+      },
+        "isExclusiveAgent": {
+        "type": "boolean"
+      }
+      },
+        "required": [
+        "action",
+        "isExclusiveAgent"
+        ]
+      },
+        "deauthorise": {
+        "type": "object",
+        "properties": {
+        "action": {
+        "type": "string",
+        "enum": [
+        "De-Authorise"
+        ]
+      }
+      },
+        "required": [
+        "action"
+        ]
+      }
+      }
+    }"""
+  )
+
 }

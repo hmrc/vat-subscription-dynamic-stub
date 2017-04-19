@@ -81,7 +81,7 @@ class ExceptionTriggersActions @Inject()(exceptionsRepository: RouteExceptionRep
   case class DesAgentExceptionTriggers(routeId: String) extends ActionBuilder[Request] {
     def invokeBlock[A](request: Request[A], block: (Request[A] => Future[Result])): Future[Result] = {
       val relationshipModel = request.asInstanceOf[Request[AnyContent]].body.asJson.get.as[RelationshipModel]
-      val uniqueId = relationshipModel.arn
+      val uniqueId = relationshipModel.agentReferenceNumber
       processException(uniqueId, routeId, request, block)
     }
   }

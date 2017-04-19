@@ -31,7 +31,7 @@ class AgentClientRelationshipRepository @Inject()() extends MongoDbConnection {
 
     override def findAllVersionsBy(o: RelationshipModel)(implicit ec: ExecutionContext):
     Future[Map[RelationshipModel, List[AgentClientSubmissionModel]]] = {
-      val allEntries = find("arn" -> o.arn)
+      val allEntries = find("arn" -> o.agentReferenceNumber)
       allEntries.map {
         _.groupBy(_.relationshipModel)
       }
@@ -47,7 +47,7 @@ class AgentClientRelationshipRepository @Inject()() extends MongoDbConnection {
     }
 
     override def removeBy(o: RelationshipModel)(implicit ec: ExecutionContext): Future[Unit] = {
-      remove("arn" -> o.arn).map { _ => }
+      remove("arn" -> o.agentReferenceNumber).map { _ => }
     }
 
     override def removeAll()(implicit ec: ExecutionContext): Future[Unit] = {
