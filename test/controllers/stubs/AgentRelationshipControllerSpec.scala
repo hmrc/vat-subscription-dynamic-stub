@@ -17,8 +17,7 @@
 package controllers.stubs
 
 import actions.ExceptionTriggersActions
-import common.RouteIds
-import models.{RelationshipModel, RouteExceptionKeyModel, RouteExceptionModel, SchemaModel}
+import models.{RelationshipModel, RouteExceptionKeyModel, RouteExceptionModel}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
@@ -26,7 +25,7 @@ import play.api.libs.json.{JsValue, Json}
 import play.api.test.FakeRequest
 import repositories._
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
-import utils2.{SchemaValidation, TestSchemas}
+import utils.SchemaValidation
 
 import scala.concurrent.Future
 

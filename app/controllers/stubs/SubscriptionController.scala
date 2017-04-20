@@ -27,7 +27,6 @@ import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent}
 import repositories.SubscriptionRepository
 import uk.gov.hmrc.play.microservice.controller.BaseController
-import utils2.SchemaValidation
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

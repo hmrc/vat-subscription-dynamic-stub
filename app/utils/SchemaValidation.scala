@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package utils2
+package utils
 
 import javax.inject.{Inject, Singleton}
 

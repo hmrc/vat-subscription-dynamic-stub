@@ -16,10 +16,7 @@
 
 package controllers.stubs
 
-import javax.inject.Inject
-
 import actions.ExceptionTriggersActions
-import common.RouteIds
 import helpers.CgtRefHelper
 import models._
 import org.mockito.ArgumentMatchers._
@@ -28,9 +25,9 @@ import org.scalatest.mock.MockitoSugar
 import play.api.libs.json.{JsValue, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import repositories.{CgtRepository, RouteExceptionRepository, SchemaRepository, SubscriptionRepository}
+import repositories.{CgtRepository, RouteExceptionRepository, SubscriptionRepository}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
-import utils2.{SchemaValidation, TestSchemas}
+import utils.SchemaValidation
 
 import scala.concurrent.Future
 

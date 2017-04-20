@@ -30,7 +30,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.{CgtRepository, NonResidentBusinessPartnerRepository, RouteExceptionRepository, SchemaRepository}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
-import utils2.{SchemaValidation, TestSchemas}
+import utils.SchemaValidation
 
 import scala.concurrent.Future
 
