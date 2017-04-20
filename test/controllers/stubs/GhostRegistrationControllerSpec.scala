@@ -25,7 +25,6 @@ import models._
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
-import play.api.Logger
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -114,6 +113,18 @@ class GhostRegistrationControllerSpec extends UnitSpec with MockitoSugar with Wi
         val json = Json.parse(data)
         (json \ "sapNumber").as[String] shouldBe "1234567890"
       }
+    }
+  }
+
+  "an invalid JSON payload is sent" should {
+    val fullDetailsModel = FullDetailsModel("Daniel", "Dorito", "25 Big House", "New York",
+      None, None, None, "invalid country code that fails schema validation")
+    val controller = setupController(List(NonResidentBusinessPartnerModel(fullDetailsModel, "123456789")), "")
+
+    lazy val result = controller.registerBusinessPartner()(FakeRequest("POST", "").withJsonBody(FullDetailsModel.asJson(fullDetailsModel)))
+
+    "return a status of 400" in {
+      status(result) shouldBe 400
     }
   }
 }

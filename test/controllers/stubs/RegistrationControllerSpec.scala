@@ -158,6 +158,5 @@ class RegistrationControllerSpec extends UnitSpec with MockitoSugar with WithFak
       }
     }
 
-    //TODO: Add new test scenario for new error guard (no point retesting an error guard that's soon-to-be inapplicable)
   }
 }
