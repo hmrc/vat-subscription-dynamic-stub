@@ -24,6 +24,7 @@ import org.mockito.Mockito._
 import play.api.libs.json.Json
 import repositories.{CgtRepository, SchemaRepository}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import utils2.SchemaValidation
 
 import scala.concurrent.Future
 

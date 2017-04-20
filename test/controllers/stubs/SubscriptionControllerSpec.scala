@@ -23,12 +23,12 @@ import models._
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.{CgtRepository, RouteExceptionRepository, SchemaRepository, SubscriptionRepository}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
-import utils.{SchemaValidation, TestSchemas}
+import utils2.{SchemaValidation, TestSchemas}
 
 import scala.concurrent.Future
 
@@ -36,15 +36,14 @@ class SubscriptionControllerSpec extends UnitSpec with MockitoSugar with WithFak
 
   def setupController(findLatestVersionResult: List[SubscriberModel],
                       ref: String,
-                      expectedExceptionCode: Option[Int] = None): SubscriptionController = {
+                      expectedExceptionCode: Option[Int] = None,
+                      isValidJson: Boolean = true): SubscriptionController = {
 
     val mockCollection = mock[CgtRepository[SubscriberModel, String]]
     val mockRepository = mock[SubscriptionRepository]
     val mockCGTRefHelper = mock[CgtRefHelper]
     val mockExceptionsCollection = mock[CgtRepository[RouteExceptionModel, RouteExceptionKeyModel]]
     val mockExceptionsRepository = mock[RouteExceptionRepository]
-    val mockSchemaRepository = mock[SchemaRepository]
-    val mockSchemaCollection = mock[CgtRepository[SchemaModel, String]]
     val exceptionTriggersActions = new ExceptionTriggersActions(mockExceptionsRepository)
     val expectedException = expectedExceptionCode.fold(List[RouteExceptionModel]()) {
       code => List(RouteExceptionModel("", "", code))
@@ -68,15 +67,7 @@ class SubscriptionControllerSpec extends UnitSpec with MockitoSugar with WithFak
     when(mockCGTRefHelper.generateCGTReference())
       .thenReturn(ref)
 
-    when(mockSchemaRepository.apply())
-      .thenReturn(mockSchemaCollection)
-
-    when(mockSchemaRepository().findLatestVersionBy(any())(any()))
-      .thenReturn(Future.successful(List(SchemaModel(RouteIds.subscribe, TestSchemas.subscriptionCreateIndvOrgSchema))))
-
-    val schemaValidation = new SchemaValidation(mockSchemaRepository)
-
-    new SubscriptionController(mockRepository, mockCGTRefHelper, exceptionTriggersActions, schemaValidation)
+    new SubscriptionController(mockRepository, mockCGTRefHelper, exceptionTriggersActions)
   }
 
   "Calling subscribe" when {
@@ -117,6 +108,10 @@ class SubscriptionControllerSpec extends UnitSpec with MockitoSugar with WithFak
         val json = Json.parse(data)
         (json \ "subscriptionCGT" \ "referenceNumber").as[String] shouldBe "CGT654321"
       }
+    }
+
+    "an invalid json payload is sent in the request body" should {
+
     }
   }
 }

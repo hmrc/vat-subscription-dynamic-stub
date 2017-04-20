@@ -22,24 +22,27 @@ import models.{RelationshipModel, RouteExceptionKeyModel, RouteExceptionModel, S
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
+import play.api.libs.json.{JsValue, Json}
 import play.api.test.FakeRequest
 import repositories._
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
-import utils.{SchemaValidation, TestSchemas}
+import utils2.{SchemaValidation, TestSchemas}
 
 import scala.concurrent.Future
 
 
 class AgentRelationshipControllerSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
 
-  def setupController(expectedExceptionCode: Option[Int] = None): AgentRelationshipController = {
+  val dummyIrrelevantSchema = Json.toJson("")
+
+  def setupController(expectedExceptionCode: Option[Int] = None,
+                      isValidJson: Boolean = true): AgentRelationshipController = {
     val mockCollection = mock[CgtRepository[RelationshipModel, String]]
     val mockRepository = mock[DesAgentClientRelationshipRepository]
     val mockAgentRepo = mock[AgentClientRelationshipRepository]
     val mockExceptionsCollection = mock[CgtRepository[RouteExceptionModel, RouteExceptionKeyModel]]
     val mockExceptionsRepository = mock[RouteExceptionRepository]
-    val mockSchemaRepository = mock[SchemaRepository]
-    val mockSchemaCollection = mock[CgtRepository[SchemaModel, String]]
+    val mockSchemaValidation = mock[SchemaValidation]
     val exceptionTriggersActions = new ExceptionTriggersActions(mockExceptionsRepository)
     val expectedException = expectedExceptionCode.fold(List[RouteExceptionModel]()) {
       code => List(RouteExceptionModel("", "", code))
@@ -57,15 +60,9 @@ class AgentRelationshipControllerSpec extends UnitSpec with MockitoSugar with Wi
         when(mockCollection.addEntry(any())(any()))
           .thenReturn(Future.successful({}))
 
-    when(mockSchemaRepository.apply())
-      .thenReturn(mockSchemaCollection)
+    when(mockSchemaValidation.validateJson(anyString(), any[JsValue]())).thenReturn(Future.successful(isValidJson))
 
-    when(mockSchemaRepository().findLatestVersionBy(any())(any()))
-      .thenReturn(Future.successful(List(SchemaModel(RouteIds.createRelationship, TestSchemas.agentRelationshipCreateSchema))))
-
-    val schemaValidation = new SchemaValidation(mockSchemaRepository)
-
-    new AgentRelationshipController(mockAgentRepo, mockRepository, exceptionTriggersActions, schemaValidation)
+    new AgentRelationshipController(mockAgentRepo, mockRepository, exceptionTriggersActions, mockSchemaValidation)
   }
 
 "Calling createDesAgentClientRelationship" when {
@@ -81,7 +78,8 @@ class AgentRelationshipControllerSpec extends UnitSpec with MockitoSugar with Wi
     }
 
     "an invalid relationship json payload is sent" should {
-      lazy val result = controller.createDesAgentClientRelationship()(FakeRequest("POST", "").withJsonBody(RelationshipModel.asJson(invalidRelationshipModel)))
+      lazy val result = setupController(isValidJson=false).
+        createDesAgentClientRelationship()(FakeRequest("POST", "").withJsonBody(RelationshipModel.asJson(invalidRelationshipModel)))
 
       "return a status of 400" in {
         status(result) shouldBe 400

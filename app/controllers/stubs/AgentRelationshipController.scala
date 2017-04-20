@@ -26,7 +26,7 @@ import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, Result}
 import repositories.{AgentClientRelationshipRepository, DesAgentClientRelationshipRepository}
 import uk.gov.hmrc.play.microservice.controller.BaseController
-import utils.SchemaValidation
+import utils2.SchemaValidation
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

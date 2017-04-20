@@ -25,12 +25,12 @@ import models._
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.{CgtRepository, NonResidentBusinessPartnerRepository, RouteExceptionRepository, SchemaRepository}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
-import utils.{SchemaValidation, TestSchemas}
+import utils2.{SchemaValidation, TestSchemas}
 
 import scala.concurrent.Future
 
@@ -39,15 +39,15 @@ class GhostRegistrationControllerSpec extends UnitSpec with MockitoSugar with Wi
 
   def setupController(findLatestVersionResult: List[NonResidentBusinessPartnerModel],
                       sap: String,
-                      expectedExceptionCode: Option[Int] = None): GhostRegistrationController = {
+                      expectedExceptionCode: Option[Int] = None,
+                      isValidJson: Boolean = true): GhostRegistrationController = {
 
     val mockCollection = mock[CgtRepository[NonResidentBusinessPartnerModel, FullDetailsModel]]
     val mockRepository = mock[NonResidentBusinessPartnerRepository]
     val mockSAPHelper = mock[SapHelper]
     val mockExceptionsCollection = mock[CgtRepository[RouteExceptionModel, RouteExceptionKeyModel]]
     val mockExceptionsRepository = mock[RouteExceptionRepository]
-    val mockSchemaRepository = mock[SchemaRepository]
-    val mockSchemaCollection = mock[CgtRepository[SchemaModel, String]]
+    val mockSchemaValidation = mock[SchemaValidation]
     val exceptionTriggersActions = new ExceptionTriggersActions(mockExceptionsRepository)
     val expectedException = expectedExceptionCode.fold(List[RouteExceptionModel]()) {
       code => List(RouteExceptionModel("", "", code))
@@ -71,15 +71,10 @@ class GhostRegistrationControllerSpec extends UnitSpec with MockitoSugar with Wi
     when(mockSAPHelper.generateSap())
       .thenReturn(sap)
 
-    when(mockSchemaRepository.apply())
-      .thenReturn(mockSchemaCollection)
+    when(mockSchemaValidation.validateJson(anyString(), any[JsValue]())).thenReturn(Future.successful(isValidJson))
 
-    when(mockSchemaRepository().findLatestVersionBy(any())(any()))
-      .thenReturn(Future.successful(List(SchemaModel(RouteIds.registerIndividualWithoutNino, TestSchemas.registrationGhostSchema))))
 
-    val schemaValidation = new SchemaValidation(mockSchemaRepository)
-
-    new GhostRegistrationController(mockRepository, mockSAPHelper, exceptionTriggersActions, schemaValidation)
+    new GhostRegistrationController(mockRepository, mockSAPHelper, exceptionTriggersActions, mockSchemaValidation)
   }
 
   "Calling registerGhostBusinessPartner" when {
@@ -119,7 +114,7 @@ class GhostRegistrationControllerSpec extends UnitSpec with MockitoSugar with Wi
   "an invalid JSON payload is sent" should {
     val fullDetailsModel = FullDetailsModel("Daniel", "Dorito", "25 Big House", "New York",
       None, None, None, "invalid country code that fails schema validation")
-    val controller = setupController(List(NonResidentBusinessPartnerModel(fullDetailsModel, "123456789")), "")
+    val controller = setupController(List(NonResidentBusinessPartnerModel(fullDetailsModel, "123456789")), "", isValidJson = false)
 
     lazy val result = controller.registerBusinessPartner()(FakeRequest("POST", "").withJsonBody(FullDetailsModel.asJson(fullDetailsModel)))
 

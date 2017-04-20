@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package utils
+package utils2
 
 import javax.inject.{Inject, Singleton}
 
@@ -24,8 +24,8 @@ import com.github.fge.jsonschema.main.{JsonSchema, JsonSchemaFactory}
 import play.api.Logger
 import play.api.libs.json.JsValue
 import repositories.SchemaRepository
-import scala.concurrent.ExecutionContext.Implicits.global
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton

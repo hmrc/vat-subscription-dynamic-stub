@@ -33,4 +33,3 @@ test-result
 tmp
 .idea_modules
 bin
-app/utils/TestSchemas.scala
