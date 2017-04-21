@@ -8,7 +8,7 @@ GET         /capital-gains-tax/registration/details                         @con
 
 POST        /capital-gains-tax/non-resident/individual/register             @controllers.stubs.GhostRegistrationController.registerBusinessPartner
 
-POST        /capital-gains-tax/create/:sap/subscribe                        @controllers.stubs.CompanyIndividualSubscriptionController.subscribe(sap: String)
+POST        /capital-gains-tax/create/:sap/subscription                      @controllers.stubs.CompanyIndividualSubscriptionController.subscribe(sap: String)
 
 POST        /agent/:arn/create-relationship                                 @controllers.stubs.AgentRelationshipController.createAgentClientRelationship(arn: String)
 POST        /capital-gains-tax/create-relationship                          @controllers.stubs.AgentRelationshipController.createDesAgentClientRelationship
