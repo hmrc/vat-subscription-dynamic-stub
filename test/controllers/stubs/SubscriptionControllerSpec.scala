@@ -107,9 +107,5 @@ class SubscriptionControllerSpec extends UnitSpec with MockitoSugar with WithFak
         (json \ "subscriptionCGT" \ "referenceNumber").as[String] shouldBe "CGT654321"
       }
     }
-
-    "an invalid json payload is sent in the request body" should {
-
-    }
   }
 }
