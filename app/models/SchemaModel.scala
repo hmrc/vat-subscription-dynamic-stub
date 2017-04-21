@@ -18,21 +18,8 @@ package models
 
 import play.api.libs.json.{JsValue, Json, OFormat}
 
-case class RelationshipModel(agentReferenceNumber: String, refNumber: String)
+case class SchemaModel(routeId: String, schema: JsValue)
 
-object RelationshipModel {
-  implicit val formats: OFormat[RelationshipModel] = Json.format[RelationshipModel]
-
-  val asJson: RelationshipModel => JsValue = model => {
-    Json.obj(
-      "acknowledgementReference" -> "dummy",
-      "refNumber" -> model.refNumber,
-      "agentReferenceNumber" -> model.agentReferenceNumber,
-      "regime" -> "CGT",
-      "authorisation" -> Json.obj(
-        "action" -> "Authorise",
-      "isExclusiveAgent" -> true
-      )
-    )
-  }
+object SchemaModel {
+  implicit val formats: OFormat[SchemaModel] = Json.format[SchemaModel]
 }

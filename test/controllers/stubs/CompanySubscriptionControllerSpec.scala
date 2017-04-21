@@ -16,23 +16,22 @@
 
 package controllers.stubs
 
-import javax.inject.Inject
-
 import actions.ExceptionTriggersActions
 import helpers.CgtRefHelper
 import models._
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito.when
 import org.scalatest.mock.MockitoSugar
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
+import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.{CgtRepository, RouteExceptionRepository, SubscriptionRepository}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import utils.SchemaValidation
 
 import scala.concurrent.Future
 
-class CompanySubscriptionControllerSpec @Inject()(companySubscriptionController: CompanySubscriptionController)
-  extends UnitSpec with MockitoSugar with WithFakeApplication {
+class CompanySubscriptionControllerSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
 
   val companyAddressModel = CompanyAddressModel(
     Some("Line one"),
@@ -46,13 +45,16 @@ class CompanySubscriptionControllerSpec @Inject()(companySubscriptionController:
 
   def setupController(findLatestVersionResult: List[SubscriberModel],
                       ref: String,
-                      expectedExceptionCode: Option[Int] = None): CompanySubscriptionController = {
+                      expectedExceptionCode: Option[Int] = None,
+                      isValidJson: Boolean = true): CompanySubscriptionController = {
 
     val mockCollection = mock[CgtRepository[SubscriberModel, String]]
     val mockRepository = mock[SubscriptionRepository]
     val mockCgtRefHelper = mock[CgtRefHelper]
     val mockExceptionsCollection = mock[CgtRepository[RouteExceptionModel, RouteExceptionKeyModel]]
+
     val mockExceptionsRepository = mock[RouteExceptionRepository]
+    val mockSchemaValidation = mock[SchemaValidation]
     val exceptionTriggersActions = new ExceptionTriggersActions(mockExceptionsRepository)
     val expectedException = expectedExceptionCode.fold(List[RouteExceptionModel]()) {
       code => List(RouteExceptionModel("", "", code))
@@ -76,15 +78,18 @@ class CompanySubscriptionControllerSpec @Inject()(companySubscriptionController:
     when(mockCgtRefHelper.generateCGTReference())
       .thenReturn(ref)
 
-    new CompanySubscriptionController(mockRepository, mockCgtRefHelper, exceptionTriggersActions)
+    when(mockSchemaValidation.validateJson(anyString(), any[JsValue]())).thenReturn(Future.successful(isValidJson))
+
+
+    new CompanySubscriptionController(mockRepository, mockCgtRefHelper, exceptionTriggersActions, mockSchemaValidation)
   }
 
   "Calling .returnSubscriptionReference" when {
 
     "there is an entry in the database for the supplied sap already" should {
 
-      val controller = setupController(List(SubscriberModel("123456789", "CGT123456")), "CGT123456")
-      lazy val result = controller.returnSubscriptionReference("123456789")
+      lazy val controller = setupController(List(SubscriberModel("123456789ABCDEF", "CGT123456")), "CGT123456")
+      lazy val result = controller.returnSubscriptionReference("123456789ABCDEF")
 
       "return a status of 200" in {
         status(result) shouldBe 200
@@ -97,14 +102,14 @@ class CompanySubscriptionControllerSpec @Inject()(companySubscriptionController:
       "return a valid CGT Reference" in {
         val data = contentAsString(result)
         val json = Json.parse(data)
-        json.as[String] shouldBe "CGT123456"
+        (json \ "subscriptionCGT" \ "referenceNumber").as[String] shouldBe "CGT123456"
       }
     }
 
     "there is no entry in the database for the supplied sap already" should {
 
       val controller = setupController(Nil, "CGT654321")
-      lazy val result = controller.returnSubscriptionReference("123456789")
+      lazy val result = controller.returnSubscriptionReference("123456789ABCDEF")
 
       "return a status of 200" in {
         status(result) shouldBe 200
@@ -117,7 +122,16 @@ class CompanySubscriptionControllerSpec @Inject()(companySubscriptionController:
       "return a valid CGT Reference" in {
         val data = contentAsString(result)
         val json = Json.parse(data)
-        json.as[String] shouldBe "CGT654321"
+        (json \ "subscriptionCGT" \ "referenceNumber").as[String] shouldBe "CGT654321"
+      }
+    }
+
+    "an invalid payload is sent due to insufficient length of SAP" should {
+      lazy val controller = setupController(List(SubscriberModel("123456789ABCDEF", "CGT123456")), "CGT123456", isValidJson = false)
+      lazy val result = await(controller.subscribe("123456789ABC")(FakeRequest("POST", "").withJsonBody(Json.toJson(companySubmissionModel))))
+
+      "return a status of 400" in {
+        status(result) shouldBe 400
       }
     }
   }

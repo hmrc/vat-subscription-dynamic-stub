@@ -31,7 +31,7 @@ class DesAgentClientRelationshipRepository @Inject()() extends MongoDbConnection
     override def findAllVersionsBy(o: String)(implicit ec: ExecutionContext): Future[Map[String, List[RelationshipModel]]] = {
       find("arn" -> o).map {
         allSubscriptions =>
-          allSubscriptions.groupBy(_.arn)
+          allSubscriptions.groupBy(_.agentReferenceNumber)
       }
     }
 

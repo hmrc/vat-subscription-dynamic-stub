@@ -34,8 +34,7 @@ import scala.concurrent.Future
 @Singleton
 class SubscriptionController @Inject()(repository: SubscriptionRepository,
                                        cgtRefHelper: CgtRefHelper,
-                                       guardedActions: ExceptionTriggersActions
-                                      ) extends BaseController {
+                                       guardedActions: ExceptionTriggersActions) extends BaseController {
 
   val subscribe: String => Action[AnyContent] = safeId => {
     guardedActions.ExceptionTriggers(safeId, RouteIds.subscribe).async {
@@ -43,27 +42,27 @@ class SubscriptionController @Inject()(repository: SubscriptionRepository,
 
         Logger.info("Received a call from the back end to subscribe an Individual")
 
-        val subscriber = repository().findLatestVersionBy(safeId)
+            val subscriber = repository().findLatestVersionBy(safeId)
 
-        def getReference(subscriber: List[SubscriberModel]): Future[String] = {
-          if (subscriber.isEmpty) {
-            val reference = cgtRefHelper.generateCGTReference()
-            repository().addEntry(SubscriberModel(safeId, reference))
-            Future.successful(cgtRefHelper.generateCGTReference())
-          } else {
-            Future.successful(subscriber.head.reference)
-          }
+            def getReference(subscriber: List[SubscriberModel]): Future[String] = {
+              if (subscriber.isEmpty) {
+                val reference = cgtRefHelper.generateCGTReference()
+                repository().addEntry(SubscriberModel(safeId, reference))
+                Future.successful(cgtRefHelper.generateCGTReference())
+              } else {
+                Future.successful(subscriber.head.reference)
+              }
+            }
+
+            for {
+              checkSubscribers <- subscriber
+              reference <- getReference(checkSubscribers)
+            } yield Ok(Json.obj(
+              "subscriptionCGT" -> Json.obj(
+                "referenceNumber" -> reference
+              )
+            ))
         }
-
-        for {
-          checkSubscribers <- subscriber
-          reference <- getReference(checkSubscribers)
-        } yield Ok(Json.obj(
-          "subscriptionCGT" -> Json.obj(
-            "referenceNumber" -> reference
-          )
-        ))
-      }
     }
   }
 }

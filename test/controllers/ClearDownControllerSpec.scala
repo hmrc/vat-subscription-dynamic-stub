@@ -33,9 +33,10 @@ class ClearDownControllerSpec extends UnitSpec with BaseController with WithFake
     val mockEnrolmentConnector = mock[TaxEnrolmentSubscriberRepository]
     val mockAgentRelationshipConnector = mock[AgentClientRelationshipRepository]
     val mockExceptionsRepository = mock[RouteExceptionRepository]
+    val mockSchemaRepository = mock[SchemaRepository]
 
     new ClearDownController(mockRegistrationConnector, mockSubscriptionConnector,
-      mockEnrolmentConnector, mockAgentRelationshipConnector, mockExceptionsRepository)
+      mockEnrolmentConnector, mockAgentRelationshipConnector, mockExceptionsRepository, mockSchemaRepository)
   }
 
   "Calling .checkForFailed" should {

@@ -27,14 +27,16 @@ import play.api.libs.json.Json
 import play.api.mvc._
 import repositories.SubscriptionRepository
 import uk.gov.hmrc.play.microservice.controller.BaseController
+import utils.SchemaValidation
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class CompanySubscriptionController @Inject()(subscriptionMongoConnector: SubscriptionRepository,
-                                              cgtRefHelper: CgtRefHelper,
-                                              guardedActions: ExceptionTriggersActions)
+class CompanySubscriptionController @Inject()(subscriptionRepository: SubscriptionRepository,
+                                              cgtRefHelper:  CgtRefHelper,
+                                              guardedActions: ExceptionTriggersActions,
+                                              schemaValidation: SchemaValidation)
   extends BaseController {
 
   def subscribe(sap: String): Action[AnyContent] = {
@@ -42,21 +44,34 @@ class CompanySubscriptionController @Inject()(subscriptionMongoConnector: Subscr
       implicit request => {
 
         Logger.info("Received a call from the back end to subscribe a Company")
-        val model = request.body.asJson.get.as[CompanySubmissionModel]
+        val body = request.body.asJson
+        val validJsonFlag = schemaValidation.validateJson(RouteIds.companySubscribe, body.getOrElse(Json.toJson("invalid json")))
 
-        returnSubscriptionReference(sap)
+        def handleJsonValidity(flag: Boolean): Future[Result] = {
+          if(flag) {
+            returnSubscriptionReference(sap)
+          }
+          else {
+            Future.successful(BadRequest("Invalid JSON body for the organisation subscription schema"))
+          }
+        }
+
+        for {
+          flag <- validJsonFlag
+          result <- handleJsonValidity(flag)
+        } yield result
       }
     }
   }
 
   def returnSubscriptionReference(sap: String): Future[Result] = {
-    val subscriber = subscriptionMongoConnector.repository.findLatestVersionBy(sap)
+    val subscriber = subscriptionRepository.apply().findLatestVersionBy(sap)
 
     def getReference(subscriber: List[SubscriberModel]): Future[String] = {
       if (subscriber.isEmpty) {
         val reference = cgtRefHelper.generateCGTReference()
         Logger.info("Generating a new entry ")
-        subscriptionMongoConnector.repository.addEntry(SubscriberModel(sap, reference))
+        subscriptionRepository.apply().addEntry(SubscriberModel(sap, reference))
         Future.successful(reference)
       } else {
         Future.successful(subscriber.head.reference)

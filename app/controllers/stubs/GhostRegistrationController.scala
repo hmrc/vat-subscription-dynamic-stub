@@ -22,10 +22,12 @@ import actions.ExceptionTriggersActions
 import common.RouteIds
 import helpers.SapHelper
 import models.{FullDetailsModel, NonResidentBusinessPartnerModel}
+import play.api.Logger
 import play.api.libs.json.Json
-import play.api.mvc.{Action, AnyContent}
+import play.api.mvc.{Action, AnyContent, Result}
 import repositories.NonResidentBusinessPartnerRepository
 import uk.gov.hmrc.play.microservice.controller.BaseController
+import utils.SchemaValidation
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -33,35 +35,52 @@ import scala.concurrent.Future
 @Singleton
 class GhostRegistrationController @Inject()(repository: NonResidentBusinessPartnerRepository,
                                             sapHelper: SapHelper,
-                                            guardedActions: ExceptionTriggersActions)
-  extends BaseController {
+                                            guardedActions: ExceptionTriggersActions,
+                                            schemaValidation: SchemaValidation) extends BaseController {
+
+  val invalidJsonBodySub = Json.toJson("not valid json")
 
   val registerBusinessPartner: Action[AnyContent] = {
     guardedActions.WithFullDetailsExceptionTriggers(RouteIds.registerIndividualWithoutNino).async {
       implicit request => {
 
         val body = request.body.asJson
-        val registrationDetails = body.get.as[FullDetailsModel]
-        val businessPartner = repository().findLatestVersionBy(registrationDetails)
+        val validJsonFlag = schemaValidation.validateJson(RouteIds.registerIndividualWithoutNino, body.getOrElse(invalidJsonBodySub))
 
-        def getReference(bp: List[NonResidentBusinessPartnerModel]): Future[String] = {
-          if (bp.isEmpty) {
-            val sap = sapHelper.generateSap()
+        def handleJsonValidity(flag: Boolean): Future[Result] = {
+          if (flag) {
+            val registrationDetails = FullDetailsModel.asModel(body.get)
+
+            Logger.info(s"Successfully read request body as $registrationDetails")
+
+            val businessPartner = repository().findLatestVersionBy(registrationDetails)
+
+            def getReference(bp: List[NonResidentBusinessPartnerModel]): Future[String] = {
+              if (bp.isEmpty) {
+                val sap = sapHelper.generateSap()
+                for {
+                  _ <- repository().addEntry(NonResidentBusinessPartnerModel(registrationDetails, sap))
+                } yield sap
+              } else {
+                Future.successful(bp.head.sap)
+              }
+            }
             for {
-              _ <- repository().addEntry(NonResidentBusinessPartnerModel(registrationDetails, sap))
-            } yield sap
-          } else {
-            Future.successful(bp.head.sap)
+              bp <- businessPartner
+              sap <- getReference(bp)
+            } yield Ok(Json.obj(
+              "sapNumber" -> sap,
+              "safeId" -> sap
+            ))
+          }
+          else {
+            Future.successful(BadRequest("Request body's JSON failed to validate against the non-UTR individual registration schema"))
           }
         }
-
         for {
-          bp <- businessPartner
-          sap <- getReference(bp)
-        } yield Ok(Json.obj(
-          "sapNumber" -> sap,
-          "safeId" -> sap
-        ))
+          flag <- validJsonFlag
+          result <- handleJsonValidity(flag)
+        } yield result
       }
     }
   }

@@ -22,11 +22,14 @@ import actions.ExceptionTriggersActions
 import common.RouteIds
 import models.{EnrolmentIssuerRequestModel, EnrolmentSubscriberRequestModel}
 import play.api.Logger
-import play.api.mvc.{Action, AnyContent}
+import play.api.libs.json.Json
+import play.api.mvc.{Action, AnyContent, Result}
 import repositories.{TaxEnrolmentIssuerRepository, TaxEnrolmentSubscriberRepository}
 import uk.gov.hmrc.play.microservice.controller.BaseController
+import utils.SchemaValidation
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
 @Singleton
@@ -35,8 +38,10 @@ class TaxEnrolmentsController @Inject()(subscriberRepository: TaxEnrolmentSubscr
                                         guardedActions: ExceptionTriggersActions)
   extends BaseController {
 
+  val invalidJsonBodySub = Json.toJson("")
+
   def subscribeIssuer(subscriptionId: String): Action[AnyContent] = guardedActions.ExceptionTriggers(subscriptionId, RouteIds.taxEnrolmentIssuer) {
-    implicit request =>
+    implicit request => {
 
       Logger.warn("Received a call from the back end to make an enrolment issuer request")
 
@@ -50,6 +55,7 @@ class TaxEnrolmentsController @Inject()(subscriberRepository: TaxEnrolmentSubscr
         case Success(_) => NoContent
         case Failure(exception) => BadRequest(exception.getMessage)
       }
+    }
   }
 
   def subscribeSubscriber(subscriptionId: String): Action[AnyContent] = guardedActions.ExceptionTriggers(subscriptionId, RouteIds.taxEnrolmentSubscribe) {

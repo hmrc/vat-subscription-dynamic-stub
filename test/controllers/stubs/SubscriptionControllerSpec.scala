@@ -34,7 +34,8 @@ class SubscriptionControllerSpec extends UnitSpec with MockitoSugar with WithFak
 
   def setupController(findLatestVersionResult: List[SubscriberModel],
                       ref: String,
-                      expectedExceptionCode: Option[Int] = None): SubscriptionController = {
+                      expectedExceptionCode: Option[Int] = None,
+                      isValidJson: Boolean = true): SubscriptionController = {
 
     val mockCollection = mock[CgtRepository[SubscriberModel, String]]
     val mockRepository = mock[SubscriptionRepository]
