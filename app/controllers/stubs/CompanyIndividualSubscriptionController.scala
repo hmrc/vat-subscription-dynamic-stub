@@ -43,7 +43,7 @@ class CompanyIndividualSubscriptionController @Inject()(subscriptionRepository: 
     guardedActions.CompanySubscriptionExceptionTriggers(RouteIds.companySubscribe, sap).async {
       implicit request => {
 
-        Logger.info("Received a call from the back end to subscribe a Company")
+        Logger.info("Received a call from the back end to subscribe a Company/Individual")
         val body = request.body.asJson
         val validJsonFlag = schemaValidation.validateJson(RouteIds.companySubscribe, body.getOrElse(Json.obj()))
 

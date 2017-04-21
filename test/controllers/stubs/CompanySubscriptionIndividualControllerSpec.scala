@@ -125,13 +125,24 @@ class CompanySubscriptionIndividualControllerSpec extends UnitSpec with MockitoS
         (json \ "subscriptionCGT" \ "referenceNumber").as[String] shouldBe "CGT654321"
       }
     }
+    "Calling .subscribe" when {
 
-    "an invalid payload is sent due to insufficient length of SAP" should {
-      lazy val controller = setupController(List(SubscriberModel("123456789ABCDEF", "CGT123456")), "CGT123456", isValidJson = false)
-      lazy val result = await(controller.subscribe("123456789ABC")(FakeRequest("POST", "").withJsonBody(Json.toJson(companySubmissionModel))))
+      "an invalid payload is sent due to insufficient length of SAP" should {
+        lazy val controller = setupController(List(SubscriberModel("123456789ABCDEF", "CGT123456")), "CGT123456", isValidJson = false)
+        lazy val result = await(controller.subscribe("123456789ABC")(FakeRequest("POST", "").withJsonBody(Json.toJson(companySubmissionModel))))
 
-      "return a status of 400" in {
-        status(result) shouldBe 400
+        "return a status of 400" in {
+          status(result) shouldBe 400
+        }
+      }
+
+      "a valid payload is sent" should {
+        lazy val controller = setupController(List(SubscriberModel("123456789ABCDEF", "CGT123456")), "CGT123456")
+        lazy val result = await(controller.subscribe("123456789ABC")(FakeRequest("POST", "").withJsonBody(Json.toJson(companySubmissionModel))))
+
+        "return a status of 200" in {
+          status(result) shouldBe 200
+        }
       }
     }
   }
