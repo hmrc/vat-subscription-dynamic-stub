@@ -29,4 +29,5 @@ case class CompanyAddressModel(
 
 object CompanyAddressModel {
   implicit val formats = Json.format[CompanyAddressModel]
+
 }

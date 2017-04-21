@@ -31,7 +31,7 @@ import utils.SchemaValidation
 
 import scala.concurrent.Future
 
-class CompanySubscriptionControllerSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
+class CompanySubscriptionIndividualControllerSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
 
   val companyAddressModel = CompanyAddressModel(
     Some("Line one"),
@@ -46,7 +46,7 @@ class CompanySubscriptionControllerSpec extends UnitSpec with MockitoSugar with 
   def setupController(findLatestVersionResult: List[SubscriberModel],
                       ref: String,
                       expectedExceptionCode: Option[Int] = None,
-                      isValidJson: Boolean = true): CompanySubscriptionController = {
+                      isValidJson: Boolean = true): CompanyIndividualSubscriptionController = {
 
     val mockCollection = mock[CgtRepository[SubscriberModel, String]]
     val mockRepository = mock[SubscriptionRepository]
@@ -81,7 +81,7 @@ class CompanySubscriptionControllerSpec extends UnitSpec with MockitoSugar with 
     when(mockSchemaValidation.validateJson(anyString(), any[JsValue]())).thenReturn(Future.successful(isValidJson))
 
 
-    new CompanySubscriptionController(mockRepository, mockCgtRefHelper, exceptionTriggersActions, mockSchemaValidation)
+    new CompanyIndividualSubscriptionController(mockRepository, mockCgtRefHelper, exceptionTriggersActions, mockSchemaValidation)
   }
 
   "Calling .returnSubscriptionReference" when {

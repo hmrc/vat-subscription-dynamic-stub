@@ -17,7 +17,8 @@
 package controllers.tests
 
 import javax.inject.{Inject, Singleton}
-import models.SubscriberModel
+
+import models.{SubscriberModel}
 import play.api.mvc.{Action, AnyContent}
 import repositories.SubscriptionRepository
 import uk.gov.hmrc.play.microservice.controller.BaseController

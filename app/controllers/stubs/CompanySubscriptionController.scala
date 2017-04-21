@@ -33,7 +33,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class CompanySubscriptionController @Inject()(subscriptionRepository: SubscriptionRepository,
+class CompanyIndividualSubscriptionController @Inject()(subscriptionRepository: SubscriptionRepository,
                                               cgtRefHelper:  CgtRefHelper,
                                               guardedActions: ExceptionTriggersActions,
                                               schemaValidation: SchemaValidation)
@@ -45,7 +45,7 @@ class CompanySubscriptionController @Inject()(subscriptionRepository: Subscripti
 
         Logger.info("Received a call from the back end to subscribe a Company")
         val body = request.body.asJson
-        val validJsonFlag = schemaValidation.validateJson(RouteIds.companySubscribe, body.getOrElse(Json.toJson("invalid json")))
+        val validJsonFlag = schemaValidation.validateJson(RouteIds.companySubscribe, body.getOrElse(Json.obj()))
 
         def handleJsonValidity(flag: Boolean): Future[Result] = {
           if(flag) {
