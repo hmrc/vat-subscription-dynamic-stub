@@ -31,7 +31,7 @@ import utils.SchemaValidation
 
 import scala.concurrent.Future
 
-class CompanySubscriptionControllerSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
+class CompanySubscriptionIndividualControllerSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
 
   val companyAddressModel = CompanyAddressModel(
     Some("Line one"),
@@ -46,7 +46,7 @@ class CompanySubscriptionControllerSpec extends UnitSpec with MockitoSugar with 
   def setupController(findLatestVersionResult: List[SubscriberModel],
                       ref: String,
                       expectedExceptionCode: Option[Int] = None,
-                      isValidJson: Boolean = true): CompanySubscriptionController = {
+                      isValidJson: Boolean = true): CompanyIndividualSubscriptionController = {
 
     val mockCollection = mock[CgtRepository[SubscriberModel, String]]
     val mockRepository = mock[SubscriptionRepository]
@@ -81,7 +81,7 @@ class CompanySubscriptionControllerSpec extends UnitSpec with MockitoSugar with 
     when(mockSchemaValidation.validateJson(anyString(), any[JsValue]())).thenReturn(Future.successful(isValidJson))
 
 
-    new CompanySubscriptionController(mockRepository, mockCgtRefHelper, exceptionTriggersActions, mockSchemaValidation)
+    new CompanyIndividualSubscriptionController(mockRepository, mockCgtRefHelper, exceptionTriggersActions, mockSchemaValidation)
   }
 
   "Calling .returnSubscriptionReference" when {
@@ -125,13 +125,24 @@ class CompanySubscriptionControllerSpec extends UnitSpec with MockitoSugar with 
         (json \ "subscriptionCGT" \ "referenceNumber").as[String] shouldBe "CGT654321"
       }
     }
+    "Calling .subscribe" when {
 
-    "an invalid payload is sent due to insufficient length of SAP" should {
-      lazy val controller = setupController(List(SubscriberModel("123456789ABCDEF", "CGT123456")), "CGT123456", isValidJson = false)
-      lazy val result = await(controller.subscribe("123456789ABC")(FakeRequest("POST", "").withJsonBody(Json.toJson(companySubmissionModel))))
+      "an invalid payload is sent due to insufficient length of SAP" should {
+        lazy val controller = setupController(List(SubscriberModel("123456789ABCDEF", "CGT123456")), "CGT123456", isValidJson = false)
+        lazy val result = await(controller.subscribe("123456789ABC")(FakeRequest("POST", "").withJsonBody(Json.toJson(companySubmissionModel))))
 
-      "return a status of 400" in {
-        status(result) shouldBe 400
+        "return a status of 400" in {
+          status(result) shouldBe 400
+        }
+      }
+
+      "a valid payload is sent" should {
+        lazy val controller = setupController(List(SubscriberModel("123456789ABCDEF", "CGT123456")), "CGT123456")
+        lazy val result = await(controller.subscribe("123456789ABC")(FakeRequest("POST", "").withJsonBody(Json.toJson(companySubmissionModel))))
+
+        "return a status of 200" in {
+          status(result) shouldBe 200
+        }
       }
     }
   }
