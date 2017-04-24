@@ -19,8 +19,8 @@ package models
 import play.api.libs.json._
 
 case class EnrolmentIssuerRequestModel(
-                                    serviceName: String,
-                                    identifier: Identifier)
+                                        serviceName: String,
+                                        identifiers: Identifier)
 //See tax enrolments readme for request body JSON
 
 case object EnrolmentIssuerRequestModel {
@@ -28,7 +28,7 @@ case object EnrolmentIssuerRequestModel {
 }
 
 case class Identifier(name: String,
-                      identifier: String)
+                      value: String)
 
 case object Identifier {
   implicit val formats: OFormat[Identifier] = Json.format[Identifier]
