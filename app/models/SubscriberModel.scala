@@ -26,6 +26,6 @@ object SubscriberModel {
   implicit val formats: OFormat[SubscriberModel] = Json.format[SubscriberModel]
 
   def validateSAP(sap: String): Boolean = {
-    sap.length.equals(15)
+    sap.length == 15
   }
 }

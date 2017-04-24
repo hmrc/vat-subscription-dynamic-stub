@@ -29,10 +29,10 @@ class TaxEnrolmentIssuerRepository @Inject()() extends MongoDbConnection {
   lazy val repository = new TaxEnrolmentIssuerRepositoryBase {
 
     override def findAllVersionsBy(o: Identifier)(implicit ec: ExecutionContext): Future[Map[Identifier, List[EnrolmentIssuerRequestModel]]] = {
-      val allEntries = find("identifier.nino" -> o.identifier)
+      val allEntries = find("identifier.nino" -> o.value)
       allEntries.map {
         allSubscriptionIssuerRequests =>
-          allSubscriptionIssuerRequests.groupBy(_.identifier)
+          allSubscriptionIssuerRequests.groupBy(_.identifiers)
       }
     }
 
@@ -47,7 +47,7 @@ class TaxEnrolmentIssuerRepository @Inject()() extends MongoDbConnection {
 
     override def removeBy(o: Identifier)(implicit ec: ExecutionContext): Future[Unit] = {
       //same as above...
-      remove("identifier.nino" -> o.identifier).map { _ => }
+      remove("identifier.nino" -> o.value).map { _ => }
     }
 
     override def removeAll()(implicit ec: ExecutionContext): Future[Unit] = {

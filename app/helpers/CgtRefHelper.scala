@@ -23,10 +23,11 @@ import scala.concurrent.forkjoin.ThreadLocalRandom
 @Singleton
 class CgtRefHelper @Inject()() {
 
-  def generateCGTReference() = {
+  def generateCGTReference(): String = {
     val prefix = "CGT"
 
-    def randomID() = ThreadLocalRandom.current().nextInt(100000, 999999)
+    def randomID(): String = ThreadLocalRandom.current().nextInt(100000, 999999).toString +
+      ThreadLocalRandom.current().nextInt(100000, 999999).toString
 
     prefix + randomID()
   }
