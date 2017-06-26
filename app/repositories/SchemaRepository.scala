@@ -51,7 +51,7 @@ class SchemaRepository @Inject()() extends MongoDbConnection {
     override def findLatestVersionBy(url: String)(implicit ec: ExecutionContext): Future[List[SchemaModel]] = {
       findAllVersionsBy(url).map {
         _.values.toList.map {
-          _.head
+          _.last
         }
       }
     }

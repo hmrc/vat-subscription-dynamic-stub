@@ -51,7 +51,7 @@ class DataRepository @Inject()() extends MongoDbConnection {
     override def findLatestVersionBy(url: String)(implicit ec: ExecutionContext): Future[List[DataModel]] = {
       findAllVersionsBy(url).map {
         _.values.toList.map {
-          _.head
+          _.last
         }
       }
     }

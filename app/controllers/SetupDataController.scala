@@ -37,7 +37,7 @@ class SetupDataController @Inject()(schemaValidation: SchemaValidation,
   val addData: Action[JsValue] = Action.async(parse.json) {
     implicit request => withJsonBody[DataModel](
       json => json.method.toUpperCase match {
-        case "GET" => schemaValidation.validateResponseJson(json._id, json.response.get) map {
+        case "GET" => schemaValidation.validateResponseJson(json.url, json.response.get) map {
           case true => addStubDataToDB(json)
           case false => BadRequest("Failed to Validate Schema")
         }

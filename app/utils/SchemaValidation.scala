@@ -34,13 +34,13 @@ class SchemaValidation @Inject()(repository: SchemaRepository) {
   private final lazy val jsonMapper = new ObjectMapper()
   private final lazy val jsonFactory = jsonMapper.getFactory
 
-  def loadResponseSchema(id: String): Future[JsonSchema] = {
+  def loadResponseSchema(url: String): Future[JsonSchema] = {
     val schemaMapper = new ObjectMapper()
     val factory = schemaMapper.getFactory
 
-    repository().findLatestVersionBy(id).map { models =>
+    repository().findLatestVersionBy(url).map { models =>
       if (models.isEmpty) {
-        throw new Exception("No schema for id in mongo")
+        throw new Exception("No schema for url in mongo")
       } else {
         val schemaParser: JsonParser = factory.createParser(models.head.responseSchema.get.toString())
         val schemaJson: JsonNode = schemaMapper.readTree(schemaParser)
@@ -50,8 +50,8 @@ class SchemaValidation @Inject()(repository: SchemaRepository) {
     }
   }
 
-  def validateResponseJson(id: String, json: JsValue): Future[Boolean] = {
-    loadResponseSchema(id).map { schema =>
+  def validateResponseJson(url: String, json: JsValue): Future[Boolean] = {
+    loadResponseSchema(url).map { schema =>
       val jsonParser = jsonFactory.createParser(json.toString())
       val jsonNode: JsonNode = jsonMapper.readTree(jsonParser)
       val report = schema.validate(jsonNode)
