@@ -33,8 +33,8 @@ class SchemaRepository @Inject()() extends MongoDbConnection {
       removeAll(WriteConcern.Acknowledged).map { _ => }
     }
 
-    override def removeBy(id: String)(implicit ec: ExecutionContext): Future[Unit] = {
-      remove("_id" -> id).map { _ => }
+    override def removeBy(url: String)(implicit ec: ExecutionContext): Future[Unit] = {
+      remove("url" -> url).map { _ => }
     }
 
     override def addEntry(document: SchemaModel)(implicit ec: ExecutionContext): Future[Unit] = {
@@ -48,19 +48,19 @@ class SchemaRepository @Inject()() extends MongoDbConnection {
       Future.successful({})
     }
 
-    override def findLatestVersionBy(id: String)(implicit ec: ExecutionContext): Future[List[SchemaModel]] = {
-      findAllVersionsBy(id).map {
+    override def findLatestVersionBy(url: String)(implicit ec: ExecutionContext): Future[List[SchemaModel]] = {
+      findAllVersionsBy(url).map {
         _.values.toList.map {
           _.head
         }
       }
     }
 
-    override def findAllVersionsBy(id: String)
+    override def findAllVersionsBy(url: String)
                                   (implicit ec: ExecutionContext): Future[Map[String, List[SchemaModel]]] = {
-      find("_id" -> id).map {
+      find("url" -> url).map {
         schemas =>
-          schemas.groupBy(_._id)
+          schemas.groupBy(_.url)
       }
     }
   }

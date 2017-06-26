@@ -19,7 +19,6 @@ package models
 import play.api.libs.json.{JsValue, Json, OFormat}
 
 case class DataModel(
-                        _id: String,
                         url: String,
                         method: String,
                         status: Int,

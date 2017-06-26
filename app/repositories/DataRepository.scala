@@ -60,7 +60,7 @@ class DataRepository @Inject()() extends MongoDbConnection {
                                   (implicit ec: ExecutionContext): Future[Map[String, List[DataModel]]] = {
       find("url" -> url).map {
         schemas =>
-          schemas.groupBy(_._id)
+          schemas.groupBy(_.url)
       }
     }
   }
