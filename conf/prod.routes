@@ -1,5 +1,7 @@
-# Add all the application routes to the app.routes file
-->         /capital-gains-subscription-dynamic-stub        app.Routes
+# Prod Routes
+
+->         /setup                                          setup.Routes
 ->         /                                               health.Routes
+->         /                                               stub.Routes
 
 GET        /admin/metrics                                  @com.kenshoo.play.metrics.MetricsController.metrics

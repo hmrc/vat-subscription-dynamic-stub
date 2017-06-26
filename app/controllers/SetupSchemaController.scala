@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-package controllers.tests
+package controllers
 
 import javax.inject.{Inject, Singleton}
 
 import models.SchemaModel
-import play.api.Logger
-import play.api.libs.json.JsValue
 import play.api.mvc.{Action, AnyContent}
 import repositories.SchemaRepository
 import uk.gov.hmrc.play.microservice.controller.BaseController
@@ -30,7 +28,7 @@ import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
 @Singleton
-class SchemaTestController @Inject()(repository: SchemaRepository) extends BaseController {
+class SetupSchemaController @Inject()(repository: SchemaRepository) extends BaseController {
 
   val addSchema: Action[AnyContent] = Action.async { implicit request =>
     Future.successful(request.body.asJson.fold(BadRequest("Empty Json Body")) {
@@ -49,10 +47,10 @@ class SchemaTestController @Inject()(repository: SchemaRepository) extends BaseC
     })
   }
 
-  val removeSchema: String => Action[AnyContent] = { url =>
+  val removeSchema: String => Action[AnyContent] = { id =>
     Action.async { implicit request =>
       Try {
-        repository().removeBy(url)
+        repository().removeBy(id)
       } match {
         case Success(_) => Future.successful(Ok("Success"))
         case Failure(ex) => ex.printStackTrace()

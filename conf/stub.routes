@@ -1,0 +1,3 @@
+# Stub Response Routes
+
+GET        /*url                                                 @controllers.RequestHandlerController.getRequestHandler(url)

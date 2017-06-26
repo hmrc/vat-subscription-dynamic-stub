@@ -19,6 +19,7 @@ package models
 import play.api.libs.json.{JsValue, Json, OFormat}
 
 case class SchemaModel(
+                        _id: String,
                         url: String,
                         method: String,
                         requestSchema: Option[JsValue],
