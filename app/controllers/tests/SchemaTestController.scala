@@ -19,6 +19,7 @@ package controllers.tests
 import javax.inject.{Inject, Singleton}
 
 import models.SchemaModel
+import play.api.Logger
 import play.api.libs.json.JsValue
 import play.api.mvc.{Action, AnyContent}
 import repositories.SchemaRepository
@@ -31,25 +32,27 @@ import scala.util.{Failure, Success, Try}
 @Singleton
 class SchemaTestController @Inject()(repository: SchemaRepository) extends BaseController {
 
-  val addSchema: String => Action[AnyContent] = { routeId =>
-    Action.async { implicit request =>
-        Try {
-          val body = request.body.asJson
-          val document = body.get.as[JsValue]
-          val model = SchemaModel(routeId, document)
-
-          repository().addEntry(model)
-        } match {
-          case Success(_) => Future.successful(Ok("Success"))
-          case Failure(_) => Future.successful(BadRequest("Could not store data"))
-        }
-    }
+  val addSchema: Action[AnyContent] = Action.async { implicit request =>
+    Future.successful(request.body.asJson.fold(BadRequest("Empty Json Body")) {
+      json =>
+        json.validate[SchemaModel].fold(
+          invalid =>
+            BadRequest("Json Parse Error, Invalid Schema Request."),
+          valid =>
+            Try {
+              repository().addEntry(valid)
+            } match {
+              case Success(_) => Ok("Success")
+              case Failure(_) => BadRequest("Could not store data")
+            }
+        )
+    })
   }
 
-  val removeSchema: String => Action[AnyContent] = { routeId =>
+  val removeSchema: String => Action[AnyContent] = { url =>
     Action.async { implicit request =>
       Try {
-        repository().removeBy(routeId)
+        repository().removeBy(url)
       } match {
         case Success(_) => Future.successful(Ok("Success"))
         case Failure(ex) => ex.printStackTrace()

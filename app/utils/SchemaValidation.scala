@@ -34,15 +34,15 @@ class SchemaValidation @Inject()(repository: SchemaRepository) {
   private final lazy val jsonMapper = new ObjectMapper()
   private final lazy val jsonFactory = jsonMapper.getFactory
 
-  def loadSchema(routeId: String): Future[JsonSchema] = {
+  def loadSchema(url: String): Future[JsonSchema] = {
     val schemaMapper = new ObjectMapper()
     val factory = schemaMapper.getFactory
 
-    repository().findLatestVersionBy(routeId).map { models =>
+    repository().findLatestVersionBy(url).map { models =>
       if (models.isEmpty) {
         throw new Exception("No schema for route in mongo")
       } else {
-        val schemaParser: JsonParser = factory.createParser(models.head.schema.toString())
+        val schemaParser: JsonParser = factory.createParser(models.head.responseSchema.toString)
         val schemaJson: JsonNode = schemaMapper.readTree(schemaParser)
         val schemaFactory = JsonSchemaFactory.byDefault()
         schemaFactory.getJsonSchema(schemaJson)
