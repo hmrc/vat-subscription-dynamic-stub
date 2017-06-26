@@ -35,7 +35,7 @@ class RequestHandlerController @Inject()(dataRepository: DataRepository) extends
 
   val getRequestHandler: String => Action[AnyContent] = url => Action.async {
     implicit request => {
-      dataRepository().find("url" -> s"/$url").flatMap {
+      dataRepository().findLatestVersionBy(s"/$url").flatMap {
         response => Future.successful(Status(response.head.status)(response.head.response.get))
       }
     }
