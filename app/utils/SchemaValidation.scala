@@ -66,4 +66,20 @@ class SchemaValidation @Inject()(repository: SchemaRepository) {
       Future.successful(true)
     }
   }
+
+  def loadUrlRegex(schemaId: String): Future[String] = {
+    repository().findLatestVersionBy(schemaId).map { models =>
+      if (models.isEmpty) {
+        throw new Exception("No schema for schemaId in mongo")
+      } else {
+        models.head.url
+      }
+    }
+  }
+
+  def validateUrlMatch(schemaId: String, url: String): Future[Boolean] = {
+    loadUrlRegex(schemaId).map { regex =>
+      url.matches(regex)
+    }
+  }
 }

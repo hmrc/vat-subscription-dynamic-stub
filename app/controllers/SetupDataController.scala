@@ -39,10 +39,18 @@ class SetupDataController @Inject()(schemaValidation: SchemaValidation,
   val addData: Action[JsValue] = Action.async(parse.json) {
     implicit request => withJsonBody[DataModel](
       json => json.method.toUpperCase match {
-        case GET => schemaValidation.validateResponseJson(json.schemaId, json.response) map {
-          case true => addStubDataToDB(json)
-          case false => BadRequest("Failed to Validate Schema")
-        }
+        case GET =>
+          schemaValidation.validateUrlMatch(json.schemaId, json._id) flatMap {
+            case true =>
+              schemaValidation.validateResponseJson(json.schemaId, json.response) map {
+                case true => addStubDataToDB(json)
+                case false => BadRequest(s"The Json Body:\n\n${json.response} did not validate against the Schema Definition")
+              }
+            case false =>
+              schemaValidation.loadUrlRegex(json.schemaId) map {
+                regex => BadRequest(s"URL ${json._id} did not match the Schema Definition Regex $regex")
+              }
+          }
         case x => Future.successful(BadRequest(s"The method: $x is currently unsupported"))
       }
     )
