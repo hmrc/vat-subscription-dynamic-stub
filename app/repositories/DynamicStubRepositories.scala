@@ -46,5 +46,5 @@ abstract class SchemaRepositoryBase(implicit mongo: () => DB, formats: Format[Sc
     with DynamicStubRepository[SchemaModel, String]
 
 abstract class StubbedDataRepositoryBase(implicit mongo: () => DB, formats: Format[DataModel], manifest: Manifest[DataModel])
-  extends ReactiveRepository[DataModel, BSONObjectID]("stubData", mongo, formats)
+  extends ReactiveRepository[DataModel, BSONObjectID]("data", mongo, formats)
     with DynamicStubRepository[DataModel, String]

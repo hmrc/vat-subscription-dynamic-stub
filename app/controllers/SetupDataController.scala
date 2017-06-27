@@ -19,13 +19,15 @@ package controllers
 import javax.inject.{Inject, Singleton}
 
 import models.DataModel
-import play.api.libs.json.JsValue
-import play.api.mvc.{Action, AnyContent, Result}
+import play.api.libs.json.{JsValue, Json}
+import play.api.mvc.{Action, Result}
 import repositories.DataRepository
 import uk.gov.hmrc.play.microservice.controller.BaseController
 import utils.SchemaValidation
+import models.HttpMethod._
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
 @Singleton
@@ -37,10 +39,11 @@ class SetupDataController @Inject()(schemaValidation: SchemaValidation,
   val addData: Action[JsValue] = Action.async(parse.json) {
     implicit request => withJsonBody[DataModel](
       json => json.method.toUpperCase match {
-        case "GET" => schemaValidation.validateResponseJson(json.url, json.response.get) map {
+        case GET => schemaValidation.validateResponseJson(json.schemaId, json.response) map {
           case true => addStubDataToDB(json)
           case false => BadRequest("Failed to Validate Schema")
         }
+        case x => Future.successful(BadRequest(s"The method: $x is currently unsupported"))
       }
     )
   }
@@ -49,8 +52,17 @@ class SetupDataController @Inject()(schemaValidation: SchemaValidation,
     Try {
       dataRepository().addEntry(json)
     } match {
-      case Success(_) => NoContent
+      case Success(_) => Ok(s"The following JSON was added to the stub: \n\n${Json.toJson(json)}")
       case Failure(ex) => BadRequest(s"Failed to add data to Stub. Error: ${ex.getMessage}. \n\n Stack Trace: ${ex.getStackTrace}")
+    }
+  }
+
+  val removeAll = Action.async { implicit request =>
+    Try {
+      dataRepository().removeAll()
+    } match {
+      case Success(_) => Future.successful(Ok("Removed All Stubbed Data"))
+      case Failure(_) => Future.successful(InternalServerError("Unexpected Error Clearing MongoDB."))
     }
   }
 }

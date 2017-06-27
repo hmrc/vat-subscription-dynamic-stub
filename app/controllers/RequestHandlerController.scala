@@ -18,16 +18,14 @@ package controllers
 
 import javax.inject.{Inject, Singleton}
 
-import models.DataModel
-import play.api.mvc.{Action, AnyContent, Result}
+import models.HttpMethod._
+import play.api.libs.json.Json
+import play.api.mvc.{Action, AnyContent}
 import repositories.DataRepository
-import uk.gov.hmrc.play.http.HttpResponse
 import uk.gov.hmrc.play.microservice.controller.BaseController
-import utils.SchemaValidation
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.util.{Failure, Success, Try}
 
 @Singleton
 class RequestHandlerController @Inject()(dataRepository: DataRepository) extends BaseController {
@@ -35,8 +33,8 @@ class RequestHandlerController @Inject()(dataRepository: DataRepository) extends
 
   val getRequestHandler: String => Action[AnyContent] = url => Action.async {
     implicit request => {
-      dataRepository().findLatestVersionBy(s"/$url").flatMap {
-        response => Future.successful(Status(response.head.status)(response.head.response.get))
+      dataRepository().find("_id" -> s"/$url", "method" -> GET).flatMap {
+        stubData => Future.successful(Status(stubData.head.status)(stubData.head.response.getOrElse(Json.parse("{}"))))
       }
     }
   }

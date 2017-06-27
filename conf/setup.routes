@@ -2,5 +2,7 @@
 
 POST        /schema                                                 @controllers.SetupSchemaController.addSchema
 DELETE      /schema                                                 @controllers.SetupSchemaController.removeSchema(id: String)
+DELETE      /all-schemas                                            @controllers.SetupSchemaController.removeAll
 
 POST        /data                                                   @controllers.SetupDataController.addData
+DELETE      /all-data                                               @controllers.SetupDataController.removeAll

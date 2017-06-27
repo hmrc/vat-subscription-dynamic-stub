@@ -34,7 +34,7 @@ class DataRepository @Inject()() extends MongoDbConnection {
     }
 
     override def removeBy(url: String)(implicit ec: ExecutionContext): Future[Unit] = {
-      remove("url" -> url).map { _ => }
+      remove("_id" -> url).map { _ => }
     }
 
     override def addEntry(document: DataModel)(implicit ec: ExecutionContext): Future[Unit] = {
@@ -58,9 +58,9 @@ class DataRepository @Inject()() extends MongoDbConnection {
 
     override def findAllVersionsBy(url: String)
                                   (implicit ec: ExecutionContext): Future[Map[String, List[DataModel]]] = {
-      find("url" -> url).map {
-        schemas =>
-          schemas.groupBy(_.url)
+      find("_id" -> url).map {
+        responses =>
+          responses.groupBy(_._id)
       }
     }
   }

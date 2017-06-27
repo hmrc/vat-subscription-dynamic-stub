@@ -28,7 +28,7 @@ import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
 @Singleton
-class SetupSchemaController @Inject()(repository: SchemaRepository) extends BaseController {
+class SetupSchemaController @Inject()(schemaRepository: SchemaRepository) extends BaseController {
 
   val addSchema: Action[AnyContent] = Action.async { implicit request =>
     Future.successful(request.body.asJson.fold(BadRequest("Empty Json Body")) {
@@ -38,7 +38,7 @@ class SetupSchemaController @Inject()(repository: SchemaRepository) extends Base
             BadRequest("Json Parse Error, Invalid Schema Request."),
           valid =>
             Try {
-              repository().addEntry(valid)
+              schemaRepository().addEntry(valid)
             } match {
               case Success(_) => Ok("Success")
               case Failure(_) => BadRequest("Could not store data")
@@ -50,12 +50,21 @@ class SetupSchemaController @Inject()(repository: SchemaRepository) extends Base
   val removeSchema: String => Action[AnyContent] = { id =>
     Action.async { implicit request =>
       Try {
-        repository().removeBy(id)
+        schemaRepository().removeBy(id)
       } match {
         case Success(_) => Future.successful(Ok("Success"))
         case Failure(ex) => ex.printStackTrace()
           Future.successful(BadRequest("Could not delete data"))
       }
+    }
+  }
+
+  val removeAll = Action.async { implicit request =>
+    Try {
+      schemaRepository().removeAll()
+    } match {
+      case Success(_) => Future.successful(Ok("Removed All Schemas"))
+      case Failure(_) => Future.successful(InternalServerError("Unexpected Error Clearing MongoDB."))
     }
   }
 }
