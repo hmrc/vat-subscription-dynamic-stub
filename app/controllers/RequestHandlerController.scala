@@ -33,9 +33,9 @@ class RequestHandlerController @Inject()(dataRepository: DataRepository) extends
     implicit request => {
       dataRepository().find("_id" -> s"""${request.uri}""", "method" -> GET).map {
         stubData => stubData.nonEmpty match {
-          case true => stubData.head.response.nonEmpty match {
-            case true => Status(stubData.head.status)
-            case _ => Status(stubData.head.status)(stubData.head.response.get)
+          case true => stubData.head.response.isEmpty match {
+            case true => Status(stubData.head.status) //Only return status, no body.
+            case _ => Status(stubData.head.status)(stubData.head.response.get) //return status and body
           }
           case _ => BadRequest(s"Could not find endpoint in Dynamic Stub matching the URI: ${request.uri}")
         }
