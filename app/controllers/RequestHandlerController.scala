@@ -33,7 +33,7 @@ class RequestHandlerController @Inject()(dataRepository: DataRepository) extends
 
   val getRequestHandler: String => Action[AnyContent] = url => Action.async {
     implicit request => {
-      dataRepository().find("_id" -> s"/$url", "method" -> GET).flatMap {
+      dataRepository().find("_id" -> s"""${request.uri}""", "method" -> GET).flatMap {
         stubData => Future.successful(Status(stubData.head.status)(stubData.head.response.getOrElse(Json.parse("{}"))))
       }
     }
