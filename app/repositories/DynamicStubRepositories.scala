@@ -19,6 +19,7 @@ package repositories
 import models._
 import play.api.libs.json.Format
 import reactivemongo.api.DB
+import reactivemongo.api.commands.WriteResult
 import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.mongo.{ReactiveRepository, Repository}
 
@@ -26,18 +27,13 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait DynamicStubRepository[T, O] extends Repository[T, BSONObjectID] {
 
-  def findAllVersionsBy(o: O)(implicit ec: ExecutionContext): Future[Map[O, List[T]]]
+  def findById(o: O)(implicit ec: ExecutionContext): Future[T]
 
-  def findLatestVersionBy(o: O)(implicit ec: ExecutionContext): Future[List[T]]
+  def removeById(o: O)(implicit ec: ExecutionContext): Future[WriteResult]
 
-  def removeBy(o: O)(implicit ec: ExecutionContext): Future[Unit]
+  def removeAll()(implicit ec: ExecutionContext): Future[WriteResult]
 
-  def removeAll()(implicit ec: ExecutionContext): Future[Unit]
-
-  def addEntry(t: T)(implicit ec: ExecutionContext): Future[Unit]
-
-  def addEntries(entries: Seq[T])(implicit ec: ExecutionContext): Future[Unit]
-
+  def addEntry(t: T)(implicit ec: ExecutionContext): Future[WriteResult]
 }
 
 

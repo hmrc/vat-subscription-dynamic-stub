@@ -29,39 +29,20 @@ class SchemaRepository @Inject()() extends MongoDbConnection {
 
   lazy val repository = new SchemaRepositoryBase() {
 
-    override def removeAll()(implicit ec: ExecutionContext): Future[Unit] = {
-      removeAll(WriteConcern.Acknowledged).map { _ => }
+    override def findById(schemaId: String)(implicit ec: ExecutionContext): Future[SchemaModel] = {
+      find("_id" -> schemaId).map(_.last)
     }
 
-    override def removeBy(schemaId: String)(implicit ec: ExecutionContext): Future[Unit] = {
-      remove("schemaId" -> schemaId).map { _ => }
+    override def removeById(schemaId: String)(implicit ec: ExecutionContext): Future[WriteResult] = {
+      remove("_id" -> schemaId)
     }
 
-    override def addEntry(document: SchemaModel)(implicit ec: ExecutionContext): Future[Unit] = {
-      insert(document).map { _ => }
+    override def removeAll()(implicit ec: ExecutionContext): Future[WriteResult] = {
+      removeAll(WriteConcern.Acknowledged)
     }
 
-    override def addEntries(entries: Seq[SchemaModel])(implicit ec: ExecutionContext): Future[Unit] = {
-      entries.foreach {
-        addEntry
-      }
-      Future.successful({})
-    }
-
-    override def findLatestVersionBy(schemaId: String)(implicit ec: ExecutionContext): Future[List[SchemaModel]] = {
-      findAllVersionsBy(schemaId).map {
-        _.values.toList.map {
-          _.last
-        }
-      }
-    }
-
-    override def findAllVersionsBy(schemaId: String)
-                                  (implicit ec: ExecutionContext): Future[Map[String, List[SchemaModel]]] = {
-      find("_id" -> schemaId).map {
-        schemas =>
-          schemas.groupBy(_._id)
-      }
+    override def addEntry(document: SchemaModel)(implicit ec: ExecutionContext): Future[WriteResult] = {
+      insert(document)
     }
   }
 

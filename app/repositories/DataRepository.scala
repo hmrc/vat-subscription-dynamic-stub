@@ -29,39 +29,20 @@ class DataRepository @Inject()() extends MongoDbConnection {
 
   lazy val repository = new StubbedDataRepositoryBase() {
 
-    override def removeAll()(implicit ec: ExecutionContext): Future[Unit] = {
-      removeAll(WriteConcern.Acknowledged).map { _ => }
+    override def removeAll()(implicit ec: ExecutionContext): Future[WriteResult] = {
+      removeAll(WriteConcern.Acknowledged)
     }
 
-    override def removeBy(url: String)(implicit ec: ExecutionContext): Future[Unit] = {
-      remove("_id" -> url).map { _ => }
+    override def removeById(url: String)(implicit ec: ExecutionContext): Future[WriteResult] = {
+      remove("_id" -> url)
     }
 
-    override def addEntry(document: DataModel)(implicit ec: ExecutionContext): Future[Unit] = {
-      insert(document).map { _ => }
+    override def addEntry(document: DataModel)(implicit ec: ExecutionContext): Future[WriteResult] = {
+      insert(document)
     }
 
-    override def addEntries(entries: Seq[DataModel])(implicit ec: ExecutionContext): Future[Unit] = {
-      entries.foreach {
-        addEntry
-      }
-      Future.successful({})
-    }
-
-    override def findLatestVersionBy(url: String)(implicit ec: ExecutionContext): Future[List[DataModel]] = {
-      findAllVersionsBy(url).map {
-        _.values.toList.map {
-          _.last
-        }
-      }
-    }
-
-    override def findAllVersionsBy(url: String)
-                                  (implicit ec: ExecutionContext): Future[Map[String, List[DataModel]]] = {
-      find("_id" -> url).map {
-        responses =>
-          responses.groupBy(_._id)
-      }
+    override def findById(url: String)(implicit ec: ExecutionContext): Future[DataModel] = {
+      find("_id" -> url).map(_.last)
     }
   }
 

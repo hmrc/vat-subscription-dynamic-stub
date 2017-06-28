@@ -18,8 +18,10 @@ package controllers
 
 import javax.inject.{Inject, Singleton}
 
-import models.SchemaModel
+import models.{DataModel, SchemaModel}
+import play.api.libs.json.JsValue
 import play.api.mvc.{Action, AnyContent}
+import reactivemongo.api.commands.DefaultWriteResult
 import repositories.SchemaRepository
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
@@ -30,41 +32,28 @@ import scala.util.{Failure, Success, Try}
 @Singleton
 class SetupSchemaController @Inject()(schemaRepository: SchemaRepository) extends BaseController {
 
-  val addSchema: Action[AnyContent] = Action.async { implicit request =>
-    Future.successful(request.body.asJson.fold(BadRequest("Empty Json Body")) {
-      json =>
-        json.validate[SchemaModel].fold(
-          invalid =>
-            BadRequest("Json Parse Error, Invalid Schema Request."),
-          valid =>
-            Try {
-              schemaRepository().addEntry(valid)
-            } match {
-              case Success(_) => Ok("Success")
-              case Failure(_) => BadRequest("Could not store data")
-            }
-        )
-    })
+  val addSchema: Action[JsValue] = Action.async(parse.json) {
+    implicit request => withJsonBody[SchemaModel](
+      json => schemaRepository().addEntry(json).map(_.ok match {
+        case true => Ok("Success")
+        case _ => InternalServerError("Could not store data")
+      })
+    )
   }
 
-  val removeSchema: String => Action[AnyContent] = { id =>
-    Action.async { implicit request =>
-      Try {
-        schemaRepository().removeBy(id)
-      } match {
-        case Success(_) => Future.successful(Ok("Success"))
-        case Failure(ex) => ex.printStackTrace()
-          Future.successful(BadRequest("Could not delete data"))
-      }
-    }
+  val removeSchema: String => Action[AnyContent] = id => Action.async {
+    implicit request =>
+      schemaRepository().removeById(id).map(_.ok match {
+        case true => Ok("Success")
+        case _ => InternalServerError("Could not delete data")
+      })
   }
 
-  val removeAll = Action.async { implicit request =>
-    Try {
-      schemaRepository().removeAll()
-    } match {
-      case Success(_) => Future.successful(Ok("Removed All Schemas"))
-      case Failure(_) => Future.successful(InternalServerError("Unexpected Error Clearing MongoDB."))
-    }
+  val removeAll = Action.async {
+    implicit request =>
+      schemaRepository().removeAll().map(_.ok match {
+        case true => Ok("Removed All Schemas")
+        case _ => InternalServerError("Unexpected Error Clearing MongoDB.")
+      })
   }
 }

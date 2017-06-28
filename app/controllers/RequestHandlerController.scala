@@ -19,13 +19,11 @@ package controllers
 import javax.inject.{Inject, Singleton}
 
 import models.HttpMethod._
-import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent}
 import repositories.DataRepository
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 @Singleton
 class RequestHandlerController @Inject()(dataRepository: DataRepository) extends BaseController {
@@ -33,8 +31,14 @@ class RequestHandlerController @Inject()(dataRepository: DataRepository) extends
 
   val getRequestHandler: String => Action[AnyContent] = url => Action.async {
     implicit request => {
-      dataRepository().find("_id" -> s"""${request.uri}""", "method" -> GET).flatMap {
-        stubData => Future.successful(Status(stubData.head.status)(stubData.head.response.getOrElse(Json.parse("{}"))))
+      dataRepository().find("_id" -> s"""${request.uri}""", "method" -> GET).map {
+        stubData => stubData.nonEmpty match {
+          case true => stubData.head.response.nonEmpty match {
+            case true => Status(stubData.head.status)
+            case _ => Status(stubData.head.status)(stubData.head.response.get)
+          }
+          case _ => BadRequest(s"Could not find endpoint in Dynamic Stub matching the URI: ${request.uri}")
+        }
       }
     }
   }
