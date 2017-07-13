@@ -18,27 +18,38 @@ package utils
 
 import com.github.fge.jsonschema.main.JsonSchema
 import models.SchemaModel
+import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers._
-import org.scalatest.mock.MockitoSugar
 import org.mockito.Mockito._
+import org.scalatest.mock.MockitoSugar
 import play.api.libs.json.Json
-import repositories.{CgtRepository, SchemaRepository}
+import repositories.{DynamicStubRepository, SchemaRepository}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
-import utils.SchemaValidation
 
 import scala.concurrent.Future
 
 class SchemaValidationSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
 
-  def setupMocks(schemaModel: List[SchemaModel]): SchemaValidation = {
-    val mockCollection = mock[CgtRepository[SchemaModel, String]]
+  def setupMocks(schemaModel: SchemaModel): SchemaValidation = {
+    val mockCollection = mock[DynamicStubRepository[SchemaModel, String]]
     val mockConnection = mock[SchemaRepository]
 
-    when(mockConnection.apply())
-      .thenReturn(mockCollection)
+    when(mockConnection.apply()).thenReturn(mockCollection)
 
-    when(mockCollection.findLatestVersionBy(any())(any()))
+    when(mockCollection.findById(ArgumentMatchers.eq(schemaModel._id))(ArgumentMatchers.any()))
       .thenReturn(Future.successful(schemaModel))
+
+    new SchemaValidation(mockConnection)
+  }
+
+  def setupFutureFailedMocks(schemaModel: SchemaModel): SchemaValidation = {
+    val mockCollection = mock[DynamicStubRepository[SchemaModel, String]]
+    val mockConnection = mock[SchemaRepository]
+
+    when(mockConnection.apply()).thenReturn(mockCollection)
+
+    when(mockCollection.findById(ArgumentMatchers.eq(schemaModel._id))(ArgumentMatchers.any()))
+      .thenThrow(new RuntimeException("Schema could not be retrieved/found in MongoDB"))
 
     new SchemaValidation(mockConnection)
   }
@@ -57,61 +68,48 @@ class SchemaValidationSpec extends UnitSpec with MockitoSugar with WithFakeAppli
                             	"required": ["firstName", "lastName"]
                             }""")
 
-  "Calling .loadSchema" should {
+  "Calling .loadResponseSchema" should {
 
     "with a matching schema in mongo" should {
-      lazy val validation = setupMocks(List(SchemaModel("route 1", schema)))
+      lazy val validation = setupMocks(SchemaModel("testSchema","/test","GET", responseSchema = schema))
 
       "return a json schema" in {
-        lazy val result = validation.loadSchema("route 1")
+        lazy val result = validation.loadResponseSchema("testSchema")
         await(result).isInstanceOf[JsonSchema]
       }
     }
 
     "without a matching schema in mongo" should {
-      lazy val validation = setupMocks(List.empty)
 
       "throw an exception" in {
-        lazy val ex = intercept[Exception] {
-          await(validation.loadSchema("route 1"))
-        }
+        val validation = setupFutureFailedMocks(SchemaModel("testSchema","/test","GET", responseSchema = schema))
 
-        ex.getMessage shouldEqual "No schema for route in mongo"
+        val ex = intercept[RuntimeException] {
+          await(validation.loadResponseSchema("testSchema"))
+        }
+        ex.getMessage shouldEqual "Schema could not be retrieved/found in MongoDB"
       }
     }
   }
 
-  "Calling .validateJson" should {
+  "Calling .validateResponseJson" should {
 
     "with a valid json body" should {
 
-      lazy val validation = setupMocks(List(SchemaModel("route 1", schema)))
-      val json = Json.parse("""{ "firstName" : "Bob", "lastName" : "Bobson" }""")
-
-      lazy val result = validation.validateJson("route 1", json)
-
       "return true" in {
+        val validation = setupMocks(SchemaModel("testSchema","/test","GET", responseSchema = schema))
+        val json = Json.parse("""{ "firstName" : "Bob", "lastName" : "Bobson" }""")
+        val result = validation.validateResponseJson("testSchema", Some(json))
         await(result) shouldEqual true
       }
     }
 
     "with an invalid json body" should {
 
-      lazy val validation = setupMocks(List(SchemaModel("route 1", schema)))
+      lazy val validation = setupMocks(SchemaModel("testSchema","/test","GET", responseSchema = schema))
       val json = Json.parse("""{ "firstName" : "Bob" }""")
 
-      lazy val result = validation.validateJson("route 1", json)
-
-      "return false" in {
-        await(result) shouldEqual false
-      }
-    }
-
-    "without a matching schema in mongo" should {
-      lazy val validation = setupMocks(List.empty)
-      val json = Json.parse("""{ "firstName" : "Bob", "lastName" : "Bobson" }""")
-
-      lazy val result = validation.validateJson("route 1", json)
+      lazy val result = validation.validateResponseJson("testSchema", Some(json))
 
       "return false" in {
         await(result) shouldEqual false

@@ -16,10 +16,16 @@
 
 package models
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{JsValue, Json, OFormat}
 
-case class SubscribeModel(sap: String)
+case class DataModel(
+                        _id: String,        // URL of the Request
+                        schemaId: String,   // Name/ID of the Schema to Validate Against
+                        method: String,
+                        status: Int,
+                        response: Option[JsValue]
+                      )
 
-object SubscribeModel {
-  implicit val formats: OFormat[SubscribeModel] = Json.format[SubscribeModel]
+object DataModel {
+  implicit val formats: OFormat[DataModel] = Json.format[DataModel]
 }
