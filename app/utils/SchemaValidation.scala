@@ -34,31 +34,35 @@ class SchemaValidation @Inject()(repository: SchemaRepository) {
   private final lazy val jsonMapper = new ObjectMapper()
   private final lazy val jsonFactory = jsonMapper.getFactory
 
-  def loadSchema(routeId: String): Future[JsonSchema] = {
+  def loadResponseSchema(schemaId: String): Future[JsonSchema] = {
     val schemaMapper = new ObjectMapper()
     val factory = schemaMapper.getFactory
-
-    repository().findLatestVersionBy(routeId).map { models =>
-      if (models.isEmpty) {
-        throw new Exception("No schema for route in mongo")
-      } else {
-        val schemaParser: JsonParser = factory.createParser(models.head.schema.toString())
-        val schemaJson: JsonNode = schemaMapper.readTree(schemaParser)
-        val schemaFactory = JsonSchemaFactory.byDefault()
-        schemaFactory.getJsonSchema(schemaJson)
-      }
+    repository().findById(schemaId).map { response =>
+      val schemaParser: JsonParser = factory.createParser(response.responseSchema.toString)
+      val schemaJson: JsonNode = schemaMapper.readTree(schemaParser)
+      JsonSchemaFactory.byDefault().getJsonSchema(schemaJson)
+    } recover {
+      case ex => throw new Exception("Schema could not be retrieved/found in MongoDB")
     }
   }
 
-  def validateJson(routeId: String, json: JsValue): Future[Boolean] = {
-    loadSchema(routeId).map { schema =>
-      val jsonParser = jsonFactory.createParser(json.toString())
-      val jsonNode: JsonNode = jsonMapper.readTree(jsonParser)
-      val report = schema.validate(jsonNode)
-      report.isSuccess
-    } recover {
-      case ex => Logger.warn(s"Error parsing json: ${ex.getMessage}")
-        false
+  def validateResponseJson(schemaId: String, json: Option[JsValue]): Future[Boolean] = {
+    json.fold(Future.successful(true)) {
+      response =>
+        loadResponseSchema(schemaId).map {
+          schema =>
+            val jsonParser = jsonFactory.createParser(response.toString)
+            val jsonNode: JsonNode = jsonMapper.readTree(jsonParser)
+            schema.validate(jsonNode).isSuccess
+        }
     }
+  }
+
+  def loadUrlRegex(schemaId: String): Future[String] = {
+    repository().findById(schemaId).map(_.url)
+  }
+
+  def validateUrlMatch(schemaId: String, url: String): Future[Boolean] = {
+    loadUrlRegex(schemaId).map(regex => url.matches(regex))
   }
 }

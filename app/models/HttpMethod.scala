@@ -16,12 +16,6 @@
 
 package models
 
-import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.domain.Nino
-
-case class BusinessPartnerModel(nino: Nino, sap: String)
-
-object BusinessPartnerModel {
-
-  implicit val formats: OFormat[BusinessPartnerModel] = Json.format[BusinessPartnerModel]
+object HttpMethod {
+  val GET = "GET"
 }
