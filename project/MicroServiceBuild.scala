@@ -7,7 +7,7 @@ import uk.gov.hmrc.versioning.SbtGitVersioning
 
 object MicroServiceBuild extends Build with MicroService {
 
-  val appName = "capital-gains-subscription-dynamic-stub"
+  val appName = "income-tax-view-change-dynamic-stub"
 
   override lazy val appDependencies: Seq[ModuleID] = compile ++ test()
 
