@@ -1,7 +1,7 @@
 # Prod Routes
 
-->         /income-tax-view-change-dynamic-stub/           stub.Routes
-->         /income-tax-view-change-dynamic-stub/setup      setup.Routes
+->         /setup                                          setup.Routes
 ->         /                                               health.Routes
+->         /                                               stub.Routes
 
 GET        /admin/metrics                                  @com.kenshoo.play.metrics.MetricsController.metrics

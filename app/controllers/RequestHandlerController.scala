@@ -28,11 +28,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
 @Singleton
 class RequestHandlerController @Inject()(dataRepository: DataRepository) extends BaseController {
 
+
   val getRequestHandler: String => Action[AnyContent] = url => Action.async {
     implicit request => {
-      val contextRouteRegex = "^/[^/]*".r
-      val stubUrl = contextRouteRegex.replaceFirstIn(request.uri, "") //removes context route
-      dataRepository().find("_id" -> s"$stubUrl", "method" -> GET).map {
+      dataRepository().find("_id" -> s"""${request.uri}""", "method" -> GET).map {
         stubData => stubData.nonEmpty match {
           case true => stubData.head.response.isEmpty match {
             case true => Status(stubData.head.status) //Only return status, no body.
