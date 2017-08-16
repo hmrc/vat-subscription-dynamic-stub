@@ -49,7 +49,9 @@ class SetupDataController @Inject()(schemaValidation: SchemaValidation, dataRepo
           }
         case x => Future.successful(BadRequest(s"The method: $x is currently unsupported"))
       }
-    )
+    ).recover {
+      case _ => InternalServerError("Error Parsing Json DataModel")
+    }
   }
 
   private def addStubDataToDB(json: DataModel): Future[Result] = {
@@ -67,7 +69,7 @@ class SetupDataController @Inject()(schemaValidation: SchemaValidation, dataRepo
       })
   }
 
-  val removeAll = Action.async {
+  val removeAll: Action[AnyContent] = Action.async {
     implicit request =>
       dataRepository().removeAll().map(_.ok match {
         case true => Ok("Removed All Stubbed Data")

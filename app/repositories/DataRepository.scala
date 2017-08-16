@@ -29,21 +29,13 @@ class DataRepository @Inject()() extends MongoDbConnection {
 
   lazy val repository = new StubbedDataRepositoryBase() {
 
-    override def removeAll()(implicit ec: ExecutionContext): Future[WriteResult] = {
-      removeAll(WriteConcern.Acknowledged)
-    }
+    override def removeAll()(implicit ec: ExecutionContext): Future[WriteResult] = removeAll(WriteConcern.Acknowledged)
 
-    override def removeById(url: String)(implicit ec: ExecutionContext): Future[WriteResult] = {
-      remove("_id" -> url)
-    }
+    override def removeById(url: String)(implicit ec: ExecutionContext): Future[WriteResult] = remove("_id" -> url)
 
-    override def addEntry(document: DataModel)(implicit ec: ExecutionContext): Future[WriteResult] = {
-      insert(document)
-    }
+    override def addEntry(document: DataModel)(implicit ec: ExecutionContext): Future[WriteResult] = insert(document)
 
-    override def findById(url: String)(implicit ec: ExecutionContext): Future[DataModel] = {
-      find("_id" -> url).map(_.last)
-    }
+    override def findById(url: String)(implicit ec: ExecutionContext): Future[DataModel] = find("_id" -> url).map(_.last)
   }
 
   def apply(): DynamicStubRepository[DataModel, String] = repository

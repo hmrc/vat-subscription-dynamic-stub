@@ -14,20 +14,12 @@
  * limitations under the License.
  */
 
-package actions
+package testUtils
 
-import javax.inject.{Inject, Singleton}
+import akka.actor.ActorSystem
+import akka.stream.ActorMaterializer
 
-import play.api.mvc.{ActionBuilder, Request, Result}
-
-import scala.concurrent.Future
-
-
-@Singleton
-class BearerTokenCheck @Inject()() {
-
-  case class WithBearerTokenCheck(hc: String = "something") extends ActionBuilder[Request] {
-    override def invokeBlock[A](request: Request[A], block: (Request[A]) => Future[Result]): Future[Result] = block(request)
-  }
-
+trait MaterializerSupport {
+  implicit val system = ActorSystem("Sys")
+  implicit val materializer = ActorMaterializer()
 }

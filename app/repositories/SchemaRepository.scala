@@ -29,21 +29,17 @@ class SchemaRepository @Inject()() extends MongoDbConnection {
 
   lazy val repository = new SchemaRepositoryBase() {
 
-    override def findById(schemaId: String)(implicit ec: ExecutionContext): Future[SchemaModel] = {
+    override def findById(schemaId: String)(implicit ec: ExecutionContext): Future[SchemaModel] =
       find("_id" -> schemaId).map(_.last)
-    }
 
-    override def removeById(schemaId: String)(implicit ec: ExecutionContext): Future[WriteResult] = {
+    override def removeById(schemaId: String)(implicit ec: ExecutionContext): Future[WriteResult] =
       remove("_id" -> schemaId)
-    }
 
-    override def removeAll()(implicit ec: ExecutionContext): Future[WriteResult] = {
+    override def removeAll()(implicit ec: ExecutionContext): Future[WriteResult] =
       removeAll(WriteConcern.Acknowledged)
-    }
 
-    override def addEntry(document: SchemaModel)(implicit ec: ExecutionContext): Future[WriteResult] = {
+    override def addEntry(document: SchemaModel)(implicit ec: ExecutionContext): Future[WriteResult] =
       insert(document)
-    }
   }
 
   def apply(): DynamicStubRepository[SchemaModel, String] = repository

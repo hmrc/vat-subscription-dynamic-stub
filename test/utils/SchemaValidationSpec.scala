@@ -19,7 +19,6 @@ package utils
 import com.github.fge.jsonschema.main.JsonSchema
 import models.SchemaModel
 import org.mockito.ArgumentMatchers
-import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import play.api.libs.json.Json
