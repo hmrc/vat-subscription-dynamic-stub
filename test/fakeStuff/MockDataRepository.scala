@@ -39,13 +39,15 @@ trait MockDataRepository extends UnitSpec with MockitoSugar with BeforeAndAfterE
     reset(mockDataRepository)
   }
 
-  def mockAddEntry(document: DataModel)(response: WriteResult): Unit ={
-    when(mockDataRepository.repository.addEntry(ArgumentMatchers.eq(document)))
+  def mockAddEntry(document: DataModel)(response: WriteResult): Unit = {
+    when(mockDataRepository().addEntry(ArgumentMatchers.eq(document)))
       .thenReturn(Future.successful(response))
   }
 
   def writeResultOk(): Unit = {
     when(mockWriteResult.ok).thenReturn(true)
+    when(mockWriteResult.n).thenReturn(1)
+    when(mockWriteResult.code).thenReturn(Some(1))
   }
 
 }

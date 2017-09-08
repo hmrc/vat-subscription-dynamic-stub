@@ -30,12 +30,11 @@ import play.api.test.FakeRequest
 import reactivemongo.api.commands.WriteResult
 
 import scala.concurrent.Future
-
 import akka.stream.Materializer
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 
-class SetupDataControllerSpec extends UnitSpec with MockitoSugar with WithFakeApplication with MockSchemaValidation with MockDataRepository{
+class SetupDataControllerSpec extends UnitSpec with MockitoSugar with MockSchemaValidation with MockDataRepository{
 
     val successResponse = HttpResponse(Status.OK, responseJson = Some(Json.parse("{}")))
 
@@ -46,7 +45,12 @@ class SetupDataControllerSpec extends UnitSpec with MockitoSugar with WithFakeAp
 
     "SetupDataController.addData" should {
 
-        val mod: DataModel = DataModel(_id = "1234", schemaId = "2345", method = "7", response = Some(Json.parse("{}")), status = Status.OK)
+        val dataModel: DataModel = DataModel(
+            _id = "1234",
+            schemaId = "2345",
+            method = "GET",
+            response = Some(Json.parse("""{"calcID": "12345671", "calcTimestamp": "2017-01-01T00:35:34.185Z", "calcAmount": 0}""")),
+            status = Status.OK)
 
         lazy val result = TestSetupDataController.addData()(FakeRequest("POST", "/").withJsonBody(Json.parse("""{ "field": "value" }""")))
 
@@ -54,8 +58,9 @@ class SetupDataControllerSpec extends UnitSpec with MockitoSugar with WithFakeAp
             mockValidateUrlMatch("1234", "http://something")(response = true)
             mockValidateResponseJson("1234", None)(response = true)
             mockLoadUrlRegex("1234")("regex")
-            mockAddEntry(mod)(response = mockWriteResult)
             writeResultOk()
+            mockAddEntry(dataModel)(response = mockWriteResult)
+
             //status(result.run()(mtrlzr)) shouldBe Status.OK
         }
 
