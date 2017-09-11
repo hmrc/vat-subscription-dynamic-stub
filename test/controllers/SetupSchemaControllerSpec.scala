@@ -59,6 +59,14 @@ class SetupSchemaControllerSpec extends TestSupport with MockSchemaRepository {
         method = "GET",
         responseSchema = Json.parse("{}")
       )
+
+      lazy val errorModel = SchemaModel(
+        _id = "test",
+        url = "/test",
+        method = "GET",
+        responseSchema = Json.parse("{}")
+      )
+
       lazy val request = FakeRequest().withBody(Json.toJson(successModel)).withHeaders(("Content-Type","application/json"))
       lazy val result = TestSetupSchemaController.addSchema(request)
 
@@ -70,6 +78,11 @@ class SetupSchemaControllerSpec extends TestSupport with MockSchemaRepository {
       s"Result Body 'Could not store data'" in {
         setupMockAddSchema(successModel)(errorWriteResult)
         await(bodyOf(result)) shouldBe "Could not store data"
+      }
+
+      "Return a status 400 (BadRequest)" in {
+        setupMockAddSchema(errorModel)(successWriteResult)
+        status(result) shouldBe Status.BAD_REQUEST
       }
     }
   }

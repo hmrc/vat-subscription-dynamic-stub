@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package fakeStuff
+package mocks
 
+import com.github.fge.jsonschema.main.JsonSchema
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.mock.MockitoSugar
+import play.api.libs.json.JsValue
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.SchemaValidation
-import com.github.fge.jsonschema.main.JsonSchema
-import play.api.libs.json.JsValue
 
 import scala.concurrent.Future
 
