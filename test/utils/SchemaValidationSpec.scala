@@ -19,7 +19,6 @@ package utils
 import com.github.fge.jsonschema.main.JsonSchema
 import models.SchemaModel
 import org.mockito.ArgumentMatchers
-import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import play.api.libs.json.Json
@@ -115,5 +114,23 @@ class SchemaValidationSpec extends UnitSpec with MockitoSugar with WithFakeAppli
         await(result) shouldEqual false
       }
     }
+  }
+
+  "Calling .loadUrlRegex" should {
+    lazy val validation = setupMocks(SchemaModel("testSchema","/test","GET", responseSchema = schema))
+
+    "return the url of the SchemaModel" in {
+      lazy val result = validation.loadUrlRegex("testSchema")
+      await(result) shouldEqual "/test"
+    }
+  }
+
+  "Calling .validateUrlMatch" should {
+    lazy val validation = setupMocks(SchemaModel("testSchema","/test","GET", responseSchema = schema))
+    "return 'true' if the urls match" in {
+      lazy val result = validation.validateUrlMatch("testSchema", "/test")
+      await(result) shouldEqual true
+    }
+
   }
 }

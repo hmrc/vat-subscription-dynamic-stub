@@ -17,5 +17,5 @@
 package models
 
 object HttpMethod {
-  val GET = "GET"
+  val GET: String = "GET"
 }

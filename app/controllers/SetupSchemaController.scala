@@ -18,27 +18,28 @@ package controllers
 
 import javax.inject.{Inject, Singleton}
 
-import models.{DataModel, SchemaModel}
+import models.SchemaModel
 import play.api.libs.json.JsValue
 import play.api.mvc.{Action, AnyContent}
-import reactivemongo.api.commands.DefaultWriteResult
 import repositories.SchemaRepository
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-import scala.util.{Failure, Success, Try}
 
 @Singleton
 class SetupSchemaController @Inject()(schemaRepository: SchemaRepository) extends BaseController {
 
   val addSchema: Action[JsValue] = Action.async(parse.json) {
     implicit request => withJsonBody[SchemaModel](
-      json => schemaRepository().addEntry(json).map(_.ok match {
-        case true => Ok("Success")
-        case _ => InternalServerError("Could not store data")
-      })
-    )
+      json => {
+        schemaRepository().addEntry(json).map(_.ok match {
+          case true => Ok(s"Successfully added Schema: ${request.body}")
+          case _ => InternalServerError("Could not store data")
+        })
+      }
+    ).recover {
+      case _ => BadRequest("Error Parsing Json SchemaModel")
+    }
   }
 
   val removeSchema: String => Action[AnyContent] = id => Action.async {
@@ -49,7 +50,7 @@ class SetupSchemaController @Inject()(schemaRepository: SchemaRepository) extend
       })
   }
 
-  val removeAll = Action.async {
+  val removeAll: Action[AnyContent] = Action.async {
     implicit request =>
       schemaRepository().removeAll().map(_.ok match {
         case true => Ok("Removed All Schemas")

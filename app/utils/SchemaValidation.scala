@@ -58,11 +58,9 @@ class SchemaValidation @Inject()(repository: SchemaRepository) {
     }
   }
 
-  def loadUrlRegex(schemaId: String): Future[String] = {
+  def loadUrlRegex(schemaId: String): Future[String] =
     repository().findById(schemaId).map(_.url)
-  }
 
-  def validateUrlMatch(schemaId: String, url: String): Future[Boolean] = {
+  def validateUrlMatch(schemaId: String, url: String): Future[Boolean] =
     loadUrlRegex(schemaId).map(regex => url.matches(regex))
-  }
 }
