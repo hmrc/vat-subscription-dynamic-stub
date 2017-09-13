@@ -115,4 +115,22 @@ class SchemaValidationSpec extends UnitSpec with MockitoSugar with WithFakeAppli
       }
     }
   }
+
+  "Calling .loadUrlRegex" should {
+    lazy val validation = setupMocks(SchemaModel("testSchema","/test","GET", responseSchema = schema))
+
+    "return the url of the SchemaModel" in {
+      lazy val result = validation.loadUrlRegex("testSchema")
+      await(result) shouldEqual "/test"
+    }
+  }
+
+  "Calling .validateUrlMatch" should {
+    lazy val validation = setupMocks(SchemaModel("testSchema","/test","GET", responseSchema = schema))
+    "return 'true' if the urls match" in {
+      lazy val result = validation.validateUrlMatch("testSchema", "/test")
+      await(result) shouldEqual true
+    }
+
+  }
 }

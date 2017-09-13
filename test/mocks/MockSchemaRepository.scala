@@ -44,9 +44,9 @@ trait MockSchemaRepository extends TestSupport {
     when(mockSchemaRepository.repository.addEntry(ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(response))
 
   def setupMockRemoveSchema(id: String)(response: WriteResult): OngoingStubbing[Future[WriteResult]] =
-    when(mockSchemaRepository.repository.removeById(ArgumentMatchers.eq(id))(ArgumentMatchers.eq(ec))).thenReturn(Future.successful(response))
+    when(mockSchemaRepository.repository.removeById(ArgumentMatchers.eq(id))(ArgumentMatchers.any())).thenReturn(Future.successful(response))
 
   def setupMockRemoveAllSchemas(response: WriteResult): OngoingStubbing[Future[WriteResult]] =
-    when(mockSchemaRepository.repository.removeAll()(ArgumentMatchers.eq(ec))).thenReturn(Future.successful(response))
+    when(mockSchemaRepository.repository.removeAll()(ArgumentMatchers.any())).thenReturn(Future.successful(response))
 
 }
