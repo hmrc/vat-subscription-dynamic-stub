@@ -18,7 +18,6 @@ package controllers
 
 import javax.inject.{Inject, Singleton}
 
-import models.HttpMethod._
 import play.api.mvc.{Action, AnyContent}
 import repositories.DataRepository
 import uk.gov.hmrc.play.microservice.controller.BaseController
@@ -28,10 +27,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 @Singleton
 class RequestHandlerController @Inject()(dataRepository: DataRepository) extends BaseController {
 
-
-  val getRequestHandler: String => Action[AnyContent] = url => Action.async {
+  def requestHandler(url: String): Action[AnyContent] = Action.async {
     implicit request => {
-      dataRepository().find("_id" -> s"""${request.uri}""", "method" -> GET).map {
+      dataRepository().find("_id" -> s"""${request.uri}""", "method" -> request.method).map {
         stubData => stubData.nonEmpty match {
           case true => stubData.head.response.isEmpty match {
             case true => Status(stubData.head.status) //Only return status, no body.
