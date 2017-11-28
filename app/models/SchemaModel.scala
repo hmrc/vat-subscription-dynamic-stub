@@ -22,7 +22,8 @@ case class SchemaModel(
                         _id: String,
                         url: String,
                         method: String,
-                        responseSchema: JsValue
+                        responseSchema: JsValue,
+                        requestSchema: Option[JsValue] = None
                        )
 
 object SchemaModel {

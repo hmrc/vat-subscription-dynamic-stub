@@ -53,4 +53,8 @@ trait MockDataRepository extends TestSupport{
     when(mockDataRepository.repository.removeAll()(ArgumentMatchers.any())).thenReturn(Future.successful(response))
   }
 
+  def mockFind(response: List[DataModel]): OngoingStubbing[Future[List[DataModel]]] = {
+    when(mockDataRepository.repository.find(ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(response)
+  }
+
 }

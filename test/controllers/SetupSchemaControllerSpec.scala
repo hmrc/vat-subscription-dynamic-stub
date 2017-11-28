@@ -20,8 +20,11 @@ import mocks.MockSchemaRepository
 import models.SchemaModel
 import play.api.http.Status
 import play.api.libs.json.Json
+import play.api.mvc.Result
 import play.api.test.FakeRequest
 import testUtils.TestSupport
+
+import scala.concurrent.Future
 
 class SetupSchemaControllerSpec extends TestSupport with MockSchemaRepository {
 
@@ -38,7 +41,7 @@ class SetupSchemaControllerSpec extends TestSupport with MockSchemaRepository {
         responseSchema = Json.parse("{}")
       )
       lazy val request = FakeRequest().withBody(Json.toJson(successModel)).withHeaders(("Content-Type","application/json"))
-      lazy val result = TestSetupSchemaController.addSchema(request)
+      lazy val result: Future[Result] = TestSetupSchemaController.addSchema(request)
 
       "Return a status 200 (OK)" in {
         setupMockAddSchema(successModel)(successWriteResult)

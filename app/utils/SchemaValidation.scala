@@ -21,6 +21,7 @@ import javax.inject.{Inject, Singleton}
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
 import com.github.fge.jsonschema.main.{JsonSchema, JsonSchemaFactory}
+import models.SchemaModel
 import play.api.Logger
 import play.api.libs.json.JsValue
 import repositories.SchemaRepository
@@ -55,6 +56,31 @@ class SchemaValidation @Inject()(repository: SchemaRepository) {
             val jsonNode: JsonNode = jsonMapper.readTree(jsonParser)
             schema.validate(jsonNode).isSuccess
         }
+    }
+  }
+
+  def loadRequestSchema(requestSchema: JsValue): JsonSchema = {
+    val schemaMapper = new ObjectMapper()
+    val factory = schemaMapper.getFactory
+    val schemaParser: JsonParser = factory.createParser(requestSchema.toString)
+    val schemaJson: JsonNode = schemaMapper.readTree(schemaParser)
+    JsonSchemaFactory.byDefault().getJsonSchema(schemaJson)
+  }
+
+  def validateRequestJson(schemaId: String, json: Option[JsValue]): Future[Boolean] = {
+    repository().findById(schemaId).map { schema =>
+      if(schema.requestSchema.isDefined) {
+        json.fold(true) {
+          response =>
+            val jsonParser = jsonFactory.createParser(response.toString)
+            val jsonNode: JsonNode = jsonMapper.readTree(jsonParser)
+            loadRequestSchema(schema.requestSchema.get).validate(jsonNode).isSuccess
+        }
+      } else {
+        true
+      }
+    } recover {
+      case ex => throw new Exception("Schema could not be retrieved/found in MongoDB")
     }
   }
 

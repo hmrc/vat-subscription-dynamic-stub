@@ -1,4 +1,4 @@
 # Stub Response Routes
 
 GET        /*url                                                 @controllers.RequestHandlerController.getRequestHandler(url)
-POST       /*url                                                 @controllers.RequestHandlerController.posRequestHandler(url)
+POST       /*url                                                 @controllers.RequestHandlerController.postRequestHandler(url)

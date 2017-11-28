@@ -41,7 +41,7 @@ trait MockSchemaValidation extends UnitSpec with MockitoSugar with BeforeAndAfte
       .thenReturn(Future.successful(response))
   }
 
-  def mockValidateResponseJson(schemaId: String, json: Option[JsValue])(response:Boolean): Unit ={
+  def mockValidateResponseJson(schemaId: String, json: Option[JsValue])(response:Boolean): Unit = {
     when(mockSchemaValidation.validateResponseJson(ArgumentMatchers.eq(schemaId), ArgumentMatchers.eq(json)))
       .thenReturn(Future.successful(response))
   }
@@ -51,8 +51,18 @@ trait MockSchemaValidation extends UnitSpec with MockitoSugar with BeforeAndAfte
       .thenReturn(Future.successful(response))
   }
 
-  def mockValidateUrlMatch(schemaId:String, url:String)(response:Boolean): Unit ={
+  def mockValidateUrlMatch(schemaId:String, url:String)(response:Boolean): Unit = {
     when(mockSchemaValidation.validateUrlMatch(ArgumentMatchers.eq(schemaId), ArgumentMatchers.eq(url)))
+      .thenReturn(Future.successful(response))
+  }
+
+  def mockLoadRequestSchema(requestSchema: JsValue)(response: JsonSchema): Unit = {
+    when(mockSchemaValidation.loadRequestSchema(ArgumentMatchers.eq(requestSchema)))
+      .thenReturn(Future.successful(response))
+  }
+
+  def mockValidateRequestJson(schemaId: String, json: Option[JsValue])(response: Boolean): Unit = {
+    when(mockSchemaValidation.validateRequestJson(ArgumentMatchers.eq(schemaId), ArgumentMatchers.any()))
       .thenReturn(Future.successful(response))
   }
 
