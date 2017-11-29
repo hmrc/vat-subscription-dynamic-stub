@@ -22,14 +22,15 @@ import models.HttpMethod._
 import play.api.mvc.{Action, AnyContent}
 import repositories.DataRepository
 import uk.gov.hmrc.play.microservice.controller.BaseController
+import utils.SchemaValidation
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 @Singleton
-class RequestHandlerController @Inject()(dataRepository: DataRepository) extends BaseController {
+class RequestHandlerController @Inject()(schemaValidation: SchemaValidation, dataRepository: DataRepository) extends BaseController {
 
-
-  val getRequestHandler: String => Action[AnyContent] = url => Action.async {
+  def getRequestHandler(url: String): Action[AnyContent] = Action.async {
     implicit request => {
       dataRepository().find("_id" -> s"""${request.uri}""", "method" -> GET).map {
         stubData => stubData.nonEmpty match {
@@ -37,9 +38,37 @@ class RequestHandlerController @Inject()(dataRepository: DataRepository) extends
             case true => Status(stubData.head.status) //Only return status, no body.
             case _ => Status(stubData.head.status)(stubData.head.response.get) //return status and body
           }
-          case _ => BadRequest(s"Could not find endpoint in Dynamic Stub matching the URI: ${request.uri}")
+          case _ => {
+            BadRequest(s"Could not find endpoint in Dynamic Stub matching the URI: ${request.uri}")
+          }
         }
       }
     }
   }
+
+  def postRequestHandler(url: String): Action[AnyContent] = Action.async {
+    implicit request => {
+      dataRepository().find("_id" -> s"""${request.uri}""", "method" -> POST).flatMap {
+        stubData => stubData.nonEmpty match {
+          case true => schemaValidation.validateRequestJson(stubData.head.schemaId, request.body.asJson) map {
+            case true => stubData.head.response.isEmpty match {
+              case true => {
+                Status(stubData.head.status)
+              }
+              case _ => {
+                Status(stubData.head.status)(stubData.head.response.get)
+              }
+            }
+            case false => {
+              BadRequest(s"The Json Body:\n\n${request.body.asJson} did not validate against the Schema Definition")
+            }
+          }
+          case _ => {
+            Future(BadRequest(s"Could not find endpoint in Dynamic Stub matching the URI: ${request.uri}"))
+          }
+        }
+      }
+    }
+  }
+
 }

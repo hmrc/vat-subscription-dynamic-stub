@@ -133,4 +133,56 @@ class SchemaValidationSpec extends UnitSpec with MockitoSugar with WithFakeAppli
     }
 
   }
+
+
+
+  val postSchema = Json.parse("""{
+                            	"title": "Person",
+                            	"type": "object",
+                            	"properties": {
+                            		"firstName": {
+                            			"type": "string"
+                            		},
+                            		"lastName": {
+                            			"type": "string"
+                            		}
+                            	},
+                            	"required": ["firstName", "lastName"]
+                            }""")
+
+  "Calling .loadRequestSchema" should {
+    "with a matching schema in mongo" should {
+      lazy val validation = setupMocks(SchemaModel("testSchema","/test","GET", responseSchema = schema, requestSchema = Some(postSchema)))
+
+      "return a json schema" in {
+        lazy val result = validation.loadRequestSchema(postSchema)
+        await(result).isInstanceOf[JsonSchema]
+      }
+    }
+  }
+
+  "Calling .validateRequestJson" should {
+
+    "with a valid json body" should {
+
+      "return true" in {
+        val validation = setupMocks(SchemaModel("testSchema","/test","GET", responseSchema = schema, requestSchema = Some(postSchema)))
+        val json = Json.parse("""{ "firstName" : "Bob", "lastName" : "Bobson" }""")
+        val result = validation.validateRequestJson("testSchema", Some(json))
+        await(result) shouldEqual true
+      }
+    }
+
+    "with an invalid json body" should {
+
+      lazy val validation = setupMocks(SchemaModel("testSchema","/test","GET", responseSchema = schema, requestSchema = Some(postSchema)))
+      val json = Json.parse("""{ "firstName" : "Bob" }""")
+
+      lazy val result = validation.validateRequestJson("testSchema", Some(json))
+
+      "return false" in {
+        await(result) shouldEqual false
+      }
+    }
+  }
 }
