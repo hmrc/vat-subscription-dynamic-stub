@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import reactivemongo.api.commands.{DefaultWriteResult, WriteError, WriteResult}
 import repositories.{DataRepository, StubbedDataRepositoryBase}
 import testUtils.TestSupport
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 trait MockDataRepository extends TestSupport{
