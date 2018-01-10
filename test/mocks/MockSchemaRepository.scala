@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.mockito.stubbing.OngoingStubbing
 import reactivemongo.api.commands.{DefaultWriteResult, WriteError, WriteResult}
-import repositories.{DynamicStubRepository, SchemaRepository, SchemaRepositoryBase}
+import repositories.{SchemaRepository, SchemaRepositoryBase}
 import testUtils.TestSupport
 
 import scala.concurrent.Future
