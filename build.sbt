@@ -9,7 +9,7 @@ import sbt.Tests.{Group, SubProcess}
 val appName = "income-tax-view-change-dynamic-stub"
 
 val compile: Seq[ModuleID] = Seq(
-  "uk.gov.hmrc" %% "play-reactivemongo" % "5.1.0",
+  "uk.gov.hmrc" %% "play-reactivemongo" % "6.2.0",
   ws,
   "uk.gov.hmrc" %% "bootstrap-play-25" % "1.5.0",
   "uk.gov.hmrc" %% "play-url-binders" % "2.1.0",
