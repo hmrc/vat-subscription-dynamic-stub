@@ -6,7 +6,7 @@ import uk.gov.hmrc.SbtAutoBuildPlugin
 import play.core.PlayVersion
 import sbt.Tests.{Group, SubProcess}
 
-val appName = "income-tax-view-change-dynamic-stub"
+val appName = "manage-vat-subscription-dynamic-stub"
 
 val compile: Seq[ModuleID] = Seq(
   "uk.gov.hmrc" %% "play-reactivemongo" % "6.2.0",
