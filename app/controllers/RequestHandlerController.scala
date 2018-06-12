@@ -46,9 +46,12 @@ class RequestHandlerController @Inject()(schemaValidation: SchemaValidation, dat
     }
   }
 
-  def postRequestHandler(url: String): Action[AnyContent] = Action.async {
+  def postRequestHandler(url: String): Action[AnyContent] = requestHandler(url,POST)
+  def putRequestHandler(url: String): Action[AnyContent] = requestHandler(url,PUT)
+
+  private def requestHandler(url: String, method: String): Action[AnyContent] = Action.async {
     implicit request => {
-      dataRepository().find("_id" -> s"""${request.uri}""", "method" -> POST).flatMap {
+      dataRepository().find("_id" -> s"""${request.uri}""", "method" -> method).flatMap {
         stubData => stubData.nonEmpty match {
           case true => schemaValidation.validateRequestJson(stubData.head.schemaId, request.body.asJson) map {
             case true => stubData.head.response.isEmpty match {
