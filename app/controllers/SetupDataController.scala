@@ -35,7 +35,7 @@ class SetupDataController @Inject()(schemaValidation: SchemaValidation, dataRepo
   val addData: Action[JsValue] = Action.async(parse.json) {
     implicit request => withJsonBody[DataModel](
       json => json.method.toUpperCase match {
-        case GET | POST =>
+        case GET | POST | PUT =>
           schemaValidation.validateUrlMatch(json.schemaId, json._id) flatMap {
             case true =>
               schemaValidation.validateResponseJson(json.schemaId, json.response) flatMap {

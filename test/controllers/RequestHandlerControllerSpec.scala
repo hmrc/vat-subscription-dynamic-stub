@@ -46,10 +46,18 @@ class RequestHandlerControllerSpec extends TestSupport with MockSchemaValidation
     response = Some(Json.parse("""{"something" : "hello"}"""))
   )
 
-  lazy val successRequestSchema = SchemaModel(
+  lazy val postSuccessRequestSchema = SchemaModel(
     _id = "testRequest",
     url = "someURL",
     method = "POST",
+    responseSchema = Json.parse("""{"response" : "sup"}"""),
+    requestSchema = Some(Json.parse("""{"request" : "jaffa cakes"}"""))
+  )
+
+  lazy val putSuccessRequestSchema = SchemaModel(
+    _id = "testRequest",
+    url = "someURL",
+    method = "PUT",
     responseSchema = Json.parse("""{"response" : "sup"}"""),
     requestSchema = Some(Json.parse("""{"request" : "jaffa cakes"}"""))
   )
@@ -85,7 +93,7 @@ class RequestHandlerControllerSpec extends TestSupport with MockSchemaValidation
       lazy val result = TestRequestHandlerController.postRequestHandler("/test")(FakeRequest())
 
       mockFind(List(successWithBodyModel))
-      mockValidateRequestJson(successWithBodyModel.schemaId, successRequestSchema.requestSchema)(response = true)
+      mockValidateRequestJson(successWithBodyModel.schemaId, postSuccessRequestSchema.requestSchema)(response = true)
 
       await(bodyOf(result)) shouldBe s"${successWithBodyModel.response.get}"
     }
@@ -94,7 +102,7 @@ class RequestHandlerControllerSpec extends TestSupport with MockSchemaValidation
       lazy val result = TestRequestHandlerController.postRequestHandler("/test")(FakeRequest())
 
       mockFind(List(successModel))
-      mockValidateRequestJson(successModel.schemaId, successRequestSchema.requestSchema)(response = true)
+      mockValidateRequestJson(successModel.schemaId, postSuccessRequestSchema.requestSchema)(response = true)
 
       status(result) shouldBe Status.OK
     }
@@ -111,6 +119,47 @@ class RequestHandlerControllerSpec extends TestSupport with MockSchemaValidation
 
     "return a 400 status if the endpoint specified in the POST request can't be found" in {
       lazy val result = TestRequestHandlerController.postRequestHandler("/test")(FakeRequest())
+
+      mockFind(List())
+
+      status(result) shouldBe Status.BAD_REQUEST
+      await(bodyOf(result)) shouldBe s"Could not find endpoint in Dynamic Stub matching the URI: /"
+    }
+  }
+
+
+  "The putRequestHandler method" should {
+
+    "return the corresponding response of an incoming PUT request" in {
+      lazy val result = TestRequestHandlerController.putRequestHandler("/test")(FakeRequest())
+
+      mockFind(List(successWithBodyModel))
+      mockValidateRequestJson(successWithBodyModel.schemaId, putSuccessRequestSchema.requestSchema)(response = true)
+
+      await(bodyOf(result)) shouldBe s"${successWithBodyModel.response.get}"
+    }
+
+    "return a response status when there is no stubbed response body for an incoming PUT request" in {
+      lazy val result = TestRequestHandlerController.putRequestHandler("/test")(FakeRequest())
+
+      mockFind(List(successModel))
+      mockValidateRequestJson(successModel.schemaId, putSuccessRequestSchema.requestSchema)(response = true)
+
+      status(result) shouldBe Status.OK
+    }
+
+    "return a 400 status if the request body doesn't validate against the stub" in {
+      lazy val result = TestRequestHandlerController.putRequestHandler("/test")(FakeRequest())
+
+      mockFind(List(successWithBodyModel))
+      mockValidateRequestJson(successWithBodyModel.schemaId, None)(response = false)
+
+      status(result) shouldBe Status.BAD_REQUEST
+      await(bodyOf(result)) shouldBe s"The Json Body:\n\nNone did not validate against the Schema Definition"
+    }
+
+    "return a 400 status if the endpoint specified in the PUT request can't be found" in {
+      lazy val result = TestRequestHandlerController.putRequestHandler("/test")(FakeRequest())
 
       mockFind(List())
 
