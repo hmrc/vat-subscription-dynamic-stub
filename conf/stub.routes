@@ -2,3 +2,4 @@
 
 GET        /*url                                                 @controllers.RequestHandlerController.getRequestHandler(url)
 POST       /*url                                                 @controllers.RequestHandlerController.postRequestHandler(url)
+PUT        /*url                                                 @controllers.RequestHandlerController.putRequestHandler(url)
