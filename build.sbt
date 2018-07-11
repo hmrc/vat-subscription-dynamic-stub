@@ -18,12 +18,12 @@ val compile: Seq[ModuleID] = Seq(
 
 def test(scope: String = "test,it"): Seq[ModuleID] = Seq(
   "uk.gov.hmrc" %% "hmrctest" % "3.0.0" % scope,
-  "org.scalatest" %% "scalatest" % "2.2.6" % scope,
+  "org.scalatest" %% "scalatest" % "3.0.0" % scope,
   "org.pegdown" % "pegdown" % "1.6.0" % scope,
-  "org.jsoup" % "jsoup" % "1.8.3" % scope,
+  "org.jsoup" % "jsoup" % "1.10.2" % scope,
   "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
   "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.0" % scope,
-  "org.mockito" % "mockito-core" % "2.7.17" % "test"
+  "org.mockito" % "mockito-core" % "2.13.0" % "test"
 )
 
 lazy val appDependencies : Seq[ModuleID] = compile ++ test()
