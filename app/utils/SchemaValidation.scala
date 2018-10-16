@@ -17,9 +17,9 @@
 package utils
 
 import javax.inject.{Inject, Singleton}
-
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
+import com.github.fge.jsonschema.core.report.ProcessingReport
 import com.github.fge.jsonschema.main.{JsonSchema, JsonSchemaFactory}
 import models.SchemaModel
 import play.api.Logger
@@ -74,7 +74,11 @@ class SchemaValidation @Inject()(repository: SchemaRepository) {
           response =>
             val jsonParser = jsonFactory.createParser(response.toString)
             val jsonNode: JsonNode = jsonMapper.readTree(jsonParser)
-            loadRequestSchema(schema.requestSchema.get).validate(jsonNode).isSuccess
+            val result: ProcessingReport = loadRequestSchema(schema.requestSchema.get).validate(jsonNode)
+            if(!result.isSuccess) {
+              Logger.warn("Request did not validate against schema: " + result.toString)
+              false
+            } else true
         }
       } else {
         true

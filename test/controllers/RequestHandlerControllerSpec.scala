@@ -114,7 +114,10 @@ class RequestHandlerControllerSpec extends TestSupport with MockSchemaValidation
       mockValidateRequestJson(successWithBodyModel.schemaId, None)(response = false)
 
       status(result) shouldBe Status.BAD_REQUEST
-      await(bodyOf(result)) shouldBe s"The Json Body:\n\nNone did not validate against the Schema Definition"
+      await(bodyOf(result)) shouldBe Json.obj(
+        "code" -> "400",
+        "reason" -> "Request did not validate against schema"
+      ).toString
     }
 
     "return a 400 status if the endpoint specified in the POST request can't be found" in {
@@ -155,7 +158,10 @@ class RequestHandlerControllerSpec extends TestSupport with MockSchemaValidation
       mockValidateRequestJson(successWithBodyModel.schemaId, None)(response = false)
 
       status(result) shouldBe Status.BAD_REQUEST
-      await(bodyOf(result)) shouldBe s"The Json Body:\n\nNone did not validate against the Schema Definition"
+      await(bodyOf(result)) shouldBe Json.obj(
+        "code" -> "400",
+        "reason" -> "Request did not validate against schema"
+      ).toString
     }
 
     "return a 400 status if the endpoint specified in the PUT request can't be found" in {
