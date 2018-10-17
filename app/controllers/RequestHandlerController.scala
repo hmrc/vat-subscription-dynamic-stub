@@ -17,8 +17,8 @@
 package controllers
 
 import javax.inject.{Inject, Singleton}
-
 import models.HttpMethod._
+import play.api.libs.json.{JsObject, JsValue, Json}
 import play.api.mvc.{Action, AnyContent}
 import repositories.DataRepository
 import uk.gov.hmrc.play.bootstrap.controller.BaseController
@@ -63,7 +63,7 @@ class RequestHandlerController @Inject()(schemaValidation: SchemaValidation, dat
               }
             }
             case false => {
-              BadRequest(s"The Json Body:\n\n${request.body.asJson} did not validate against the Schema Definition")
+              BadRequest(Json.obj("code" -> "400", "reason" -> "Request did not validate against schema"))
             }
           }
           case _ => {
