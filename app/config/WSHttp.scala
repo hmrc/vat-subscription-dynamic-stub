@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import uk.gov.hmrc.play.config.{AppName, RunMode}
 import uk.gov.hmrc.play.http.ws._
 
 @Singleton
-class WSHttp @Inject()(val environment: Environment,
+abstract class WSHttp @Inject()(val environment: Environment,
                        val conf: Configuration,
                        override val auditConnector: MicroserviceAuditConnector)
   extends WSGet with HttpGet
