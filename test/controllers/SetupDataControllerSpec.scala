@@ -19,12 +19,9 @@ package controllers
 import play.api.libs.json.Json
 import play.mvc.Http.Status
 import models.DataModel
-import play.api.mvc.Result
 import play.api.test.FakeRequest
 
-import scala.concurrent.Future
 import mocks.{MockDataRepository, MockSchemaValidation}
-import play.api.Application
 import testUtils.TestSupport
 
 class SetupDataControllerSpec extends TestSupport with MockSchemaValidation with MockDataRepository{
