@@ -14,18 +14,8 @@
  * limitations under the License.
  */
 
-package models
+package models.requests
 
-import play.api.libs.json.{JsValue, Json, OFormat}
+import play.api.mvc.{Request, WrappedRequest}
 
-case class DataModel(
-                        _id: String,        // URL of the Request
-                        schemaId: String,   // Name/ID of the Schema to Validate Against
-                        method: String,
-                        status: Int,
-                        response: Option[JsValue]
-                      )
-
-object DataModel {
-  implicit val formats: OFormat[DataModel] = Json.format[DataModel]
-}
+case class AuthenticatedRequest[A] (request: Request[A], externalId: String) extends WrappedRequest[A](request)
