@@ -27,12 +27,12 @@ val appName = "vat-subscription-dynamic-stub"
 val compile: Seq[ModuleID] = Seq(
   "uk.gov.hmrc" %% "play-reactivemongo" % "6.7.0",
   ws,
-  "uk.gov.hmrc" %% "bootstrap-play-25" % "4.11.0",
+  "uk.gov.hmrc" %% "bootstrap-play-25" % "4.13.0",
   "com.github.fge" % "json-schema-validator" % "2.2.6"
 )
 
 def test(scope: String = "test,it"): Seq[ModuleID] = Seq(
-  "uk.gov.hmrc" %% "hmrctest" % "3.8.0-play-25" % scope,
+  "uk.gov.hmrc" %% "hmrctest" % "3.9.0-play-25" % scope,
   "org.scalatest" %% "scalatest" % "3.0.5" % scope,
   "org.pegdown" % "pegdown" % "1.6.0" % scope,
   "org.jsoup" % "jsoup" % "1.11.3" % scope,
