@@ -26,7 +26,7 @@ import testUtils.TestSupport
 
 class SetupDataControllerSpec extends TestSupport with MockSchemaValidation with MockDataRepository{
 
-    object TestSetupDataController extends SetupDataController(mockSchemaValidation, mockDataRepository)
+    object TestSetupDataController extends SetupDataController(mockSchemaValidation, mockDataRepository, cc)
 
     "SetupDataController.addData" when {
 

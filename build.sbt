@@ -25,20 +25,21 @@ import sbt.Tests.{Group, SubProcess}
 val appName = "vat-subscription-dynamic-stub"
 
 val compile: Seq[ModuleID] = Seq(
-  "uk.gov.hmrc" %% "play-reactivemongo" % "6.8.0",
+  "uk.gov.hmrc" %% "simple-reactivemongo" % "7.29.0-play-26",
   ws,
-  "uk.gov.hmrc" %% "bootstrap-play-25" % "5.1.0",
+  "uk.gov.hmrc" %% "bootstrap-play-26" % "1.14.0",
   "com.github.fge" % "json-schema-validator" % "2.2.6"
 )
 
 def test(scope: String = "test,it"): Seq[ModuleID] = Seq(
-  "uk.gov.hmrc" %% "hmrctest" % "3.9.0-play-25" % scope,
-  "org.scalatest" %% "scalatest" % "3.0.5" % scope,
+  "uk.gov.hmrc" %% "hmrctest" % "3.9.0-play-26" % scope,
+  "org.scalatest" %% "scalatest" % "3.0.8" % scope,
   "org.pegdown" % "pegdown" % "1.6.0" % scope,
   "org.jsoup" % "jsoup" % "1.11.3" % scope,
   "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
-  "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.1" % scope,
-  "org.mockito" % "mockito-core" % "2.21.0" % "test"
+  "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.0" % scope,
+  "org.mockito" % "mockito-core" % "2.24.5" % "test",
+  "org.scalamock" %% "scalamock-scalatest-support" % "3.6.0" % scope
 )
 
 lazy val appDependencies: Seq[ModuleID] = compile ++ test()
@@ -68,8 +69,7 @@ lazy val microservice = Project(appName, file("."))
     majorVersion := 0,
     libraryDependencies ++= appDependencies,
     retrieveManaged := true,
-    evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
-    routesGenerator := StaticRoutesGenerator
+    evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false)
   )
   .configs(IntegrationTest)
   .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)

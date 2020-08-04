@@ -21,11 +21,11 @@ import play.api.libs.json.Format
 import reactivemongo.api.DB
 import reactivemongo.api.commands.WriteResult
 import reactivemongo.bson.BSONObjectID
-import uk.gov.hmrc.mongo.{ReactiveRepository, Repository}
+import uk.gov.hmrc.mongo.ReactiveRepository
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait DynamicStubRepository[T, O] extends Repository[T, BSONObjectID] {
+trait DynamicStubRepository[T, O] extends ReactiveRepository[T, BSONObjectID] {
 
   def findById(o: O)(implicit ec: ExecutionContext): Future[T]
 
