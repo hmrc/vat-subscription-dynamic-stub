@@ -31,7 +31,7 @@ trait MockDataRepository extends TestSupport{
   val successWriteResult = DefaultWriteResult(ok = true, n = 1, writeErrors = Seq(), None, None, None)
   val errorWriteResult = DefaultWriteResult(ok = false, n = 1, writeErrors = Seq(WriteError(1,1,"Error")), None, None, None)
 
-  lazy val mockDataRepository: DataRepository = new DataRepository {
+  lazy val mockDataRepository: DataRepository = new DataRepository(rmc) {
     override lazy val repository: StubbedDataRepositoryBase = mock[StubbedDataRepositoryBase]
   }
 

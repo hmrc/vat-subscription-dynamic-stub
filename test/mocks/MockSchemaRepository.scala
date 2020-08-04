@@ -31,7 +31,7 @@ trait MockSchemaRepository extends TestSupport {
   val successWriteResult = DefaultWriteResult(ok = true, n = 1, writeErrors = Seq(), None, None, None)
   val errorWriteResult = DefaultWriteResult(ok = false, n = 1, writeErrors = Seq(WriteError(1,1,"Error")), None, None, None)
 
-  lazy val mockSchemaRepository: SchemaRepository = new SchemaRepository {
+  lazy val mockSchemaRepository: SchemaRepository = new SchemaRepository(rmc) {
     override lazy val repository: SchemaRepositoryBase = mock[SchemaRepositoryBase]
   }
 

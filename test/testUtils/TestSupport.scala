@@ -22,6 +22,7 @@ import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, Suite}
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.mvc.ControllerComponents
 import play.api.test.Helpers.stubControllerComponents
+import play.modules.reactivemongo.ReactiveMongoComponent
 import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.ExecutionContext
@@ -37,5 +38,7 @@ trait TestSupport extends UnitSpec with GuiceOneServerPerSuite with MockitoSugar
   implicit val config: Config = app.configuration.underlying
 
   lazy val cc: ControllerComponents = stubControllerComponents()
+
+  lazy val rmc: ReactiveMongoComponent = app.injector.instanceOf[ReactiveMongoComponent]
 
 }
