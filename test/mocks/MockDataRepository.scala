@@ -29,7 +29,7 @@ import scala.concurrent.Future
 trait MockDataRepository extends TestSupport{
 
   val successWriteResult = UpdateWriteResult(ok = true, n = 1, nModified = 1, upserted= Seq(), writeErrors = Seq(), None, None, None)
-  val errorWriteResult = UpdateWriteResult(ok = false, n = 1, nModified = 1, upserted = Seq(), writeErrors = Seq(WriteError(1,1,"Error")), None, None, None)
+  val errorWriteResult = UpdateWriteResult(ok = false, n = 1, nModified = 0, upserted = Seq(), writeErrors = Seq(WriteError(1,1,"Error")), None, None, None)
 
   lazy val mockDataRepository: DataRepository = new DataRepository(rmc) {
     override lazy val repository: StubbedDataRepositoryBase = mock[StubbedDataRepositoryBase]
