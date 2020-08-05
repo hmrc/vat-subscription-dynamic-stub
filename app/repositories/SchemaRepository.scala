@@ -22,6 +22,7 @@ import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.DefaultDB
 import reactivemongo.api.commands._
 import uk.gov.hmrc.mongo.MongoConnector
+import reactivemongo.api.WriteConcern.Acknowledged
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -40,7 +41,7 @@ class SchemaRepository @Inject()(reactiveMongoComponent: ReactiveMongoComponent)
       remove("_id" -> schemaId)
 
     override def removeAll()(implicit ec: ExecutionContext): Future[WriteResult] =
-      removeAll(WriteConcern.Acknowledged)
+      removeAll(Acknowledged)
 
     override def addEntry(document: SchemaModel)(implicit ec: ExecutionContext): Future[WriteResult] =
       insert(document)

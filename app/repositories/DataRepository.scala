@@ -22,6 +22,8 @@ import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.DefaultDB
 import reactivemongo.api.commands._
 import uk.gov.hmrc.mongo.MongoConnector
+import reactivemongo.api.WriteConcern.Acknowledged
+
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -33,7 +35,7 @@ class DataRepository @Inject()(reactiveMongoComponent: ReactiveMongoComponent){
 
   lazy val repository = new StubbedDataRepositoryBase() {
 
-    override def removeAll()(implicit ec: ExecutionContext): Future[WriteResult] = removeAll(WriteConcern.Acknowledged)
+    override def removeAll()(implicit ec: ExecutionContext): Future[WriteResult] = removeAll(Acknowledged)
 
     override def removeById(url: String)(implicit ec: ExecutionContext): Future[WriteResult] = remove("_id" -> url)
 
