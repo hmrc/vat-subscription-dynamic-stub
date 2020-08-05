@@ -28,7 +28,7 @@ import scala.concurrent.Future
 
 class SetupSchemaControllerSpec extends TestSupport with MockSchemaRepository {
 
-  object TestSetupSchemaController extends SetupSchemaController(mockSchemaRepository)
+  object TestSetupSchemaController extends SetupSchemaController(mockSchemaRepository, cc)
 
   "The SetupSchemaController" when {
 

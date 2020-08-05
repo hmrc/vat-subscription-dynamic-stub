@@ -17,17 +17,17 @@
 package controllers
 
 import javax.inject.{Inject, Singleton}
-
 import models.SchemaModel
 import play.api.libs.json.JsValue
-import play.api.mvc.{Action, AnyContent}
+import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import repositories.SchemaRepository
-import uk.gov.hmrc.play.bootstrap.controller.BaseController
+import uk.gov.hmrc.play.bootstrap.controller.BackendController
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
-class SetupSchemaController @Inject()(schemaRepository: SchemaRepository) extends BaseController {
+class SetupSchemaController @Inject()(schemaRepository: SchemaRepository,
+                                      cc: ControllerComponents) extends BackendController(cc) {
 
   val addSchema: Action[JsValue] = Action.async(parse.json) {
     implicit request => withJsonBody[SchemaModel](

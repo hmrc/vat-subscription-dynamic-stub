@@ -19,16 +19,13 @@ package controllers
 import mocks.{MockDataRepository, MockSchemaValidation}
 import models.{DataModel, SchemaModel}
 import play.api.libs.json.Json
-import play.api.mvc.{Action, Result}
-import play.api.test.{FakeHeaders, FakeRequest}
+import play.api.test.FakeRequest
 import play.mvc.Http.Status
 import testUtils.TestSupport
 
-import scala.concurrent.Future
-
 class RequestHandlerControllerSpec extends TestSupport with MockSchemaValidation with MockDataRepository {
 
-  object TestRequestHandlerController extends RequestHandlerController(mockSchemaValidation, mockDataRepository)
+  object TestRequestHandlerController extends RequestHandlerController(mockSchemaValidation, mockDataRepository, cc)
 
   lazy val successModel = DataModel(
     _id = "test",
@@ -72,20 +69,20 @@ class RequestHandlerControllerSpec extends TestSupport with MockSchemaValidation
     }
 
     "return the status and body" in {
-      lazy val result = TestRequestHandlerController.getRequestHandler("/test")(FakeRequest())
+        lazy val result = TestRequestHandlerController.getRequestHandler("/test")(FakeRequest())
 
-      mockFind(List(successWithBodyModel))
-      status(result) shouldBe Status.OK
-      await(bodyOf(result)) shouldBe s"${successWithBodyModel.response.get}"
-    }
+        mockFind(List(successWithBodyModel))
+        status(result) shouldBe Status.OK
+        await(bodyOf(result)) shouldBe s"${successWithBodyModel.response.get}"
+      }
 
-    "return a 400 status when the endpoint cannot be found" in {
-      lazy val result = TestRequestHandlerController.getRequestHandler("/test")(FakeRequest())
+      "return a 400 status when the endpoint cannot be found" in {
+        lazy val result = TestRequestHandlerController.getRequestHandler("/test")(FakeRequest())
 
-      mockFind(List())
-      status(result) shouldBe Status.BAD_REQUEST
-    }
-  }
+        mockFind(List())
+        status(result) shouldBe Status.BAD_REQUEST
+      }
+}
 
   "The postRequestHandler method" should {
 

@@ -20,7 +20,7 @@ import com.github.fge.jsonschema.main.JsonSchema
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterEach
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json.JsValue
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.SchemaValidation

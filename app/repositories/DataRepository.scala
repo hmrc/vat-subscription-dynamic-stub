@@ -17,19 +17,25 @@
 package repositories
 
 import javax.inject.{Inject, Singleton}
-
 import models.DataModel
-import play.modules.reactivemongo.MongoDbConnection
+import play.modules.reactivemongo.ReactiveMongoComponent
+import reactivemongo.api.DefaultDB
 import reactivemongo.api.commands._
+import uk.gov.hmrc.mongo.MongoConnector
+import reactivemongo.api.WriteConcern.Acknowledged
+
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class DataRepository @Inject()() extends MongoDbConnection {
+class DataRepository @Inject()(reactiveMongoComponent: ReactiveMongoComponent){
+
+  lazy val mongoConnector: MongoConnector = reactiveMongoComponent.mongoConnector
+  implicit lazy val db: () => DefaultDB = mongoConnector.db
 
   lazy val repository = new StubbedDataRepositoryBase() {
 
-    override def removeAll()(implicit ec: ExecutionContext): Future[WriteResult] = removeAll(WriteConcern.Acknowledged)
+    override def removeAll()(implicit ec: ExecutionContext): Future[WriteResult] = removeAll(Acknowledged)
 
     override def removeById(url: String)(implicit ec: ExecutionContext): Future[WriteResult] = remove("_id" -> url)
 

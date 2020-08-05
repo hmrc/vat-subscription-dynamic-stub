@@ -20,7 +20,7 @@ import models.DataModel
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.{reset, when}
 import org.mockito.stubbing.OngoingStubbing
-import reactivemongo.api.commands.{DefaultWriteResult, WriteError, WriteResult}
+import reactivemongo.api.commands.{UpdateWriteResult, WriteError, WriteResult}
 import repositories.{DataRepository, StubbedDataRepositoryBase}
 import testUtils.TestSupport
 
@@ -28,10 +28,10 @@ import scala.concurrent.Future
 
 trait MockDataRepository extends TestSupport{
 
-  val successWriteResult = DefaultWriteResult(ok = true, n = 1, writeErrors = Seq(), None, None, None)
-  val errorWriteResult = DefaultWriteResult(ok = false, n = 1, writeErrors = Seq(WriteError(1,1,"Error")), None, None, None)
+  val successWriteResult = UpdateWriteResult(ok = true, n = 1, nModified = 1, upserted= Seq(), writeErrors = Seq(), None, None, None)
+  val errorWriteResult = UpdateWriteResult(ok = false, n = 1, nModified = 0, upserted = Seq(), writeErrors = Seq(WriteError(1,1,"Error")), None, None, None)
 
-  lazy val mockDataRepository: DataRepository = new DataRepository {
+  lazy val mockDataRepository: DataRepository = new DataRepository(rmc) {
     override lazy val repository: StubbedDataRepositoryBase = mock[StubbedDataRepositoryBase]
   }
 
