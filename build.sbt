@@ -35,10 +35,10 @@ def test(scope: String = "test,it"): Seq[ModuleID] = Seq(
   "uk.gov.hmrc" %% "hmrctest" % "3.9.0-play-26" % scope,
   "org.scalatest" %% "scalatest" % "3.0.8" % scope,
   "org.pegdown" % "pegdown" % "1.6.0" % scope,
-  "org.jsoup" % "jsoup" % "1.11.3" % scope,
+  "org.jsoup" % "jsoup" % "1.12.1" % scope,
   "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
-  "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.0" % scope,
-  "org.mockito" % "mockito-core" % "2.24.5" % "test"
+  "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.3" % scope,
+  "org.mockito" % "mockito-core" % "3.2.0" % scope
 )
 
 lazy val appDependencies: Seq[ModuleID] = compile ++ test()
@@ -87,8 +87,6 @@ lazy val microservice = Project(appName, file("."))
 
 def oneForkedJvmPerTest(tests: Seq[TestDefinition]): Seq[Group] = {
   tests.map { test =>
-    new Group(test.name, Seq(test),
-      SubProcess(ForkOptions().withRunJVMOptions(Vector(s"-
-        Dtest.name=${test.name}"))))
+    new Group(test.name, Seq(test), SubProcess(ForkOptions().withRunJVMOptions(Vector(s"- Dtest.name=${test.name}"))))
   }
 }
