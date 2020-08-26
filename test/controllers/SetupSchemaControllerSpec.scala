@@ -63,13 +63,6 @@ class SetupSchemaControllerSpec extends TestSupport with MockSchemaRepository {
         responseSchema = Json.parse("{}")
       )
 
-      lazy val errorModel = SchemaModel(
-        _id = "test",
-        url = "/test",
-        method = "GET",
-        responseSchema = Json.parse("{}")
-      )
-
       lazy val request = FakeRequest().withBody(Json.toJson(successModel)).withHeaders(("Content-Type","application/json"))
       lazy val result = TestSetupSchemaController.addSchema(request)
 

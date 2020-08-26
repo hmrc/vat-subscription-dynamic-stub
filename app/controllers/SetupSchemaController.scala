@@ -21,7 +21,7 @@ import models.SchemaModel
 import play.api.libs.json.JsValue
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import repositories.SchemaRepository
-import uk.gov.hmrc.play.bootstrap.controller.BackendController
+import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
