@@ -27,7 +27,7 @@ val appName = "vat-subscription-dynamic-stub"
 val compile: Seq[ModuleID] = Seq(
   "uk.gov.hmrc" %% "simple-reactivemongo" % "7.29.0-play-26",
   ws,
-  "uk.gov.hmrc" %% "bootstrap-play-26" % "1.14.0",
+  "uk.gov.hmrc" %% "bootstrap-backend-play-26" % "2.24.0",
   "com.github.fge" % "json-schema-validator" % "2.2.6"
 )
 
@@ -66,6 +66,7 @@ lazy val microservice = Project(appName, file("."))
   .settings(defaultSettings(): _*)
   .settings(
     majorVersion := 0,
+    scalaVersion := "2.12.11",
     libraryDependencies ++= appDependencies,
     retrieveManaged := true,
     evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false)
@@ -84,7 +85,10 @@ lazy val microservice = Project(appName, file("."))
     Resolver.jcenterRepo
   ))
 
-def oneForkedJvmPerTest(tests: Seq[TestDefinition]): Seq[Group] =
-  tests map {
-    test => Group(test.name, Seq(test), SubProcess(ForkOptions(runJVMOptions = Seq("-Dtest.name=" + test.name))))
+def oneForkedJvmPerTest(tests: Seq[TestDefinition]): Seq[Group] = {
+  tests.map { test =>
+    new Group(test.name, Seq(test),
+      SubProcess(ForkOptions().withRunJVMOptions(Vector(s"-
+        Dtest.name=${test.name}"))))
   }
+}
