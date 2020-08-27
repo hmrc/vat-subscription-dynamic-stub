@@ -63,7 +63,6 @@ class SetupDataController @Inject()(schemaValidation: SchemaValidation,
   }
 
   val removeData: String => Action[AnyContent] = url => Action.async {
-    implicit request =>
       dataRepository().removeById(url).map(_.ok match {
         case true => Ok("Success")
         case _ => InternalServerError("Could not delete data")
@@ -71,7 +70,6 @@ class SetupDataController @Inject()(schemaValidation: SchemaValidation,
   }
 
   val removeAll: Action[AnyContent] = Action.async {
-    implicit request =>
       dataRepository().removeAll().map(_.ok match {
         case true => Ok("Removed All Stubbed Data")
         case _ => InternalServerError("Unexpected Error Clearing MongoDB.")

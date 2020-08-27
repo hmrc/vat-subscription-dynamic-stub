@@ -43,7 +43,6 @@ class SetupSchemaController @Inject()(schemaRepository: SchemaRepository,
   }
 
   val removeSchema: String => Action[AnyContent] = id => Action.async {
-    implicit request =>
       schemaRepository().removeById(id).map(_.ok match {
         case true => Ok("Success")
         case _ => InternalServerError("Could not delete data")
@@ -51,7 +50,6 @@ class SetupSchemaController @Inject()(schemaRepository: SchemaRepository,
   }
 
   val removeAll: Action[AnyContent] = Action.async {
-    implicit request =>
       schemaRepository().removeAll().map(_.ok match {
         case true => Ok("Removed All Schemas")
         case _ => InternalServerError("Unexpected Error Clearing MongoDB.")
