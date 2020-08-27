@@ -21,7 +21,6 @@ import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
 import com.github.fge.jsonschema.core.report.ProcessingReport
 import com.github.fge.jsonschema.main.{JsonSchema, JsonSchemaFactory}
-import models.SchemaModel
 import play.api.Logger
 import play.api.libs.json.JsValue
 import repositories.SchemaRepository

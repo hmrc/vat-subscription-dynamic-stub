@@ -20,6 +20,7 @@ import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 import uk.gov.hmrc.versioning.SbtGitVersioning
 import uk.gov.hmrc.{SbtArtifactory, SbtAutoBuildPlugin}
 import play.core.PlayVersion
+import play.sbt.routes.RoutesKeys
 import sbt.Tests.{Group, SubProcess}
 
 val appName = "vat-subscription-dynamic-stub"
@@ -27,7 +28,7 @@ val appName = "vat-subscription-dynamic-stub"
 val compile: Seq[ModuleID] = Seq(
   "uk.gov.hmrc" %% "simple-reactivemongo" % "7.29.0-play-26",
   ws,
-  "uk.gov.hmrc" %% "bootstrap-play-26" % "1.14.0",
+  "uk.gov.hmrc" %% "bootstrap-backend-play-26" % "2.24.0",
   "com.github.fge" % "json-schema-validator" % "2.2.6"
 )
 
@@ -35,20 +36,22 @@ def test(scope: String = "test,it"): Seq[ModuleID] = Seq(
   "uk.gov.hmrc" %% "hmrctest" % "3.9.0-play-26" % scope,
   "org.scalatest" %% "scalatest" % "3.0.8" % scope,
   "org.pegdown" % "pegdown" % "1.6.0" % scope,
-  "org.jsoup" % "jsoup" % "1.11.3" % scope,
+  "org.jsoup" % "jsoup" % "1.12.1" % scope,
   "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
-  "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.0" % scope,
-  "org.mockito" % "mockito-core" % "2.24.5" % "test"
+  "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.3" % scope,
+  "org.mockito" % "mockito-core" % "3.2.0" % scope
 )
 
 lazy val appDependencies: Seq[ModuleID] = compile ++ test()
 lazy val plugins: Seq[Plugins] = Seq.empty
 lazy val playSettings: Seq[Setting[_]] = Seq.empty
 
+RoutesKeys.routesImport := Seq.empty
+
 lazy val scoverageSettings = {
   import scoverage.ScoverageKeys
   Seq(
-    ScoverageKeys.coverageExcludedPackages := "<empty>;Reverse.*;models/.data/..*;" +
+    ScoverageKeys.coverageExcludedPackages := "<empty>;.*Reverse.*;models/.data/..*;" +
       "filters.*;.handlers.*;components.*;.*BuildInfo.*;.*FrontendAuditConnector.*;.*Routes.*;views.html.templates.*;views.html.feedback.*;config.*;" +
       "controllers.feedback.*;app.*;prod.*;config.*;com.*;testOnly.*;\"",
     ScoverageKeys.coverageMinimum := 90,
@@ -66,6 +69,7 @@ lazy val microservice = Project(appName, file("."))
   .settings(defaultSettings(): _*)
   .settings(
     majorVersion := 0,
+    scalaVersion := "2.12.11",
     libraryDependencies ++= appDependencies,
     retrieveManaged := true,
     evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false)
@@ -84,7 +88,8 @@ lazy val microservice = Project(appName, file("."))
     Resolver.jcenterRepo
   ))
 
-def oneForkedJvmPerTest(tests: Seq[TestDefinition]): Seq[Group] =
-  tests map {
-    test => Group(test.name, Seq(test), SubProcess(ForkOptions(runJVMOptions = Seq("-Dtest.name=" + test.name))))
+def oneForkedJvmPerTest(tests: Seq[TestDefinition]): Seq[Group] = {
+  tests.map { test =>
+    new Group(test.name, Seq(test), SubProcess(ForkOptions().withRunJVMOptions(Vector(s"- Dtest.name=${test.name}"))))
   }
+}
