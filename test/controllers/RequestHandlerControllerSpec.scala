@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,11 +76,11 @@ class RequestHandlerControllerSpec extends TestSupport with MockSchemaValidation
         await(bodyOf(result)) shouldBe s"${successWithBodyModel.response.get}"
       }
 
-      "return a 400 status when the endpoint cannot be found" in {
+      "return a 404 status when the endpoint cannot be found" in {
         lazy val result = TestRequestHandlerController.getRequestHandler("/test")(FakeRequest())
 
         mockFind(List())
-        status(result) shouldBe Status.BAD_REQUEST
+        status(result) shouldBe Status.NOT_FOUND
       }
 }
 
@@ -117,13 +117,16 @@ class RequestHandlerControllerSpec extends TestSupport with MockSchemaValidation
       ).toString
     }
 
-    "return a 400 status if the endpoint specified in the POST request can't be found" in {
+    "return a 404 status if the endpoint specified in the POST request can't be found" in {
       lazy val result = TestRequestHandlerController.postRequestHandler("/test")(FakeRequest())
 
       mockFind(List())
 
-      status(result) shouldBe Status.BAD_REQUEST
-      await(bodyOf(result)) shouldBe s"Could not find endpoint in Dynamic Stub matching the URI: /"
+      status(result) shouldBe Status.NOT_FOUND
+      await(bodyOf(result)) shouldBe Json.obj(
+        "code" -> "NOT_FOUND",
+        "reason" -> "The back end has indicated that No subscription can be found."
+      ).toString
     }
   }
 
@@ -161,13 +164,16 @@ class RequestHandlerControllerSpec extends TestSupport with MockSchemaValidation
       ).toString
     }
 
-    "return a 400 status if the endpoint specified in the PUT request can't be found" in {
+    "return a 404 status if the endpoint specified in the PUT request can't be found" in {
       lazy val result = TestRequestHandlerController.putRequestHandler("/test")(FakeRequest())
 
       mockFind(List())
 
-      status(result) shouldBe Status.BAD_REQUEST
-      await(bodyOf(result)) shouldBe s"Could not find endpoint in Dynamic Stub matching the URI: /"
+      status(result) shouldBe Status.NOT_FOUND
+      await(bodyOf(result)) shouldBe Json.obj(
+        "code" -> "NOT_FOUND",
+        "reason" -> "The back end has indicated that No subscription can be found."
+      ).toString
     }
   }
 

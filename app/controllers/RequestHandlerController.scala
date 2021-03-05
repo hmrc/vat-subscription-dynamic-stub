@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package controllers
 
 import javax.inject.{Inject, Singleton}
 import models.HttpMethod._
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import repositories.DataRepository
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
@@ -34,16 +34,10 @@ class RequestHandlerController @Inject()(schemaValidation: SchemaValidation,
 
   def getRequestHandler(url: String): Action[AnyContent] = Action.async {
     implicit request => {
-      dataRepository().find("_id" -> s"""${request.uri}""", "method" -> GET).map {
-        stubData => if (stubData.nonEmpty) {
-          if (stubData.head.response.isEmpty) {
-            Status(stubData.head.status) //Only return status, no body.
-          } else {
-            Status(stubData.head.status)(stubData.head.response.get)  //return status and body
-          }
-        } else {
-          BadRequest(s"Could not find endpoint in Dynamic Stub matching the URI: ${request.uri}")
-        }
+      dataRepository().find("_id" -> request.uri, "method" -> GET).map {
+        case head :: _ if head.response.nonEmpty => Status(head.status)(head.response.get)
+        case head :: _ => Status(head.status)
+        case _ => NotFound(errorResponseBody)
       }
     }
   }
@@ -53,7 +47,7 @@ class RequestHandlerController @Inject()(schemaValidation: SchemaValidation,
 
   private def requestHandler(url: String, method: String): Action[AnyContent] = Action.async {
     implicit request => {
-      dataRepository().find("_id" -> s"""${request.uri}""", "method" -> method).flatMap {
+      dataRepository().find("_id" -> request.uri, "method" -> method).flatMap {
         stubData => if (stubData.nonEmpty) {
           schemaValidation.validateRequestJson(stubData.head.schemaId, request.body.asJson) map {
             case true => if (stubData.head.response.isEmpty) {
@@ -64,10 +58,15 @@ class RequestHandlerController @Inject()(schemaValidation: SchemaValidation,
             case false => BadRequest(Json.obj("code" -> "400", "reason" -> "Request did not validate against schema"))
           }
         } else {
-          Future(BadRequest(s"Could not find endpoint in Dynamic Stub matching the URI: ${request.uri}"))
+          Future(NotFound(errorResponseBody))
         }
       }
     }
   }
+
+  val errorResponseBody: JsValue = Json.obj(
+    "code" -> "NOT_FOUND",
+    "reason" -> "The back end has indicated that No subscription can be found."
+  )
 
 }
