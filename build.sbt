@@ -25,21 +25,20 @@ import sbt.Tests.{Group, SubProcess}
 
 val appName = "vat-subscription-dynamic-stub"
 
-val compile: Seq[ModuleID] = Seq(
-  "uk.gov.hmrc" %% "simple-reactivemongo" % "7.30.0-play-26",
-  ws,
-  "uk.gov.hmrc" %% "bootstrap-backend-play-26" % "2.25.0",
-  "com.github.fge" % "json-schema-validator" % "2.2.6"
+val compile: Seq[ModuleID] = Seq(ws,
+  "uk.gov.hmrc"     %% "simple-reactivemongo"       % "7.31.0-play-26",
+  "uk.gov.hmrc"     %% "bootstrap-backend-play-26"  % "4.1.0",
+  "com.github.fge"  %  "json-schema-validator"      % "2.2.6"
 )
 
 def test(scope: String = "test,it"): Seq[ModuleID] = Seq(
-  "uk.gov.hmrc" %% "hmrctest" % "3.9.0-play-26" % scope,
-  "org.scalatest" %% "scalatest" % "3.0.8" % scope,
-  "org.pegdown" % "pegdown" % "1.6.0" % scope,
-  "org.jsoup" % "jsoup" % "1.12.1" % scope,
-  "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
-  "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.3" % scope,
-  "org.mockito" % "mockito-core" % "3.2.0" % scope
+  "uk.gov.hmrc"             %% "hmrctest"           % "3.10.0-play-26"    % scope,
+  "org.scalatest"           %% "scalatest"          % "3.0.9"             % scope,
+  "org.pegdown"             %  "pegdown"            % "1.6.0"             % scope,
+  "org.jsoup"               %  "jsoup"              % "1.13.1"            % scope,
+  "com.typesafe.play"       %% "play-test"          % PlayVersion.current % scope,
+  "org.scalatestplus.play"  %% "scalatestplus-play" % "3.1.3"             % scope,
+  "org.mockito"             %  "mockito-core"       % "3.2.4"             % scope
 )
 
 lazy val appDependencies: Seq[ModuleID] = compile ++ test()
@@ -52,11 +51,11 @@ lazy val scoverageSettings = {
   import scoverage.ScoverageKeys
   Seq(
     ScoverageKeys.coverageExcludedPackages := "<empty>;" +
-      "Reverse.*;" +
+      ".*Reverse.*;" +
       "models/.data/..*;" +
       "filters.*;" +
-      ".handlers" +
-      ".*;components.*;" +
+      ".handlers.*;" +
+      "components.*;" +
       ".*BuildInfo.*;" +
       ".*FrontendAuditConnector.*;" +
       ".*Routes.*;" +
