@@ -17,8 +17,6 @@
 import sbt._
 import uk.gov.hmrc.DefaultBuildSettings._
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
-import uk.gov.hmrc.versioning.SbtGitVersioning
-import uk.gov.hmrc.{SbtArtifactory, SbtAutoBuildPlugin}
 import play.core.PlayVersion
 import play.sbt.routes.RoutesKeys
 import sbt.Tests.{Group, SubProcess}
@@ -26,8 +24,8 @@ import sbt.Tests.{Group, SubProcess}
 val appName = "vat-subscription-dynamic-stub"
 
 val compile: Seq[ModuleID] = Seq(ws,
-  "uk.gov.hmrc"     %% "simple-reactivemongo"       % "7.31.0-play-26",
-  "uk.gov.hmrc"     %% "bootstrap-backend-play-26"  % "4.1.0",
+  "uk.gov.hmrc"     %% "simple-reactivemongo"       % "8.0.0-play-26",
+  "uk.gov.hmrc"     %% "bootstrap-backend-play-26"  % "5.4.0",
   "com.github.fge"  %  "json-schema-validator"      % "2.2.6"
 )
 
@@ -76,7 +74,7 @@ lazy val scoverageSettings = {
 }
 
 lazy val microservice = Project(appName, file("."))
-  .enablePlugins(Seq(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory) ++ plugins: _*)
+  .enablePlugins(Seq(play.sbt.PlayScala, SbtDistributablesPlugin) ++ plugins: _*)
   .settings(playSettings: _*)
   .settings(scalaSettings: _*)
   .settings(publishingSettings: _*)
@@ -84,7 +82,7 @@ lazy val microservice = Project(appName, file("."))
   .settings(defaultSettings(): _*)
   .settings(
     majorVersion := 0,
-    scalaVersion := "2.12.11",
+    scalaVersion := "2.12.12",
     libraryDependencies ++= appDependencies,
     retrieveManaged := true,
     evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false)
@@ -97,11 +95,8 @@ lazy val microservice = Project(appName, file("."))
     unmanagedSourceDirectories in IntegrationTest := (baseDirectory in IntegrationTest) (base => Seq(base / "it")).value,
     addTestReportOption(IntegrationTest, "int-test-reports"),
     testGrouping in IntegrationTest := oneForkedJvmPerTest((definedTests in IntegrationTest).value),
-    parallelExecution in IntegrationTest := false)
-  .settings(resolvers ++= Seq(
-    Resolver.bintrayRepo("hmrc", "releases"),
-    Resolver.jcenterRepo
-  ))
+    parallelExecution in IntegrationTest := false
+  )
 
 def oneForkedJvmPerTest(tests: Seq[TestDefinition]): Seq[Group] = {
   tests.map { test =>
