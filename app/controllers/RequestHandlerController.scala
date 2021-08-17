@@ -66,7 +66,7 @@ class RequestHandlerController @Inject()(schemaValidation: SchemaValidation,
 
   val errorResponseBody: JsValue = Json.obj(
     "code" -> "NOT_FOUND",
-    "reason" -> "The back end has indicated that No subscription can be found."
+    "reason" -> "No data exists for this user."
   )
 
 }

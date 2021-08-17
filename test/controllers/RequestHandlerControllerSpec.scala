@@ -125,7 +125,7 @@ class RequestHandlerControllerSpec extends TestSupport with MockSchemaValidation
       status(result) shouldBe Status.NOT_FOUND
       await(bodyOf(result)) shouldBe Json.obj(
         "code" -> "NOT_FOUND",
-        "reason" -> "The back end has indicated that No subscription can be found."
+        "reason" -> "No data exists for this user."
       ).toString
     }
   }
@@ -172,7 +172,7 @@ class RequestHandlerControllerSpec extends TestSupport with MockSchemaValidation
       status(result) shouldBe Status.NOT_FOUND
       await(bodyOf(result)) shouldBe Json.obj(
         "code" -> "NOT_FOUND",
-        "reason" -> "The back end has indicated that No subscription can be found."
+        "reason" -> "No data exists for this user."
       ).toString
     }
   }
