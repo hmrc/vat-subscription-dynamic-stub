@@ -66,7 +66,7 @@ class RequestHandlerController @Inject()(schemaValidation: SchemaValidation,
 
   val errorResponseBody: JsValue = Json.obj(
     "code" -> "NOT_FOUND",
-    "reason" -> "No data exists for this user."
+    "reason" -> "No data exists for this request."
   )
 
 }
