@@ -17,18 +17,20 @@
 package testUtils
 
 import com.typesafe.config.Config
-import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, Suite}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.mvc.ControllerComponents
 import play.api.test.Helpers.stubControllerComponents
 import play.modules.reactivemongo.ReactiveMongoComponent
-import uk.gov.hmrc.play.test.UnitSpec
+import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.matchers.should.Matchers
 
 import scala.concurrent.ExecutionContext
 import uk.gov.hmrc.http.HeaderCarrier
 
-trait TestSupport extends UnitSpec with GuiceOneAppPerSuite with MockitoSugar with BeforeAndAfterAll with BeforeAndAfterEach with MaterializerSupport {
+trait TestSupport extends AnyWordSpecLike with GuiceOneAppPerSuite with MockitoSugar with BeforeAndAfterAll with BeforeAndAfterEach with MaterializerSupport
+  with Matchers {
   this: Suite =>
 
   implicit val ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]

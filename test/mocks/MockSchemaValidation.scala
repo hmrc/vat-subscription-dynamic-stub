@@ -20,14 +20,14 @@ import com.github.fge.jsonschema.main.JsonSchema
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterEach
+import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json.JsValue
-import uk.gov.hmrc.play.test.UnitSpec
 import utils.SchemaValidation
 
 import scala.concurrent.Future
 
-trait MockSchemaValidation extends UnitSpec with MockitoSugar with BeforeAndAfterEach {
+trait MockSchemaValidation extends AnyWordSpecLike with MockitoSugar with BeforeAndAfterEach {
 
   val mockSchemaValidation: SchemaValidation = mock[SchemaValidation]
 

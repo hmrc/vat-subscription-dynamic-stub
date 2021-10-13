@@ -23,6 +23,7 @@ import org.mockito.Mockito._
 import play.api.libs.json.Json
 import repositories.{DynamicStubRepository, SchemaRepository}
 import testUtils.TestSupport
+import play.api.test.Helpers.{await, defaultAwaitTimeout}
 
 import scala.concurrent.Future
 
@@ -73,7 +74,7 @@ class SchemaValidationSpec extends TestSupport {
 
       "return a json schema" in {
         lazy val result = validation.loadResponseSchema("testSchema")
-        await(result).isInstanceOf[JsonSchema]
+        result.isInstanceOf[JsonSchema]
       }
     }
 
@@ -98,7 +99,7 @@ class SchemaValidationSpec extends TestSupport {
         val validation = setupMocks(SchemaModel("testSchema","/test","GET", responseSchema = schema))
         val json = Json.parse("""{ "firstName" : "Bob", "lastName" : "Bobson" }""")
         val result = validation.validateResponseJson("testSchema", Some(json))
-        await(result) shouldEqual true
+        result shouldEqual true
       }
     }
 
@@ -110,7 +111,7 @@ class SchemaValidationSpec extends TestSupport {
       lazy val result = validation.validateResponseJson("testSchema", Some(json))
 
       "return false" in {
-        await(result) shouldEqual false
+        result shouldEqual false
       }
     }
   }
@@ -120,7 +121,7 @@ class SchemaValidationSpec extends TestSupport {
 
     "return the url of the SchemaModel" in {
       lazy val result = validation.loadUrlRegex("testSchema")
-      await(result) shouldEqual "/test"
+      result shouldEqual "/test"
     }
   }
 
@@ -128,7 +129,7 @@ class SchemaValidationSpec extends TestSupport {
     lazy val validation = setupMocks(SchemaModel("testSchema","/test","GET", responseSchema = schema))
     "return 'true' if the urls match" in {
       lazy val result = validation.validateUrlMatch("testSchema", "/test")
-      await(result) shouldEqual true
+      result shouldEqual true
     }
 
   }
@@ -155,7 +156,7 @@ class SchemaValidationSpec extends TestSupport {
 
       "return a json schema" in {
         lazy val result = validation.loadRequestSchema(postSchema)
-        await(result).isInstanceOf[JsonSchema]
+        result.isInstanceOf[JsonSchema]
       }
     }
   }

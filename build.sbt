@@ -24,19 +24,19 @@ import sbt.Tests.{Group, SubProcess}
 val appName = "vat-subscription-dynamic-stub"
 
 val compile: Seq[ModuleID] = Seq(ws,
-  "uk.gov.hmrc"     %% "simple-reactivemongo"       % "8.0.0-play-26",
-  "uk.gov.hmrc"     %% "bootstrap-backend-play-26"  % "5.4.0",
-  "com.github.fge"  %  "json-schema-validator"      % "2.2.6"
+  "uk.gov.hmrc"     %% "simple-reactivemongo"       % "8.0.0-play-28",
+  "uk.gov.hmrc"     %% "bootstrap-backend-play-28"  % "5.15.0",
+  "com.github.fge"  %  "json-schema-validator"      % "2.2.14"
 )
 
 def test(scope: String = "test,it"): Seq[ModuleID] = Seq(
-  "uk.gov.hmrc"             %% "hmrctest"           % "3.10.0-play-26"    % scope,
-  "org.scalatest"           %% "scalatest"          % "3.0.9"             % scope,
+  "org.scalatest"           %% "scalatest"          % "3.1.4"             % scope,
   "org.pegdown"             %  "pegdown"            % "1.6.0"             % scope,
   "org.jsoup"               %  "jsoup"              % "1.13.1"            % scope,
   "com.typesafe.play"       %% "play-test"          % PlayVersion.current % scope,
-  "org.scalatestplus.play"  %% "scalatestplus-play" % "3.1.3"             % scope,
-  "org.mockito"             %  "mockito-core"       % "3.2.4"             % scope
+  "org.scalatestplus.play"  %% "scalatestplus-play" % "5.1.0"             % scope,
+  "org.mockito"             %  "mockito-core"       % "3.2.0"             % scope,
+  "org.scalatestplus"      %% "scalatestplus-mockito"    % "1.0.0-M2"    % scope
 )
 
 lazy val appDependencies: Seq[ModuleID] = compile ++ test()
@@ -67,7 +67,7 @@ lazy val scoverageSettings = {
       "com.*;" +
       "testOnly.*;" +
       "\"",
-    ScoverageKeys.coverageMinimum := 90,
+    ScoverageKeys.coverageMinimumStmtTotal := 90,
     ScoverageKeys.coverageFailOnMinimum := false,
     ScoverageKeys.coverageHighlighting := true
   )

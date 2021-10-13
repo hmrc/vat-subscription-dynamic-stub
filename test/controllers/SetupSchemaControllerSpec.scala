@@ -18,11 +18,12 @@ package controllers
 
 import mocks.MockSchemaRepository
 import models.SchemaModel
-import play.api.http.Status
 import play.api.libs.json.Json
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import testUtils.TestSupport
+import play.api.http.Status
+import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, status}
 
 import scala.concurrent.Future
 
@@ -50,7 +51,7 @@ class SetupSchemaControllerSpec extends TestSupport with MockSchemaRepository {
 
       s"Result Body 'Successfully added Schema: ${Json.toJson(successModel)}'" in {
         setupMockAddSchema(successModel)(successWriteResult)
-        await(bodyOf(result)) shouldBe s"Successfully added Schema: ${Json.toJson(successModel)}"
+        contentAsString(result) shouldBe s"Successfully added Schema: ${Json.toJson(successModel)}"
       }
     }
 
@@ -73,7 +74,7 @@ class SetupSchemaControllerSpec extends TestSupport with MockSchemaRepository {
 
       s"Result Body 'Could not store data'" in {
         setupMockAddSchema(successModel)(errorWriteResult)
-        await(bodyOf(result)) shouldBe "Could not store data"
+        contentAsString(result) shouldBe "Could not store data"
       }
 
 //      "Return a status 400 (BadRequest)" in {
