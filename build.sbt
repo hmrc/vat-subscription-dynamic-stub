@@ -35,7 +35,7 @@ def test(scope: String = "test,it"): Seq[ModuleID] = Seq(
   "org.jsoup"               %  "jsoup"              % "1.13.1"            % scope,
   "com.typesafe.play"       %% "play-test"          % PlayVersion.current % scope,
   "org.scalatestplus.play"  %% "scalatestplus-play" % "5.1.0"             % scope,
-  "org.mockito"             %  "mockito-core"       % "3.2.0"             % scope,
+  "org.mockito"             %  "mockito-core"       % "3.2.4"             % scope,
   "org.scalatestplus"      %% "scalatestplus-mockito"    % "1.0.0-M2"    % scope
 )
 
