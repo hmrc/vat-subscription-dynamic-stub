@@ -58,7 +58,7 @@ trait MockSchemaValidation extends AnyWordSpecLike with MockitoSugar with Before
 
   def mockLoadRequestSchema(requestSchema: JsValue)(response: JsonSchema): Unit = {
     when(mockSchemaValidation.loadRequestSchema(ArgumentMatchers.eq(requestSchema)))
-      .thenReturn(Future.successful(response))
+      .thenReturn(response)
   }
 
   def mockValidateRequestJson(schemaId: String, json: Option[JsValue])(response: Boolean): Unit = {

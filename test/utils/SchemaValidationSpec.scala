@@ -99,7 +99,7 @@ class SchemaValidationSpec extends TestSupport {
         val validation = setupMocks(SchemaModel("testSchema","/test","GET", responseSchema = schema))
         val json = Json.parse("""{ "firstName" : "Bob", "lastName" : "Bobson" }""")
         val result = validation.validateResponseJson("testSchema", Some(json))
-        result shouldEqual true
+        await(result) shouldEqual true
       }
     }
 
@@ -111,7 +111,7 @@ class SchemaValidationSpec extends TestSupport {
       lazy val result = validation.validateResponseJson("testSchema", Some(json))
 
       "return false" in {
-        result shouldEqual false
+        await(result) shouldEqual false
       }
     }
   }
@@ -121,7 +121,7 @@ class SchemaValidationSpec extends TestSupport {
 
     "return the url of the SchemaModel" in {
       lazy val result = validation.loadUrlRegex("testSchema")
-      result shouldEqual "/test"
+      await(result) shouldEqual "/test"
     }
   }
 
@@ -129,7 +129,7 @@ class SchemaValidationSpec extends TestSupport {
     lazy val validation = setupMocks(SchemaModel("testSchema","/test","GET", responseSchema = schema))
     "return 'true' if the urls match" in {
       lazy val result = validation.validateUrlMatch("testSchema", "/test")
-      result shouldEqual true
+      await(result) shouldEqual true
     }
 
   }

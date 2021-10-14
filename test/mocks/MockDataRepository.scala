@@ -53,7 +53,7 @@ trait MockDataRepository extends TestSupport{
   }
 
   def mockFind(response: List[DataModel]): OngoingStubbing[Future[List[DataModel]]] = {
-    when(mockDataRepository.repository.find(ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(response)
+    when(mockDataRepository.repository.find(ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future(response))
   }
 
 }
