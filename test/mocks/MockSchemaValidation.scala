@@ -18,12 +18,12 @@ package mocks
 
 import com.github.fge.jsonschema.main.JsonSchema
 import org.mockito.ArgumentMatchers
-import org.mockito.Mockito._
-import org.scalatest.BeforeAndAfterEach
 import org.scalatest.wordspec.AnyWordSpecLike
-import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json.JsValue
 import utils.SchemaValidation
+import org.mockito.Mockito._
+import org.scalatest.BeforeAndAfterEach
+import org.scalatestplus.mockito.MockitoSugar
 
 import scala.concurrent.Future
 
