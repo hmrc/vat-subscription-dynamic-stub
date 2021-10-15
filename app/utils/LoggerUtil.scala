@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package testUtils
+package utils
 
-import akka.actor.ActorSystem
+import org.slf4j.{Logger, LoggerFactory}
+import play.api.LoggerLike
 
-trait MaterializerSupport {
-  implicit val system = ActorSystem("Sys")
+trait LoggerUtil extends LoggerLike {
+  override val logger: Logger = LoggerFactory.getLogger("application")
 }

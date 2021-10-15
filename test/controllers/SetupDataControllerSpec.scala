@@ -20,7 +20,7 @@ import play.api.libs.json.Json
 import play.mvc.Http.Status
 import models.DataModel
 import play.api.test.FakeRequest
-
+import play.api.test.Helpers.{status, defaultAwaitTimeout}
 import mocks.{MockDataRepository, MockSchemaValidation}
 import testUtils.TestSupport
 

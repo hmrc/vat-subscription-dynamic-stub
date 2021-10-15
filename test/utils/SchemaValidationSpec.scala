@@ -23,6 +23,7 @@ import org.mockito.Mockito._
 import play.api.libs.json.Json
 import repositories.{DynamicStubRepository, SchemaRepository}
 import testUtils.TestSupport
+import play.api.test.Helpers.{await, defaultAwaitTimeout}
 
 import scala.concurrent.Future
 
@@ -73,7 +74,7 @@ class SchemaValidationSpec extends TestSupport {
 
       "return a json schema" in {
         lazy val result = validation.loadResponseSchema("testSchema")
-        await(result).isInstanceOf[JsonSchema]
+        result.isInstanceOf[JsonSchema]
       }
     }
 
@@ -155,7 +156,7 @@ class SchemaValidationSpec extends TestSupport {
 
       "return a json schema" in {
         lazy val result = validation.loadRequestSchema(postSchema)
-        await(result).isInstanceOf[JsonSchema]
+        result.isInstanceOf[JsonSchema]
       }
     }
   }
