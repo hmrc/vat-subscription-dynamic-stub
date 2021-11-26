@@ -38,7 +38,7 @@ class SetupSchemaController @Inject()(schemaRepository: SchemaRepository,
         })
       }
     ).recover {
-      case _ => BadRequest("Error Parsing Json SchemaModel")
+      case ex => InternalServerError(s"Schema could not be added due to exception: ${ex.getMessage}")
     }
   }
 

@@ -16,7 +16,6 @@
 
 package mocks
 
-import models.SchemaModel
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.mockito.stubbing.OngoingStubbing
@@ -28,8 +27,10 @@ import scala.concurrent.Future
 
 trait MockSchemaRepository extends TestSupport {
 
-  val successWriteResult = UpdateWriteResult(ok = true, n = 1, nModified = 1, upserted = Seq(), writeErrors = Seq(), None, None, None)
-  val errorWriteResult = UpdateWriteResult(ok = false, n = 1, nModified = 0, upserted = Seq(), writeErrors = Seq(WriteError(1,1,"Error")), None, None, None)
+  val successWriteResult: UpdateWriteResult =
+    UpdateWriteResult(ok = true, n = 1, nModified = 1, upserted = Seq(), writeErrors = Seq(), None, None, None)
+  val errorWriteResult: UpdateWriteResult =
+    UpdateWriteResult(ok = false, n = 1, nModified = 0, upserted = Seq(), writeErrors = Seq(WriteError(1,1,"Error")), None, None, None)
 
   lazy val mockSchemaRepository: SchemaRepository = new SchemaRepository(rmc) {
     override lazy val repository: SchemaRepositoryBase = mock[SchemaRepositoryBase]
@@ -40,8 +41,8 @@ trait MockSchemaRepository extends TestSupport {
     reset(mockSchemaRepository.repository)
   }
 
-  def setupMockAddSchema(model: SchemaModel)(response: WriteResult): OngoingStubbing[Future[WriteResult]] =
-    when(mockSchemaRepository.repository.addEntry(ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(response))
+  def setupMockAddSchema(response: Future[WriteResult]): OngoingStubbing[Future[WriteResult]] =
+    when(mockSchemaRepository.repository.addEntry(ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(response)
 
   def setupMockRemoveSchema(id: String)(response: WriteResult): OngoingStubbing[Future[WriteResult]] =
     when(mockSchemaRepository.repository.removeById(ArgumentMatchers.eq(id))(ArgumentMatchers.any())).thenReturn(Future.successful(response))
