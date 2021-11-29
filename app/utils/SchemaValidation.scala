@@ -40,7 +40,7 @@ class SchemaValidation @Inject()(repository: SchemaRepository) extends LoggerUti
       val schemaJson: JsonNode = schemaMapper.readTree(schemaParser)
       JsonSchemaFactory.byDefault().getJsonSchema(schemaJson)
     } recover {
-      case ex => throw new Exception("Schema could not be retrieved/found in MongoDB")
+      case ex => throw new Exception(s"Schema could not be retrieved due to exception: ${ex.getMessage}")
     }
   }
 
@@ -81,7 +81,7 @@ class SchemaValidation @Inject()(repository: SchemaRepository) extends LoggerUti
         true
       }
     } recover {
-      case ex => throw new Exception("Schema could not be retrieved/found in MongoDB")
+      case ex => throw new Exception(s"Schema could not be retrieved due to exception: ${ex.getMessage}")
     }
   }
 

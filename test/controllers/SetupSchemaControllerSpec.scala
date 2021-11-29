@@ -31,64 +31,86 @@ class SetupSchemaControllerSpec extends TestSupport with MockSchemaRepository {
 
   object TestSetupSchemaController extends SetupSchemaController(mockSchemaRepository, cc)
 
+  val successModel: SchemaModel = SchemaModel(
+    _id = "test",
+    url = "/test",
+    method = "GET",
+    responseSchema = Json.parse("{}")
+  )
+
   "The SetupSchemaController" when {
 
     "a request to add a valid schema is successful" should {
 
-      lazy val successModel = SchemaModel(
-        _id = "test",
-        url = "/test",
-        method = "GET",
-        responseSchema = Json.parse("{}")
-      )
       lazy val request = FakeRequest().withBody(Json.toJson(successModel)).withHeaders(("Content-Type","application/json"))
-      lazy val result: Future[Result] = TestSetupSchemaController.addSchema(request)
+      lazy val result: Future[Result] = {
+        setupMockAddSchema(Future.successful(successWriteResult))
+        TestSetupSchemaController.addSchema(request)
+      }
 
-      "Return a status 200 (OK)" in {
-        setupMockAddSchema(successModel)(successWriteResult)
+      "return a status 200 (OK)" in {
         status(result) shouldBe Status.OK
       }
 
-      s"Result Body 'Successfully added Schema: ${Json.toJson(successModel)}'" in {
-        setupMockAddSchema(successModel)(successWriteResult)
+      s"return a response body of 'Successfully added Schema: ${Json.toJson(successModel)}'" in {
         contentAsString(result) shouldBe s"Successfully added Schema: ${Json.toJson(successModel)}"
       }
     }
 
-    "a request to add a valid schema is unsuccessful" should {
-
-      lazy val successModel = SchemaModel(
-        _id = "test",
-        url = "/test",
-        method = "GET",
-        responseSchema = Json.parse("{}")
-      )
+    "a request to add a valid schema is unsuccessful due to a mongo write result error" should {
 
       lazy val request = FakeRequest().withBody(Json.toJson(successModel)).withHeaders(("Content-Type","application/json"))
-      lazy val result = TestSetupSchemaController.addSchema(request)
+      lazy val result = {
+        setupMockAddSchema(Future.successful(errorWriteResult))
+        TestSetupSchemaController.addSchema(request)
+      }
 
-      "Return a status 500 (ISE)" in {
-        setupMockAddSchema(successModel)(errorWriteResult)
+      "return a status 500 (INTERNAL_SERVER_ERROR)" in {
         status(result) shouldBe Status.INTERNAL_SERVER_ERROR
       }
 
-      s"Result Body 'Could not store data'" in {
-        setupMockAddSchema(successModel)(errorWriteResult)
+      "return a response body of 'Could not store data'" in {
         contentAsString(result) shouldBe "Could not store data"
       }
+    }
 
-//      "Return a status 400 (BadRequest)" in {
-//        lazy val request1 = FakeRequest().withBody(Json.toJson(errorModel)).withHeaders(("Content-Type","application/json"))
-//        lazy val result1 = TestSetupSchemaController.addSchema(request1)
-//        setupMockAddSchema(errorModel)(successWriteResult)
-//        status(result1) shouldBe Status.BAD_REQUEST
-//      }
+    "a request to add a valid schema is unsuccessful due to an unexpected exception" should {
+
+      lazy val request = FakeRequest().withBody(Json.toJson(successModel)).withHeaders(("Content-Type","application/json"))
+      lazy val result = {
+        setupMockAddSchema(Future.failed(new Exception("something went wrong")))
+        TestSetupSchemaController.addSchema(request)
+      }
+
+      "return a status 500 (INTERNAL_SERVER_ERROR)" in {
+        status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+      }
+
+      "return a response body of 'Schema could not be added due to exception:' with the exception message" in {
+        contentAsString(result) shouldBe "Schema could not be added due to exception: something went wrong"
+      }
+    }
+
+    "invalid JSON is sent in the request to add a schema" should {
+
+      val json = Json.obj("_id" -> "test", "url" -> "test", "method" -> 1, "responseSchema" -> Json.parse("{}"))
+      lazy val request = FakeRequest().withBody(json).withHeaders(("Content-Type","application/json"))
+      lazy val result: Future[Result] = TestSetupSchemaController.addSchema(request)
+
+      "return a status 400 (BAD_REQUEST)" in {
+        status(result) shouldBe Status.BAD_REQUEST
+      }
+
+      "return an error message containing details about the fields that are invalid" in {
+        contentAsString(result) shouldBe "Invalid SchemaModel payload: " +
+          "List((/method,List(JsonValidationError(List(error.expected.jsstring),WrappedArray()))))"
+      }
     }
 
     "removing a schema is successful" should {
-      "Return a status 200 (OK)" in {
-        lazy val request = FakeRequest()
-        lazy val result = TestSetupSchemaController.removeSchema("someId")(request)
+
+      "return a status 200 (OK)" in {
+        lazy val result = TestSetupSchemaController.removeSchema("someId")(FakeRequest())
 
         setupMockRemoveSchema("someId")(successWriteResult)
         status(result) shouldBe Status.OK
@@ -96,9 +118,9 @@ class SetupSchemaControllerSpec extends TestSupport with MockSchemaRepository {
     }
 
     "removing a schema is unsuccessful" should {
-      "Return a status 500 (ISE)" in {
-        lazy val request = FakeRequest()
-        lazy val result = TestSetupSchemaController.removeSchema("someId")(request)
+
+      "return a status 500 (ISE)" in {
+        lazy val result = TestSetupSchemaController.removeSchema("someId")(FakeRequest())
 
         setupMockRemoveSchema("someId")(errorWriteResult)
         status(result) shouldBe Status.INTERNAL_SERVER_ERROR
@@ -106,9 +128,9 @@ class SetupSchemaControllerSpec extends TestSupport with MockSchemaRepository {
     }
 
     "removing all schemas is successful" should {
-      "Return a status 200 (OK)" in {
-        lazy val request = FakeRequest()
-        lazy val result = TestSetupSchemaController.removeAll()(request)
+
+      "return a status 200 (OK)" in {
+        lazy val result = TestSetupSchemaController.removeAll()(FakeRequest())
 
         setupMockRemoveAllSchemas(successWriteResult)
         status(result) shouldBe Status.OK
@@ -116,9 +138,9 @@ class SetupSchemaControllerSpec extends TestSupport with MockSchemaRepository {
     }
 
     "removing all schemas is unsuccessful" should {
-      "Return a status 500 (ISE)" in {
-        lazy val request = FakeRequest()
-        lazy val result = TestSetupSchemaController.removeAll()(request)
+
+      "return a status 500 (ISE)" in {
+        lazy val result = TestSetupSchemaController.removeAll()(FakeRequest())
 
         setupMockRemoveAllSchemas(errorWriteResult)
         status(result) shouldBe Status.INTERNAL_SERVER_ERROR

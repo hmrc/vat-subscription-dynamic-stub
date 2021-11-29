@@ -25,7 +25,7 @@ val appName = "vat-subscription-dynamic-stub"
 
 val compile: Seq[ModuleID] = Seq(ws,
   "uk.gov.hmrc"     %% "simple-reactivemongo"       % "8.0.0-play-28",
-  "uk.gov.hmrc"     %% "bootstrap-backend-play-28"  % "5.15.0",
+  "uk.gov.hmrc"     %% "bootstrap-backend-play-28"  % "5.16.0",
   "com.github.fge"  %  "json-schema-validator"      % "2.2.14"
 )
 
@@ -51,24 +51,12 @@ lazy val scoverageSettings = {
   Seq(
     ScoverageKeys.coverageExcludedPackages := "<empty>;" +
       ".*Reverse.*;" +
-      "models/.data/..*;" +
-      "filters.*;" +
-      ".handlers.*;" +
-      "components.*;" +
-      ".*BuildInfo.*;" +
-      ".*FrontendAuditConnector.*;" +
       ".*Routes.*;" +
-      "views.html.templates.*;" +
-      "views.html.feedback.*;" +
       "config.*;" +
-      "controllers.feedback.*;" +
       "app.*;" +
       "prod.*;" +
-      "config.*;" +
-      "com.*;" +
-      "testOnly.*;" +
-      "\"",
-    ScoverageKeys.coverageMinimumStmtTotal := 90,
+      "config.*;",
+    ScoverageKeys.coverageMinimumStmtTotal := 95,
     ScoverageKeys.coverageFailOnMinimum := false,
     ScoverageKeys.coverageHighlighting := true
   )
