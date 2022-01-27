@@ -16,43 +16,58 @@
 
 package controllers
 
+
 import javax.inject.{Inject, Singleton}
 import models.SchemaModel
 import play.api.libs.json.JsValue
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import repositories.SchemaRepository
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
+import utils.LoggerUtil
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext
 
 @Singleton
 class SetupSchemaController @Inject()(schemaRepository: SchemaRepository,
-                                      cc: ControllerComponents) extends BackendController(cc) {
+                                      cc: ControllerComponents)
+                                     (implicit ec: ExecutionContext) extends BackendController(cc) with LoggerUtil {
 
   val addSchema: Action[JsValue] = Action.async(parse.json) {
     implicit request => withJsonBody[SchemaModel](
       json => {
         schemaRepository().addEntry(json).map(_.ok match {
           case true => Ok(s"Successfully added Schema: ${request.body}")
-          case _ => InternalServerError("Could not store data")
+          case _ =>
+            val message = "Could not store data"
+            logger.warn(s"[SetupSchemaController][addSchema] - $message")
+            InternalServerError(message)
         })
       }
     ).recover {
-      case ex => InternalServerError(s"Schema could not be added due to exception: ${ex.getMessage}")
+      case ex =>
+        val message = s"Schema could not be added due to exception: ${ex.getMessage}"
+        logger.warn(s"[SetupSchemaController][addSchema] - $message")
+        InternalServerError(message)
     }
   }
 
   val removeSchema: String => Action[AnyContent] = id => Action.async {
       schemaRepository().removeById(id).map(_.ok match {
         case true => Ok("Success")
-        case _ => InternalServerError("Could not delete data")
+        case _ =>
+          val message = "Could not delete data"
+          logger.warn(s"[SetupSchemaController][removeSchema] - $message")
+          InternalServerError(message)
       })
   }
 
   val removeAll: Action[AnyContent] = Action.async {
       schemaRepository().removeAll().map(_.ok match {
         case true => Ok("Removed All Schemas")
-        case _ => InternalServerError("Unexpected Error Clearing MongoDB.")
+        case _ =>
+          val message = "Unexpected error clearing MongoDB"
+          logger.warn(s"[SetupSchemaController][removeAll] - $message")
+          InternalServerError(message)
       })
   }
 }

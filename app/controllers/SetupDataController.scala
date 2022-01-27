@@ -23,15 +23,15 @@ import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import repositories.DataRepository
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
-import utils.SchemaValidation
+import utils.{LoggerUtil, SchemaValidation}
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class SetupDataController @Inject()(schemaValidation: SchemaValidation,
                                     dataRepository: DataRepository,
-                                    cc: ControllerComponents) extends BackendController(cc) {
+                                    cc: ControllerComponents)
+                                   (implicit ec: ExecutionContext) extends BackendController(cc) with LoggerUtil {
 
   val addData: Action[JsValue] = Action.async(parse.json) {
     implicit request => withJsonBody[DataModel](
@@ -39,40 +39,60 @@ class SetupDataController @Inject()(schemaValidation: SchemaValidation,
         case GET | POST | PUT =>
           schemaValidation.validateUrlMatch(json.schemaId, json._id) flatMap {
             case true =>
-              schemaValidation.validateResponseJson(json.schemaId, json.response) flatMap {
+              schemaValidation.validateResponse(json.schemaId, json.response) flatMap {
                 case true => addStubDataToDB(json)
-                case false => Future.successful(BadRequest(s"The Json Body:\n\n${json.response.get} did not validate against the Schema Definition"))
+                case false =>
+                  val message = s"The Json Body:\n\n${json.response.get} did not validate against the Schema Definition"
+                  logger.warn(s"[SetupDataController][addData] - $message")
+                  Future.successful(BadRequest(message))
               }
             case false =>
-              schemaValidation.loadUrlRegex(json.schemaId) map {
-                regex => BadRequest(s"URL ${json._id} did not match the Schema Definition Regex $regex")
+              schemaValidation.loadUrlRegex(json.schemaId) map { regex =>
+                val message = s"URL ${json._id} did not match the Schema Definition Regex $regex"
+                logger.warn(s"[SetupDataController][addData] - $message")
+                BadRequest(message)
               }
           }
-        case x => Future.successful(BadRequest(s"The method: $x is currently unsupported"))
+        case x =>
+          val message = s"The method: $x is currently unsupported"
+          logger.warn(s"[SetupDataController][addData] - $message")
+          Future.successful(BadRequest(message))
       }
     ).recover {
-      case _ => InternalServerError("Error Parsing Json DataModel")
+      case ex =>
+        val message = s"Error Parsing Json DataModel due to exception: ${ex.getMessage}"
+        logger.warn(s"[SetupDataController][addData] - $message")
+        InternalServerError(message)
     }
   }
 
   private def addStubDataToDB(json: DataModel): Future[Result] = {
     dataRepository().addEntry(json).map(_.ok match {
       case true => Ok(s"The following JSON was added to the stub: \n\n${Json.toJson(json)}")
-      case _ => InternalServerError(s"Failed to add data to Stub.")
+      case _ =>
+        val message = "Failed to add data to Stub."
+        logger.warn(s"[SetupDataController][addStubDataToDB] - $message")
+        InternalServerError(message)
     })
   }
 
   val removeData: String => Action[AnyContent] = url => Action.async {
       dataRepository().removeById(url).map(_.ok match {
         case true => Ok("Success")
-        case _ => InternalServerError("Could not delete data")
+        case _ =>
+          val message = "Could not delete data"
+          logger.warn(s"[SetupDataController][removeData] - $message")
+          InternalServerError(message)
       })
   }
 
   val removeAll: Action[AnyContent] = Action.async {
       dataRepository().removeAll().map(_.ok match {
         case true => Ok("Removed All Stubbed Data")
-        case _ => InternalServerError("Unexpected Error Clearing MongoDB.")
+        case _ =>
+          val message = "Unexpected Error Clearing MongoDB."
+          logger.warn(s"[SetupDataController][removeAll] - $message")
+          InternalServerError(message)
       })
   }
 }
