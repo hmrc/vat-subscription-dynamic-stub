@@ -36,34 +36,23 @@ trait MockSchemaValidation extends AnyWordSpecLike with MockitoSugar with Before
     reset(mockSchemaValidation)
   }
 
-  def mockLoadResponseSchema(schemaId: String)(response: JsonSchema): Unit = {
-    when(mockSchemaValidation.loadResponseSchema(ArgumentMatchers.eq(schemaId)))
+  def mockValidateResponse(schemaId: String, response: Boolean): Unit =
+    when(mockSchemaValidation.validateResponse(ArgumentMatchers.eq(schemaId), ArgumentMatchers.any()))
       .thenReturn(Future.successful(response))
-  }
 
-  def mockValidateResponseJson(schemaId: String, json: Option[JsValue])(response:Boolean): Unit = {
-    when(mockSchemaValidation.validateResponseJson(ArgumentMatchers.eq(schemaId), ArgumentMatchers.eq(json)))
-      .thenReturn(Future.successful(response))
-  }
-
-  def mockLoadUrlRegex(schemaId:String)(response: String): Unit ={
+  def mockLoadUrlRegex(schemaId:String)(response: String): Unit =
     when(mockSchemaValidation.loadUrlRegex(ArgumentMatchers.eq(schemaId)))
       .thenReturn(Future.successful(response))
-  }
 
-  def mockValidateUrlMatch(schemaId:String, url:String)(response:Boolean): Unit = {
+  def mockValidateUrlMatch(schemaId:String, url:String)(response:Boolean): Unit =
     when(mockSchemaValidation.validateUrlMatch(ArgumentMatchers.eq(schemaId), ArgumentMatchers.eq(url)))
       .thenReturn(Future.successful(response))
-  }
 
-  def mockLoadRequestSchema(requestSchema: JsValue)(response: JsonSchema): Unit = {
+  def mockLoadRequestSchema(requestSchema: JsValue)(response: JsonSchema): Unit =
     when(mockSchemaValidation.loadRequestSchema(ArgumentMatchers.eq(requestSchema)))
       .thenReturn(response)
-  }
 
-  def mockValidateRequestJson(schemaId: String, json: Option[JsValue])(response: Boolean): Unit = {
+  def mockValidateRequestJson(schemaId: String, json: Option[JsValue])(response: Boolean): Unit =
     when(mockSchemaValidation.validateRequestJson(ArgumentMatchers.eq(schemaId), ArgumentMatchers.any()))
       .thenReturn(Future.successful(response))
-  }
-
 }

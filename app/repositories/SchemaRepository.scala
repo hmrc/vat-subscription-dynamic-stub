@@ -32,7 +32,7 @@ class SchemaRepository @Inject()(reactiveMongoComponent: ReactiveMongoComponent)
   lazy val mongoConnector: MongoConnector = reactiveMongoComponent.mongoConnector
   implicit lazy val db: () => DefaultDB = mongoConnector.db
 
-  lazy val repository = new SchemaRepositoryBase() {
+  lazy val repository: SchemaRepositoryBase = new SchemaRepositoryBase() {
 
     override def findById(schemaId: String)(implicit ec: ExecutionContext): Future[SchemaModel] =
       find("_id" -> schemaId).map(_.last)

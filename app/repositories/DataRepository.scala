@@ -33,7 +33,7 @@ class DataRepository @Inject()(reactiveMongoComponent: ReactiveMongoComponent){
   lazy val mongoConnector: MongoConnector = reactiveMongoComponent.mongoConnector
   implicit lazy val db: () => DefaultDB = mongoConnector.db
 
-  lazy val repository = new StubbedDataRepositoryBase() {
+  lazy val repository: StubbedDataRepositoryBase = new StubbedDataRepositoryBase() {
 
     override def removeAll()(implicit ec: ExecutionContext): Future[WriteResult] = removeAll(Acknowledged)
 
