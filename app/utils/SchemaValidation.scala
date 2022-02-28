@@ -29,6 +29,7 @@ import java.io.StringReader
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.{Failure, Success, Try}
 
 @Singleton
 class SchemaValidation @Inject()(repository: SchemaRepository) extends LoggerUtil {
@@ -50,7 +51,11 @@ class SchemaValidation @Inject()(repository: SchemaRepository) extends LoggerUti
   def validateAgainstYaml(schemaModel: SchemaModel, json: JsValue): Boolean = {
     val yamlSchema = (schemaModel.responseSchema \ "value").as[String]
     val validator: SwaggerValidator = SwaggerValidator.forYamlSchema(new StringReader(yamlSchema))
-    val successReport: ProcessingReport = validator.validate(json.toString(), "/components/schemas/successResponse")
+    val successReport: ProcessingReport =
+      Try(validator.validate(json.toString(), "/components/schemas/successResponse")) match {
+        case Success(report) => report
+        case Failure(_) => validator.validate(json.toString(), "/components/schemas/responseSchema")
+      }
     val failureReport: ProcessingReport = validator.validate(json.toString(), "/components/schemas/failureResponse")
     successReport.isSuccess | failureReport.isSuccess
   }

@@ -24,7 +24,7 @@ import play.api.libs.json.{JsValue, Json}
 import repositories.{DynamicStubRepository, SchemaRepository}
 import testUtils.TestSupport
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
-import testUtils.TestAssets.{jsonSchema, validYamlData, yamlSchema}
+import testUtils.TestAssets.{jsonSchema, validYamlData, validYamlFailureData, yamlSchema}
 
 import scala.concurrent.Future
 
@@ -85,10 +85,25 @@ class SchemaValidationSpec extends TestSupport {
 
       "the data matches the schema" should {
 
-        "return 'true'" in {
+        "return 'true' when matching on the successResponse definition" in {
           val validation =
-            setupMocks(schemaModel.copy(responseSchema = Json.obj("value" -> yamlSchema), schemaType = Some("yaml")))
+            setupMocks(schemaModel.copy(responseSchema = Json.obj("value" -> yamlSchema()), schemaType = Some("yaml")))
           val result = validation.validateResponse("testSchema", Some(validYamlData))
+          await(result) shouldBe true
+        }
+
+        "return 'true' when matching on the responseSchema definition" in {
+          val validation = setupMocks(
+            schemaModel.copy(responseSchema = Json.obj("value" -> yamlSchema("responseSchema")), schemaType = Some("yaml"))
+          )
+          val result = validation.validateResponse("testSchema", Some(validYamlData))
+          await(result) shouldBe true
+        }
+
+        "return 'true' when matching on the failureResponse definition" in {
+          val validation =
+            setupMocks(schemaModel.copy(responseSchema = Json.obj("value" -> yamlSchema()), schemaType = Some("yaml")))
+          val result = validation.validateResponse("testSchema", Some(validYamlFailureData))
           await(result) shouldBe true
         }
       }
@@ -97,7 +112,7 @@ class SchemaValidationSpec extends TestSupport {
 
         "return 'false'" in {
           val validation =
-            setupMocks(schemaModel.copy(responseSchema = Json.obj("value" -> yamlSchema), schemaType = Some("yaml")))
+            setupMocks(schemaModel.copy(responseSchema = Json.obj("value" -> yamlSchema()), schemaType = Some("yaml")))
           val json = Json.parse("""{ "firstName" : "Bob" }""")
           val result = validation.validateResponse("testSchema", Some(json))
           await(result) shouldBe false

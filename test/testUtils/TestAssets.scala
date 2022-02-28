@@ -36,8 +36,9 @@ object TestAssets {
     }"""
   )
 
-  val yamlSchema: String =
-    """
+  //scalastyle:off
+  def yamlSchema(successSchemaDefinition: String = "successResponse"): String =
+    s"""
       |openapi: 1
       |info:
       |  title: Example
@@ -69,19 +70,19 @@ object TestAssets {
       |      security:
       |        - bearerAuth: []
       |      parameters:
-      |        - $ref: '#/components/parameters/correlationId'
-      |        - $ref: '#/components/parameters/idTypePathParam'
-      |        - $ref: '#/components/parameters/onlyOpenItemsQueryParam'
+      |        - $$ref: '#/components/parameters/correlationId'
+      |        - $$ref: '#/components/parameters/idTypePathParam'
+      |        - $$ref: '#/components/parameters/onlyOpenItemsQueryParam'
       |      responses:
       |        '200':
       |          description: Successful Response
       |          headers:
       |            CorrelationId:
-      |              $ref: '#/components/headers/CorrelationId'
+      |              $$ref: '#/components/headers/CorrelationId'
       |          content:
       |            application/json;charset=UTF-8:
       |              schema:
-      |                $ref: '#/components/schemas/successResponse'
+      |                $$ref: '#/components/schemas/$successSchemaDefinition'
       |              examples:
       |                Success Response:
       |                  value:
@@ -99,11 +100,11 @@ object TestAssets {
       |            INVALID_IDTYPE                Submission has not passed validation. Invalid parameter idType.
       |          headers:
       |            CorrelationId:
-      |              $ref: '#/components/headers/CorrelationId'
+      |              $$ref: '#/components/headers/CorrelationId'
       |          content:
       |            application/json;charset=UTF-8:
       |              schema:
-      |                $ref: '#/components/schemas/failureResponse'
+      |                $$ref: '#/components/schemas/failureResponse'
       |              examples:
       |                Error_InvalidCorrelationId:
       |                  value:
@@ -124,11 +125,11 @@ object TestAssets {
       |            NO_DATA_FOUND   The remote endpoint has indicated that no data can be found.
       |          headers:
       |            CorrelationId:
-      |              $ref: '#/components/headers/CorrelationId'
+      |              $$ref: '#/components/headers/CorrelationId'
       |          content:
       |            application/json;charset=UTF-8:
       |              schema:
-      |                $ref: '#/components/schemas/failureResponse'
+      |                $$ref: '#/components/schemas/failureResponse'
       |              examples:
       |                Error_NotFound:
       |                  value:
@@ -143,11 +144,11 @@ object TestAssets {
       |            SERVER_ERROR   IF is currently experiencing problems that require live service intervention.
       |          headers:
       |            CorrelationId:
-      |              $ref: '#/components/headers/CorrelationId'
+      |              $$ref: '#/components/headers/CorrelationId'
       |          content:
       |            application/json;charset=UTF-8:
       |              schema:
-      |                $ref: '#/components/schemas/failureResponse'
+      |                $$ref: '#/components/schemas/failureResponse'
       |              examples:
       |                ServerError:
       |                  value:
@@ -173,7 +174,7 @@ object TestAssets {
       |      required: true
       |      schema:
       |        type: string
-      |        pattern: '^[A-Za-z]{1,6}$'
+      |        pattern: '^[A-Za-z]{1,6}$$'
       |    onlyOpenItemsQueryParam:
       |      in: query
       |      name: onlyOpenItems
@@ -202,13 +203,13 @@ object TestAssets {
       |              code:
       |                description: Keys for all the errors returned
       |                type: string
-      |                pattern: '^[A-Z0-9_-]{1,160}$'
+      |                pattern: '^[A-Z0-9_-]{1,160}$$'
       |              reason:
       |                description: A simple description for the failure
       |                type: string
       |                minLength: 1
       |                maxLength: 160
-      |    successResponse:
+      |    $successSchemaDefinition:
       |      description: Get Details Response
       |      type: object
       |      properties:
@@ -218,15 +219,15 @@ object TestAssets {
       |            idType:
       |              description: 'Expected values: MTDBSA , NINO'
       |              type: string
-      |              pattern: '^[A-Z]{1,10}$'
+      |              pattern: '^[A-Z]{1,10}$$'
       |            idNumber:
       |              description: 'MTDBSA number, Example XQIT00000000001. NINO number, Example IN408059B'
       |              type: string
-      |              pattern: '^[0-9A-Z]{1,30}$'
+      |              pattern: '^[0-9A-Z]{1,30}$$'
       |            regimeType:
       |              description: 'RegimeType, expected value ITSA'
       |              type: string
-      |              pattern: '^[A-Z]{1,10}$'
+      |              pattern: '^[A-Z]{1,10}$$'
       |          required:
       |            - idType
       |            - idNumber
@@ -243,4 +244,11 @@ object TestAssets {
       "idNumber" -> "123456789",
       "regimeType" -> "VATC"
     ))
+
+  val validYamlFailureData: JsObject = Json.obj(
+    "failures" -> Json.arr(Json.obj(
+      "code" -> "A_CODE",
+      "reason" -> "A reason."
+    ))
+  )
 }
