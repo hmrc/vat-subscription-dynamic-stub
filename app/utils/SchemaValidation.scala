@@ -54,7 +54,10 @@ class SchemaValidation @Inject()(repository: SchemaRepository) extends LoggerUti
     val successReport: ProcessingReport =
       Try(validator.validate(json.toString(), "/components/schemas/successResponse")) match {
         case Success(report) => report
-        case Failure(_) => validator.validate(json.toString(), "/components/schemas/responseSchema")
+        case Failure(_) => Try(validator.validate(json.toString(), "/components/schemas/responseSchema")) match {
+          case Success(report) => report
+          case Failure(_) => validator.validate(json.toString(), "/components/schemas/successResponseSchema")
+        }
       }
     val failureReport: ProcessingReport = validator.validate(json.toString(), "/components/schemas/failureResponse")
     successReport.isSuccess | failureReport.isSuccess
