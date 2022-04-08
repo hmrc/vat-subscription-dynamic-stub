@@ -16,6 +16,7 @@
 
 package testUtils
 
+import models.{DataModel, SchemaModel}
 import play.api.libs.json.{JsObject, JsValue, Json}
 
 object TestAssets {
@@ -251,4 +252,8 @@ object TestAssets {
       "reason" -> "A reason."
     ))
   )
+
+  val schemaModel: SchemaModel = SchemaModel("testSchema", "/test", "GET", responseSchema = jsonSchema)
+
+  val dataModel: DataModel = DataModel("/test", "testSchema", "GET", 200, response = Some(Json.parse("{}")) )
 }

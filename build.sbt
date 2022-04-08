@@ -24,20 +24,19 @@ import sbt.Tests.{Group, SubProcess}
 val appName = "vat-subscription-dynamic-stub"
 
 val compile: Seq[ModuleID] = Seq(ws,
-  "uk.gov.hmrc"        %% "simple-reactivemongo"      % "8.0.0-play-28",
+  "uk.gov.hmrc.mongo"  %% "hmrc-mongo-play-28"        % "0.62.0",
   "uk.gov.hmrc"        %% "bootstrap-backend-play-28" % "5.20.0",
   "com.github.fge"     %  "json-schema-validator"     % "2.2.14",
-  "com.github.bjansen" % "swagger-schema-validator"   % "1.0.0"
+  "com.github.bjansen" %  "swagger-schema-validator"  % "1.0.0"
 )
 
 def test(scope: String = "test,it"): Seq[ModuleID] = Seq(
-  "org.scalatest"          %% "scalatest"             % "3.1.4"             % scope,
-  "org.pegdown"            %  "pegdown"               % "1.6.0"             % scope,
-  "org.jsoup"              %  "jsoup"                 % "1.13.1"            % scope,
-  "com.typesafe.play"      %% "play-test"             % PlayVersion.current % scope,
-  "org.scalatestplus.play" %% "scalatestplus-play"    % "5.1.0"             % scope,
-  "org.mockito"            %  "mockito-core"          % "3.2.4"             % scope,
-  "org.scalatestplus"      %% "scalatestplus-mockito" % "1.0.0-M2"          % scope,
+  "org.scalatest"          %% "scalatest"                 % "3.1.4"             % scope,
+  "org.pegdown"            %  "pegdown"                   % "1.6.0"             % scope,
+  "com.typesafe.play"      %% "play-test"                 % PlayVersion.current % scope,
+  "org.scalatestplus.play" %% "scalatestplus-play"        % "5.1.0"             % scope,
+  "org.scalamock"           %% "scalamock-scalatest-support" % "3.6.0"          % scope,
+  "uk.gov.hmrc.mongo"       %% "hmrc-mongo-test-play-28"     % "0.62.0"         % scope,
   "com.vladsch.flexmark"   %  "flexmark-all"          % "0.36.8"            % scope
 )
 

@@ -20,21 +20,19 @@ import javax.inject.{Inject, Singleton}
 import models.HttpMethod._
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
-import repositories.DataRepository
+import services.DataService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import utils.SchemaValidation
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class RequestHandlerController @Inject()(schemaValidation: SchemaValidation,
-                                         dataRepository: DataRepository,
-                                         cc: ControllerComponents) extends BackendController(cc) {
+                                         DataRepository: DataService,
+                                         cc: ControllerComponents)(implicit ec: ExecutionContext) extends BackendController(cc) {
 
   def getRequestHandler(url: String): Action[AnyContent] = Action.async {
     implicit request => {
-      dataRepository().find("_id" -> request.uri, "method" -> GET).map {
+      DataRepository.find(Seq("_id" -> request.uri, "method" -> GET)).map {
         case head :: _ if head.response.nonEmpty => Status(head.status)(head.response.get)
         case head :: _ => Status(head.status)
         case _ => NotFound(errorResponseBody)
@@ -47,7 +45,7 @@ class RequestHandlerController @Inject()(schemaValidation: SchemaValidation,
 
   private def requestHandler(url: String, method: String): Action[AnyContent] = Action.async {
     implicit request => {
-      dataRepository().find("_id" -> request.uri, "method" -> method).flatMap {
+      DataRepository.find(Seq("_id" -> request.uri, "method" -> method)).flatMap {
         stubData => if (stubData.nonEmpty) {
           schemaValidation.validateRequestJson(stubData.head.schemaId, request.body.asJson) map {
             case true => if (stubData.head.response.isEmpty) {

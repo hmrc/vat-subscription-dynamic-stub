@@ -17,42 +17,40 @@
 package mocks
 
 import com.github.fge.jsonschema.main.JsonSchema
-import org.mockito.ArgumentMatchers
-import org.scalatest.wordspec.AnyWordSpecLike
+import org.scalamock.handlers.{CallHandler1, CallHandler2}
+import org.scalatest.wordspec.AnyWordSpec
 import play.api.libs.json.JsValue
 import utils.SchemaValidation
-import org.mockito.Mockito._
-import org.scalatest.BeforeAndAfterEach
-import org.scalatestplus.mockito.MockitoSugar
+import org.scalamock.scalatest.MockFactory
 
 import scala.concurrent.Future
 
-trait MockSchemaValidation extends AnyWordSpecLike with MockitoSugar with BeforeAndAfterEach {
+trait MockSchemaValidation extends AnyWordSpec with MockFactory {
 
   val mockSchemaValidation: SchemaValidation = mock[SchemaValidation]
 
-  override def beforeEach(): Unit = {
-    super.beforeEach()
-    reset(mockSchemaValidation)
-  }
+  def mockValidateResponse(response: Future[Boolean]): CallHandler2[String, Option[JsValue], Future[Boolean]] =
+    (mockSchemaValidation.validateResponse(_: String, _: Option[JsValue]))
+      .expects(*,*)
+      .returning(response)
 
-  def mockValidateResponse(schemaId: String, response: Boolean): Unit =
-    when(mockSchemaValidation.validateResponse(ArgumentMatchers.eq(schemaId), ArgumentMatchers.any()))
-      .thenReturn(Future.successful(response))
+  def mockLoadUrlRegex(response: String): CallHandler1[String, Future[String]] =
+    (mockSchemaValidation.loadUrlRegex(_: String))
+      .expects(*)
+      .returning(Future.successful(response))
 
-  def mockLoadUrlRegex(schemaId:String)(response: String): Unit =
-    when(mockSchemaValidation.loadUrlRegex(ArgumentMatchers.eq(schemaId)))
-      .thenReturn(Future.successful(response))
+  def mockValidateUrlMatch(response:Boolean): CallHandler2[String, String, Future[Boolean]] =
+    (mockSchemaValidation.validateUrlMatch(_: String, _: String))
+      .expects(*,*)
+      .returning(Future.successful(response))
 
-  def mockValidateUrlMatch(schemaId:String, url:String)(response:Boolean): Unit =
-    when(mockSchemaValidation.validateUrlMatch(ArgumentMatchers.eq(schemaId), ArgumentMatchers.eq(url)))
-      .thenReturn(Future.successful(response))
+  def mockLoadRequestSchema(response: JsonSchema): CallHandler1[JsValue, JsonSchema] =
+    (mockSchemaValidation.loadRequestSchema(_: JsValue))
+      .expects(*)
+      .returning(response)
 
-  def mockLoadRequestSchema(requestSchema: JsValue)(response: JsonSchema): Unit =
-    when(mockSchemaValidation.loadRequestSchema(ArgumentMatchers.eq(requestSchema)))
-      .thenReturn(response)
-
-  def mockValidateRequestJson(schemaId: String, json: Option[JsValue])(response: Boolean): Unit =
-    when(mockSchemaValidation.validateRequestJson(ArgumentMatchers.eq(schemaId), ArgumentMatchers.any()))
-      .thenReturn(Future.successful(response))
+  def mockValidateRequestJson(response: Boolean): CallHandler2[String, Option[JsValue], Future[Boolean]] =
+    (mockSchemaValidation.validateRequestJson(_: String, _: Option[JsValue]))
+      .expects(*,*)
+      .returning(Future.successful(response))
 }

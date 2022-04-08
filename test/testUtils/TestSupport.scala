@@ -16,31 +16,25 @@
 
 package testUtils
 
-import com.typesafe.config.Config
-import org.scalatest.wordspec.AnyWordSpecLike
-import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, Suite}
+import com.mongodb.client.result.{DeleteResult, InsertOneResult}
+import org.mongodb.scala.bson.BsonObjectId
+import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.mvc.ControllerComponents
 import play.api.test.Helpers.stubControllerComponents
-import play.modules.reactivemongo.ReactiveMongoComponent
-import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.matchers.should.Matchers
-
 import scala.concurrent.ExecutionContext
-import uk.gov.hmrc.http.HeaderCarrier
 
-trait TestSupport extends AnyWordSpecLike with GuiceOneAppPerSuite with MockitoSugar with BeforeAndAfterAll with BeforeAndAfterEach with MaterializerSupport
+trait TestSupport extends AnyWordSpec with GuiceOneAppPerSuite
   with Matchers {
-  this: Suite =>
+
+  val successWriteResult: InsertOneResult = InsertOneResult.acknowledged(BsonObjectId())
+  val errorWriteResult: InsertOneResult = InsertOneResult.unacknowledged()
+  val successDeleteResult: DeleteResult = DeleteResult.acknowledged(1)
+  val errorDeleteResult: DeleteResult = DeleteResult.unacknowledged()
 
   implicit val ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
 
-  implicit val headerCarrier: HeaderCarrier = HeaderCarrier()
-
-  implicit val config: Config = app.configuration.underlying
-
   lazy val cc: ControllerComponents = stubControllerComponents()
-
-  lazy val rmc: ReactiveMongoComponent = app.injector.instanceOf[ReactiveMongoComponent]
 
 }

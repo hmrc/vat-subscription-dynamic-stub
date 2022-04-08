@@ -21,7 +21,7 @@ import models.DataModel
 import models.HttpMethod._
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
-import repositories.DataRepository
+import services.DataService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import utils.{LoggerUtil, SchemaValidation}
 
@@ -29,7 +29,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class SetupDataController @Inject()(schemaValidation: SchemaValidation,
-                                    dataRepository: DataRepository,
+                                    DataRepository: DataService,
                                     cc: ControllerComponents)
                                    (implicit ec: ExecutionContext) extends BackendController(cc) with LoggerUtil {
 
@@ -67,32 +67,32 @@ class SetupDataController @Inject()(schemaValidation: SchemaValidation,
   }
 
   private def addStubDataToDB(json: DataModel): Future[Result] = {
-    dataRepository().addEntry(json).map(_.ok match {
-      case true => Ok(s"The following JSON was added to the stub: \n\n${Json.toJson(json)}")
+    DataRepository.addEntry(json).map {
+      case result if result.wasAcknowledged() => Ok(s"The following JSON was added to the stub: \n\n${Json.toJson(json)}")
       case _ =>
         val message = "Failed to add data to Stub."
         logger.warn(s"[SetupDataController][addStubDataToDB] - $message")
         InternalServerError(message)
-    })
+    }
   }
 
   val removeData: String => Action[AnyContent] = url => Action.async {
-      dataRepository().removeById(url).map(_.ok match {
-        case true => Ok("Success")
+    DataRepository.removeById(url).map {
+        case result if result.wasAcknowledged() => Ok("Success")
         case _ =>
           val message = "Could not delete data"
           logger.warn(s"[SetupDataController][removeData] - $message")
           InternalServerError(message)
-      })
+      }
   }
 
   val removeAll: Action[AnyContent] = Action.async {
-      dataRepository().removeAll().map(_.ok match {
-        case true => Ok("Removed All Stubbed Data")
+    DataRepository.removeAll().map {
+        case result if result.wasAcknowledged() => Ok("Removed All Stubbed Data")
         case _ =>
           val message = "Unexpected Error Clearing MongoDB."
           logger.warn(s"[SetupDataController][removeAll] - $message")
           InternalServerError(message)
-      })
+      }
   }
 }
