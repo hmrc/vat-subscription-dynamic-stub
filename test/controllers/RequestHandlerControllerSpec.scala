@@ -16,7 +16,7 @@
 
 package controllers
 
-import mocks.{MockDataRepository, MockSchemaValidation}
+import mocks.{MockDataService, MockSchemaValidation}
 import models.{DataModel, SchemaModel}
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
@@ -25,9 +25,9 @@ import testUtils.TestSupport
 import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, status}
 
 
-class RequestHandlerControllerSpec extends TestSupport with MockSchemaValidation with MockDataRepository {
+class RequestHandlerControllerSpec extends TestSupport with MockSchemaValidation with MockDataService {
 
-  object TestRequestHandlerController extends RequestHandlerController(mockSchemaValidation, mockDataRepository, cc)
+  object TestRequestHandlerController extends RequestHandlerController(mockSchemaValidation, mockDataService, cc)
 
   lazy val successModel = DataModel(
     _id = "test",
@@ -92,7 +92,7 @@ class RequestHandlerControllerSpec extends TestSupport with MockSchemaValidation
       lazy val result = TestRequestHandlerController.postRequestHandler("/test")(FakeRequest())
 
       mockFind(List(successWithBodyModel))
-      mockValidateRequestJson(successWithBodyModel.schemaId, postSuccessRequestSchema.requestSchema)(response = true)
+      mockValidateRequestJson(response = true)
 
       contentAsString(result) shouldBe s"${successWithBodyModel.response.get}"
     }
@@ -101,7 +101,7 @@ class RequestHandlerControllerSpec extends TestSupport with MockSchemaValidation
       lazy val result = TestRequestHandlerController.postRequestHandler("/test")(FakeRequest())
 
       mockFind(List(successModel))
-      mockValidateRequestJson(successModel.schemaId, postSuccessRequestSchema.requestSchema)(response = true)
+      mockValidateRequestJson(response = true)
 
       status(result) shouldBe Status.OK
     }
@@ -110,7 +110,7 @@ class RequestHandlerControllerSpec extends TestSupport with MockSchemaValidation
       lazy val result = TestRequestHandlerController.postRequestHandler("/test")(FakeRequest())
 
       mockFind(List(successWithBodyModel))
-      mockValidateRequestJson(successWithBodyModel.schemaId, None)(response = false)
+      mockValidateRequestJson(response = false)
 
       status(result) shouldBe Status.BAD_REQUEST
       contentAsString(result) shouldBe Json.obj(
@@ -139,7 +139,7 @@ class RequestHandlerControllerSpec extends TestSupport with MockSchemaValidation
       lazy val result = TestRequestHandlerController.putRequestHandler("/test")(FakeRequest())
 
       mockFind(List(successWithBodyModel))
-      mockValidateRequestJson(successWithBodyModel.schemaId, putSuccessRequestSchema.requestSchema)(response = true)
+      mockValidateRequestJson(response = true)
 
       contentAsString(result) shouldBe s"${successWithBodyModel.response.get}"
     }
@@ -148,7 +148,7 @@ class RequestHandlerControllerSpec extends TestSupport with MockSchemaValidation
       lazy val result = TestRequestHandlerController.putRequestHandler("/test")(FakeRequest())
 
       mockFind(List(successModel))
-      mockValidateRequestJson(successModel.schemaId, putSuccessRequestSchema.requestSchema)(response = true)
+      mockValidateRequestJson(response = true)
 
       status(result) shouldBe Status.OK
     }
@@ -157,7 +157,7 @@ class RequestHandlerControllerSpec extends TestSupport with MockSchemaValidation
       lazy val result = TestRequestHandlerController.putRequestHandler("/test")(FakeRequest())
 
       mockFind(List(successWithBodyModel))
-      mockValidateRequestJson(successWithBodyModel.schemaId, None)(response = false)
+      mockValidateRequestJson(response = false)
 
       status(result) shouldBe Status.BAD_REQUEST
       contentAsString(result) shouldBe Json.obj(

@@ -16,33 +16,17 @@
 
 package repositories
 
+import models._
+import uk.gov.hmrc.mongo.MongoComponent
+import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import javax.inject.{Inject, Singleton}
-import models.DataModel
-import play.modules.reactivemongo.ReactiveMongoComponent
-import reactivemongo.api.DefaultDB
-import reactivemongo.api.commands._
-import uk.gov.hmrc.mongo.MongoConnector
-import reactivemongo.api.WriteConcern.Acknowledged
-
-
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 @Singleton
-class DataRepository @Inject()(reactiveMongoComponent: ReactiveMongoComponent){
-
-  lazy val mongoConnector: MongoConnector = reactiveMongoComponent.mongoConnector
-  implicit lazy val db: () => DefaultDB = mongoConnector.db
-
-  lazy val repository: StubbedDataRepositoryBase = new StubbedDataRepositoryBase() {
-
-    override def removeAll()(implicit ec: ExecutionContext): Future[WriteResult] = removeAll(Acknowledged)
-
-    override def removeById(url: String)(implicit ec: ExecutionContext): Future[WriteResult] = remove("_id" -> url)
-
-    override def addEntry(document: DataModel)(implicit ec: ExecutionContext): Future[WriteResult] = insert(document)
-
-    override def findById(url: String)(implicit ec: ExecutionContext): Future[DataModel] = find("_id" -> url).map(_.last)
-  }
-
-  def apply(): DynamicStubRepository[DataModel, String] = repository
-}
+class DataRepository @Inject()(mongo: MongoComponent)(implicit ec: ExecutionContext
+) extends PlayMongoRepository[DataModel](
+  mongoComponent = mongo,
+  collectionName = "data",
+  domainFormat   = DataModel.formats,
+  indexes        = Seq()
+)

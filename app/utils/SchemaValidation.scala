@@ -23,7 +23,7 @@ import com.github.fge.jsonschema.core.report.ProcessingReport
 import com.github.fge.jsonschema.main.{JsonSchema, JsonSchemaFactory}
 import models.SchemaModel
 import play.api.libs.json.JsValue
-import repositories.SchemaRepository
+import services.SchemaService
 
 import java.io.StringReader
 import javax.inject.{Inject, Singleton}
@@ -32,7 +32,7 @@ import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
 @Singleton
-class SchemaValidation @Inject()(repository: SchemaRepository) extends LoggerUtil {
+class SchemaValidation @Inject()(repository: SchemaService) extends LoggerUtil {
 
   private final lazy val jsonMapper = new ObjectMapper()
   private final lazy val jsonFactory = jsonMapper.getFactory
@@ -65,7 +65,7 @@ class SchemaValidation @Inject()(repository: SchemaRepository) extends LoggerUti
 
   def validateResponse(schemaId: String, json: Option[JsValue]): Future[Boolean] =
     json.fold(Future.successful(true)) { data =>
-      repository().findById(schemaId).map { schema =>
+      repository.findById(schemaId).map { schema =>
         if (schema.schemaType.contains("yaml")) validateAgainstYaml(schema, data)
         else validateAgainstJson(schema, data)
       }
@@ -80,7 +80,7 @@ class SchemaValidation @Inject()(repository: SchemaRepository) extends LoggerUti
   }
 
   def validateRequestJson(schemaId: String, json: Option[JsValue]): Future[Boolean] = {
-    repository().findById(schemaId).map { schema =>
+    repository.findById(schemaId).map { schema =>
       if(schema.requestSchema.isDefined) {
         json.fold(true) {
           response =>
@@ -101,7 +101,7 @@ class SchemaValidation @Inject()(repository: SchemaRepository) extends LoggerUti
   }
 
   def loadUrlRegex(schemaId: String): Future[String] =
-    repository().findById(schemaId).map(_.url)
+    repository.findById(schemaId).map(_.url)
 
   def validateUrlMatch(schemaId: String, url: String): Future[Boolean] =
     loadUrlRegex(schemaId).map(regex => url.matches(regex))
