@@ -24,8 +24,8 @@ import sbt.Tests.{Group, SubProcess}
 val appName = "vat-subscription-dynamic-stub"
 
 val compile: Seq[ModuleID] = Seq(ws,
-  "uk.gov.hmrc.mongo"  %% "hmrc-mongo-play-28"        % "0.62.0",
-  "uk.gov.hmrc"        %% "bootstrap-backend-play-28" % "5.24.0",
+  "uk.gov.hmrc.mongo"  %% "hmrc-mongo-play-28"        % "0.68.0",
+  "uk.gov.hmrc"        %% "bootstrap-backend-play-28" % "6.4.0",
   "com.github.fge"     %  "json-schema-validator"     % "2.2.14",
   "com.github.bjansen" %  "swagger-schema-validator"  % "1.0.0"
 )
@@ -36,7 +36,7 @@ def test(scope: String = "test,it"): Seq[ModuleID] = Seq(
   "com.typesafe.play"      %% "play-test"                 % PlayVersion.current % scope,
   "org.scalatestplus.play" %% "scalatestplus-play"        % "5.1.0"             % scope,
   "org.scalamock"           %% "scalamock-scalatest-support" % "3.6.0"          % scope,
-  "uk.gov.hmrc.mongo"       %% "hmrc-mongo-test-play-28"     % "0.62.0"         % scope,
+  "uk.gov.hmrc.mongo"       %% "hmrc-mongo-test-play-28"     % "0.68.0"         % scope,
   "com.vladsch.flexmark"   %  "flexmark-all"          % "0.36.8"            % scope
 )
 
@@ -71,7 +71,7 @@ lazy val microservice = Project(appName, file("."))
   .settings(defaultSettings(): _*)
   .settings(
     majorVersion := 0,
-    scalaVersion := "2.12.15",
+    scalaVersion := "2.12.16",
     libraryDependencies ++= appDependencies,
     retrieveManaged := true
   )

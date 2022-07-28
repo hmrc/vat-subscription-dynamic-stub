@@ -63,7 +63,7 @@ class SchemaValidationSpec extends TestSupport with MockSchemaService {
       "the data matches the schema" should {
 
         "return 'true' when matching on the successResponse definition" in {
-          mockFindById(Future.successful(schemaModel.copy(responseSchema = Json.obj("value" -> yamlSchema("responseSchema")), schemaType = Some("yaml"))))
+          mockFindById(Future.successful(schemaModel.copy(responseSchema = Json.obj("value" -> yamlSchema("successResponse")), schemaType = Some("yaml"))))
           val result = validation.validateResponse("testSchema", Some(validYamlData))
           await(result) shouldBe true
         }
@@ -74,8 +74,15 @@ class SchemaValidationSpec extends TestSupport with MockSchemaService {
           await(result) shouldBe true
         }
 
+        "return 'true' when matching on the SuccessResponseSchema definition" in {
+          mockFindById(Future.successful(schemaModel.copy(responseSchema = Json.obj("value" -> yamlSchema("successResponseSchema")), schemaType = Some("yaml"))))
+          val result = validation.validateResponse("testSchema", Some(validYamlData))
+          await(result) shouldBe true
+        }
+
+
         "return 'true' when matching on the failureResponse definition" in {
-          mockFindById(Future.successful(schemaModel.copy(responseSchema = Json.obj("value" -> yamlSchema()), schemaType = Some("yaml"))))
+          mockFindById(Future.successful(schemaModel.copy(responseSchema = Json.obj("value" -> yamlSchema("successResponse")), schemaType = Some("yaml"))))
           val result = validation.validateResponse("testSchema", Some(validYamlFailureData))
           await(result) shouldBe true
         }
@@ -85,7 +92,7 @@ class SchemaValidationSpec extends TestSupport with MockSchemaService {
 
         "return 'false'" in {
           val json = Json.parse("""{ "firstName" : "Bob" }""")
-          mockFindById(Future.successful(schemaModel.copy(responseSchema = Json.obj("value" -> yamlSchema()), schemaType = Some("yaml"))))
+          mockFindById(Future.successful(schemaModel.copy(responseSchema = Json.obj("value" -> yamlSchema("successResponse")), schemaType = Some("yaml"))))
           val result = validation.validateResponse("testSchema", Some(json))
           await(result) shouldBe false
         }
@@ -149,7 +156,7 @@ class SchemaValidationSpec extends TestSupport with MockSchemaService {
 
     "there is a valid json body" when {
 
-      "a request schema exists" should {
+      "a request schema does not exist" should {
 
         "return true" in {
           mockFindById(Future.successful(schemaModel))
@@ -158,10 +165,19 @@ class SchemaValidationSpec extends TestSupport with MockSchemaService {
         }
       }
 
-      "a request schema does not exist" should {
+      "a json value is not passed" should {
 
         "return true" in {
-          mockFindById(Future.successful(schemaModel.copy("testSchema", "/test", "GET", responseSchema = jsonSchema, requestSchema = None)))
+          mockFindById(Future.successful(schemaModel.copy("testSchema", "/test", "GET", responseSchema = jsonSchema, requestSchema =  Some(postSchema))))
+          val result = validation.validateRequestJson("testSchema", None)
+          await(result) shouldBe true
+        }
+      }
+
+      "a request schema exists" should {
+
+        "return true" in {
+          mockFindById(Future.successful(schemaModel.copy("testSchema", "/test", "GET", responseSchema = jsonSchema, requestSchema =  Some(postSchema))))
           val result = validation.validateRequestJson("testSchema", Some(json))
           await(result) shouldBe true
         }
