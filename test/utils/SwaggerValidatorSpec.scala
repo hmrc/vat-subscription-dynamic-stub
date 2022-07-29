@@ -26,7 +26,7 @@ import testUtils.TestSupport
 
 class SwaggerValidatorSpec extends TestSupport {
 
-  val spec: Reader = new StringReader(yamlSchema())
+  val spec: Reader = new StringReader(yamlSchema("successResponse"))
   val validator: SwaggerValidator = SwaggerValidator.forYamlSchema(spec)
 
   "The SwaggerValidator" should {

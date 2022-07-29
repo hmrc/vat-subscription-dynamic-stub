@@ -38,7 +38,7 @@ object TestAssets {
   )
 
   //scalastyle:off
-  def yamlSchema(successSchemaDefinition: String = "successResponse"): String =
+  def yamlSchema(successSchemaDefinition: String): String =
     s"""
       |openapi: 1
       |info:
