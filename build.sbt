@@ -24,19 +24,19 @@ import sbt.Tests.{Group, SubProcess}
 val appName = "vat-subscription-dynamic-stub"
 
 val compile: Seq[ModuleID] = Seq(ws,
-  "uk.gov.hmrc.mongo"  %% "hmrc-mongo-play-28"        % "0.68.0",
-  "uk.gov.hmrc"        %% "bootstrap-backend-play-28" % "6.4.0",
+  "uk.gov.hmrc.mongo"  %% "hmrc-mongo-play-28"        % "0.73.0",
+  "uk.gov.hmrc"        %% "bootstrap-backend-play-28" % "7.4.0",
   "com.github.fge"     %  "json-schema-validator"     % "2.2.14",
   "com.github.bjansen" %  "swagger-schema-validator"  % "1.0.0"
 )
 
 def test(scope: String = "test,it"): Seq[ModuleID] = Seq(
-  "org.scalatest"          %% "scalatest"                 % "3.1.4"             % scope,
+  "org.scalatest"          %% "scalatest"                 % "3.3.0-SNAP3"       % scope,
   "org.pegdown"            %  "pegdown"                   % "1.6.0"             % scope,
   "com.typesafe.play"      %% "play-test"                 % PlayVersion.current % scope,
   "org.scalatestplus.play" %% "scalatestplus-play"        % "5.1.0"             % scope,
   "org.scalamock"           %% "scalamock-scalatest-support" % "3.6.0"          % scope,
-  "uk.gov.hmrc.mongo"       %% "hmrc-mongo-test-play-28"     % "0.68.0"         % scope,
+  "uk.gov.hmrc.mongo"       %% "hmrc-mongo-test-play-28"     % "0.73.0"         % scope,
   "com.vladsch.flexmark"   %  "flexmark-all"          % "0.36.8"            % scope
 )
 
@@ -79,11 +79,11 @@ lazy val microservice = Project(appName, file("."))
   .configs(IntegrationTest)
   .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)
   .settings(
-    Keys.fork in IntegrationTest := false,
-    unmanagedSourceDirectories in IntegrationTest := (baseDirectory in IntegrationTest) (base => Seq(base / "it")).value,
+    IntegrationTest / Keys.fork := false,
+    IntegrationTest / unmanagedSourceDirectories := (IntegrationTest / baseDirectory) (base => Seq(base / "it")).value,
     addTestReportOption(IntegrationTest, "int-test-reports"),
-    testGrouping in IntegrationTest := oneForkedJvmPerTest((definedTests in IntegrationTest).value),
-    parallelExecution in IntegrationTest := false
+    IntegrationTest / testGrouping := oneForkedJvmPerTest((IntegrationTest / definedTests).value),
+    IntegrationTest / parallelExecution := false
   )
 
 def oneForkedJvmPerTest(tests: Seq[TestDefinition]): Seq[Group] = {
