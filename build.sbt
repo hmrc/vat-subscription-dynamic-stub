@@ -31,13 +31,9 @@ val compile: Seq[ModuleID] = Seq(ws,
 )
 
 def test(scope: String = "test,it"): Seq[ModuleID] = Seq(
-  "org.scalatest"          %% "scalatest"                 % "3.3.0-SNAP3"       % scope,
-  "org.pegdown"            %  "pegdown"                   % "1.6.0"             % scope,
-  "com.typesafe.play"      %% "play-test"                 % PlayVersion.current % scope,
-  "org.scalatestplus.play" %% "scalatestplus-play"        % "5.1.0"             % scope,
+  "uk.gov.hmrc"            %% "bootstrap-test-play-28"    % "7.4.0"             % scope,
   "org.scalamock"           %% "scalamock-scalatest-support" % "3.6.0"          % scope,
-  "uk.gov.hmrc.mongo"       %% "hmrc-mongo-test-play-28"     % "0.73.0"         % scope,
-  "com.vladsch.flexmark"   %  "flexmark-all"          % "0.36.8"            % scope
+  "uk.gov.hmrc.mongo"       %% "hmrc-mongo-test-play-28"     % "0.73.0"         % scope
 )
 
 lazy val appDependencies: Seq[ModuleID] = compile ++ test()
