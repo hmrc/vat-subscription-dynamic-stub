@@ -27,12 +27,11 @@ import services.SchemaService
 
 import java.io.StringReader
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
 @Singleton
-class SchemaValidation @Inject()(repository: SchemaService) extends LoggerUtil {
+class SchemaValidation @Inject()(repository: SchemaService)(implicit ec: ExecutionContext) extends LoggerUtil {
 
   private final lazy val jsonMapper = new ObjectMapper()
   private final lazy val jsonFactory = jsonMapper.getFactory
