@@ -16,16 +16,32 @@
 
 package models
 
-import play.api.libs.json.{JsValue, Json, OFormat}
+import play.api.libs.json.{Format, JsNull, JsObject, JsValue, Json, Writes}
+import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
-case class DataModel(
-                        _id: String,        // URL of the Request
-                        schemaId: String,   // Name/ID of the Schema to Validate Against
-                        method: String,
-                        status: Int,
-                        response: Option[JsValue]
-                      )
+import java.time.Instant
+
+case class DataModel(_id: String,
+                     schemaId: String,
+                     method: String,
+                     status: Int,
+                     response: Option[JsValue])
 
 object DataModel {
-  implicit val formats: OFormat[DataModel] = Json.format[DataModel]
+
+  implicit val dateFormat: Format[Instant] = MongoJavatimeFormats.instantFormat
+
+  implicit val formats: Format[DataModel] = Format(
+    Json.reads[DataModel],
+    Writes[DataModel] { model =>
+      JsObject(Json.obj(
+        "_id" -> model._id,
+        "schemaId" -> model.schemaId,
+        "method" -> model.method,
+        "status" -> model.status,
+        "response" -> model.response,
+        "creationTimestamp" -> Instant.now()
+      ).fields.filterNot(_._2 == JsNull))
+    }
+  )
 }

@@ -52,8 +52,8 @@ class SetupSchemaControllerSpec extends TestSupport with MockSchemaService {
         status(result) shouldBe Status.OK
       }
 
-      s"return a response body of 'Successfully added Schema: ${Json.toJson(successModel)}'" in {
-        contentAsString(result) shouldBe s"Successfully added Schema: ${Json.toJson(successModel)}"
+      "return a response body that contains a confirmation" in {
+        contentAsString(result) should include("Successfully added Schema")
       }
     }
 
