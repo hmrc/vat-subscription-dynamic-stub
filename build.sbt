@@ -16,31 +16,25 @@
 
 import sbt._
 import uk.gov.hmrc.DefaultBuildSettings._
-import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
-import play.core.PlayVersion
 import play.sbt.routes.RoutesKeys
 import sbt.Tests.{Group, SubProcess}
 
 val appName = "vat-subscription-dynamic-stub"
 
 val compile: Seq[ModuleID] = Seq(ws,
-  "uk.gov.hmrc.mongo"  %% "hmrc-mongo-play-28"        % "0.74.0",
-  "uk.gov.hmrc"        %% "bootstrap-backend-play-28" % "7.12.0",
+  "uk.gov.hmrc.mongo"  %% "hmrc-mongo-play-28"        % "1.1.0",
+  "uk.gov.hmrc"        %% "bootstrap-backend-play-28" % "7.15.0",
   "com.github.fge"     %  "json-schema-validator"     % "2.2.14",
   "com.github.bjansen" %  "swagger-schema-validator"  % "1.0.0"
 )
 
 def test(scope: String = "test,it"): Seq[ModuleID] = Seq(
-  "uk.gov.hmrc"            %% "bootstrap-test-play-28"    % "7.12.0" % scope,
-  "org.scalamock"          %% "scalamock"                 % "5.2.0"  % scope,
-  "uk.gov.hmrc.mongo"       %% "hmrc-mongo-test-play-28"  % "0.74.0" % scope
+  "uk.gov.hmrc"            %% "bootstrap-test-play-28"   % "7.15.0" % scope,
+  "org.scalamock"          %% "scalamock"                % "5.2.0"  % scope,
+  "uk.gov.hmrc.mongo"      %% "hmrc-mongo-test-play-28"  % "1.1.0"  % scope
 )
 
 lazy val appDependencies: Seq[ModuleID] = compile ++ test()
-lazy val plugins: Seq[Plugins] = Seq.empty
-lazy val playSettings: Seq[Setting[_]] = Seq.empty
-
-RoutesKeys.routesImport := Seq.empty
 
 lazy val scoverageSettings = {
   import scoverage.ScoverageKeys
@@ -59,17 +53,16 @@ lazy val scoverageSettings = {
 }
 
 lazy val microservice = Project(appName, file("."))
-  .enablePlugins(Seq(play.sbt.PlayScala, SbtDistributablesPlugin) ++ plugins: _*)
-  .settings(playSettings: _*)
+  .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
   .settings(scalaSettings: _*)
-  .settings(publishingSettings: _*)
   .settings(scoverageSettings: _*)
   .settings(defaultSettings(): _*)
   .settings(
     majorVersion := 0,
     scalaVersion := "2.13.8",
     libraryDependencies ++= appDependencies,
-    retrieveManaged := true
+    retrieveManaged := true,
+    RoutesKeys.routesImport := Seq.empty
   )
   .settings(PlayKeys.playDefaultPort := 9156)
   .configs(IntegrationTest)

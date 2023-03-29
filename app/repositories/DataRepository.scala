@@ -16,17 +16,25 @@
 
 package repositories
 
-import models._
+import common.Constants
+import models.DataModel
+import org.mongodb.scala.model.{IndexModel, IndexOptions, Indexes}
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
+
+import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class DataRepository @Inject()(mongo: MongoComponent)(implicit ec: ExecutionContext
-) extends PlayMongoRepository[DataModel](
+class DataRepository @Inject()(mongo: MongoComponent)
+                              (implicit ec: ExecutionContext) extends PlayMongoRepository[DataModel](
   mongoComponent = mongo,
   collectionName = "data",
   domainFormat   = DataModel.formats,
-  indexes        = Seq()
+  indexes        = Seq(IndexModel(
+    Indexes.ascending("creationTimestamp"),
+    IndexOptions().name("expiry").expireAfter(Constants.timeToLiveInSeconds, TimeUnit.SECONDS)
+  )),
+  replaceIndexes = true
 )

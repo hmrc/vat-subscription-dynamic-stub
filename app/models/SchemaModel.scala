@@ -16,17 +16,34 @@
 
 package models
 
-import play.api.libs.json.{JsValue, Json, OFormat}
+import play.api.libs.json.{Format, JsNull, JsObject, JsValue, Json, Writes}
+import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
-case class SchemaModel(
-                        _id: String,
-                        url: String,
-                        method: String,
-                        responseSchema: JsValue,
-                        requestSchema: Option[JsValue] = None,
-                        schemaType: Option[String] = None
-                       )
+import java.time.Instant
+
+case class SchemaModel(_id: String,
+                       url: String,
+                       method: String,
+                       responseSchema: JsValue,
+                       requestSchema: Option[JsValue] = None,
+                       schemaType: Option[String] = None)
 
 object SchemaModel {
-  implicit val formats: OFormat[SchemaModel] = Json.format[SchemaModel]
+
+  implicit val dateFormat: Format[Instant] = MongoJavatimeFormats.instantFormat
+
+  implicit val formats: Format[SchemaModel] = Format(
+    Json.reads[SchemaModel],
+    Writes[SchemaModel] { model =>
+      JsObject(Json.obj(
+        "_id" -> model._id,
+        "url" -> model.url,
+        "method" -> model.method,
+        "responseSchema" -> model.responseSchema,
+        "requestSchema" -> model.requestSchema,
+        "schemaType" -> model.schemaType,
+        "creationTimestamp" -> Instant.now()
+      ).fields.filterNot(_._2 == JsNull))
+    }
+  )
 }
