@@ -20,18 +20,19 @@ import play.sbt.routes.RoutesKeys
 import sbt.Tests.{Group, SubProcess}
 
 val appName = "vat-subscription-dynamic-stub"
+val hmrcMongoVersion = "1.2.0"
 
 val compile: Seq[ModuleID] = Seq(ws,
-  "uk.gov.hmrc.mongo"  %% "hmrc-mongo-play-28"        % "1.1.0",
+  "uk.gov.hmrc.mongo"  %% "hmrc-mongo-play-28"        % hmrcMongoVersion,
   "uk.gov.hmrc"        %% "bootstrap-backend-play-28" % "7.15.0",
   "com.github.fge"     %  "json-schema-validator"     % "2.2.14",
   "com.github.bjansen" %  "swagger-schema-validator"  % "1.0.0"
 )
 
 def test(scope: String = "test,it"): Seq[ModuleID] = Seq(
-  "uk.gov.hmrc"            %% "bootstrap-test-play-28"   % "7.15.0" % scope,
-  "org.scalamock"          %% "scalamock"                % "5.2.0"  % scope,
-  "uk.gov.hmrc.mongo"      %% "hmrc-mongo-test-play-28"  % "1.1.0"  % scope
+  "uk.gov.hmrc"            %% "bootstrap-test-play-28"   % "7.15.0"          % scope,
+  "org.scalamock"          %% "scalamock"                % "5.2.0"           % scope,
+  "uk.gov.hmrc.mongo"      %% "hmrc-mongo-test-play-28"  % hmrcMongoVersion  % scope
 )
 
 lazy val appDependencies: Seq[ModuleID] = compile ++ test()
