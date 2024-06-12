@@ -14,25 +14,26 @@
  * limitations under the License.
  */
 
-import sbt._
-import uk.gov.hmrc.DefaultBuildSettings._
 import play.sbt.routes.RoutesKeys
-import sbt.Tests.{Group, SubProcess}
+import sbt.*
+import uk.gov.hmrc.DefaultBuildSettings
+import uk.gov.hmrc.DefaultBuildSettings.*
 
 val appName = "vat-subscription-dynamic-stub"
-val hmrcMongoVersion = "1.2.0"
+val hmrcMongoVersion = "2.0.0"
+val bootstrapVersion = "8.5.0"
 
 val compile: Seq[ModuleID] = Seq(ws,
-  "uk.gov.hmrc.mongo"  %% "hmrc-mongo-play-28"        % hmrcMongoVersion,
-  "uk.gov.hmrc"        %% "bootstrap-backend-play-28" % "7.15.0",
+  "uk.gov.hmrc.mongo"  %% "hmrc-mongo-play-30"        % hmrcMongoVersion,
+  "uk.gov.hmrc"        %% "bootstrap-backend-play-30" % bootstrapVersion,
   "com.github.fge"     %  "json-schema-validator"     % "2.2.14",
   "com.github.bjansen" %  "swagger-schema-validator"  % "1.0.0"
 )
 
-def test(scope: String = "test,it"): Seq[ModuleID] = Seq(
-  "uk.gov.hmrc"            %% "bootstrap-test-play-28"   % "7.15.0"          % scope,
-  "org.scalamock"          %% "scalamock"                % "5.2.0"           % scope,
-  "uk.gov.hmrc.mongo"      %% "hmrc-mongo-test-play-28"  % hmrcMongoVersion  % scope
+def test(scope: String = "test"): Seq[ModuleID] = Seq(
+  "uk.gov.hmrc"            %% "bootstrap-test-play-30"   % bootstrapVersion  % scope,
+  "org.scalamock"          %% "scalamock"                % "6.0.0"           % scope,
+  "uk.gov.hmrc.mongo"      %% "hmrc-mongo-test-play-30"  % hmrcMongoVersion  % scope
 )
 
 lazy val appDependencies: Seq[ModuleID] = compile ++ test()
@@ -53,31 +54,23 @@ lazy val scoverageSettings = {
   )
 }
 
+ThisBuild / majorVersion := 0
+ThisBuild / scalaVersion := "2.13.12"
+
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
   .settings(scalaSettings: _*)
   .settings(scoverageSettings: _*)
   .settings(defaultSettings(): _*)
   .settings(
-    majorVersion := 0,
-    scalaVersion := "2.13.8",
     libraryDependencies ++= appDependencies,
     retrieveManaged := true,
     RoutesKeys.routesImport := Seq.empty
   )
   .settings(PlayKeys.playDefaultPort := 9156)
-  .configs(IntegrationTest)
-  .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)
-  .settings(
-    IntegrationTest / Keys.fork := false,
-    IntegrationTest / unmanagedSourceDirectories := (IntegrationTest / baseDirectory) (base => Seq(base / "it")).value,
-    addTestReportOption(IntegrationTest, "int-test-reports"),
-    IntegrationTest / testGrouping := oneForkedJvmPerTest((IntegrationTest / definedTests).value),
-    IntegrationTest / parallelExecution := false
-  )
 
-def oneForkedJvmPerTest(tests: Seq[TestDefinition]): Seq[Group] = {
-  tests.map { test =>
-    Group(test.name, Seq(test), SubProcess(ForkOptions().withRunJVMOptions(Vector(s"- Dtest.name=${test.name}"))))
-  }
-}
+lazy val it = project
+  .enablePlugins(PlayScala)
+  .dependsOn(microservice % "test->test")
+  .settings(DefaultBuildSettings.itSettings())
+
