@@ -6,3 +6,4 @@ DELETE      /all-schemas                                            controllers.
 
 POST        /data                                                   controllers.SetupDataController.addData
 DELETE      /all-data                                               controllers.SetupDataController.removeAll
+DELETE      /data                                                   controllers.SetupDataController.removeData(redirectUrl: RedirectUrl)

@@ -23,6 +23,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.{defaultAwaitTimeout, status}
 import mocks.{MockDataService, MockSchemaValidation}
 import testUtils.TestSupport
+import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
 
 import scala.concurrent.Future
 
@@ -118,7 +119,7 @@ class SetupDataControllerSpec extends TestSupport with MockSchemaValidation with
 
     "return Status OK (200) on successful removal of data from the stub" in {
       lazy val request = FakeRequest()
-      lazy val result = TestSetupDataController.removeData("someUrl")(request)
+      lazy val result = TestSetupDataController.removeData(RedirectUrl("/validate-relative-path"))(request)
 
       mockRemoveById(successDeleteResult)
 
@@ -127,7 +128,7 @@ class SetupDataControllerSpec extends TestSupport with MockSchemaValidation with
 
     "return Status InternalServerError (500) on unsuccessful removal of data from the stub" in {
       lazy val request = FakeRequest()
-      lazy val result = TestSetupDataController.removeData("someUrl")(request)
+      lazy val result = TestSetupDataController.removeData(RedirectUrl("/validate-relative-path"))(request)
 
       mockRemoveById(errorDeleteResult)
 
