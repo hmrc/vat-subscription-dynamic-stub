@@ -23,7 +23,9 @@ import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import services.DataService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
+import uk.gov.hmrc.play.bootstrap.binders.{OnlyRelative, RedirectUrl}
 import utils.{LoggerUtil, SchemaValidation}
+import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -76,14 +78,15 @@ class SetupDataController @Inject()(schemaValidation: SchemaValidation,
     }
   }
 
-  val removeData: String => Action[AnyContent] = url => Action.async {
-    DataRepository.removeById(url).map {
-        case result if result.wasAcknowledged() => Ok("Success")
-        case _ =>
-          val message = "Could not delete data"
-          logger.warn(s"[SetupDataController][removeData] - $message")
-          InternalServerError(message)
-      }
+  val removeData: RedirectUrl => Action[AnyContent] = redirectUrl => Action.async {
+    val validatedUrl = redirectUrl.get(OnlyRelative).url
+    DataRepository.removeById(validatedUrl).map {
+      case result if result.wasAcknowledged() => Ok("Success")
+      case _ =>
+        val message = "Could not delete data"
+        logger.warn(s"[SetupDataController][removeData] - $message")
+        InternalServerError(message)
+    }
   }
 
   val removeAll: Action[AnyContent] = Action.async {

@@ -20,8 +20,8 @@ import uk.gov.hmrc.DefaultBuildSettings
 import uk.gov.hmrc.DefaultBuildSettings.*
 
 val appName = "vat-subscription-dynamic-stub"
-val hmrcMongoVersion = "2.0.0"
-val bootstrapVersion = "8.5.0"
+val hmrcMongoVersion = "2.6.0"
+val bootstrapVersion = "9.11.0"
 
 val compile: Seq[ModuleID] = Seq(ws,
   "uk.gov.hmrc.mongo"  %% "hmrc-mongo-play-30"        % hmrcMongoVersion,
@@ -55,17 +55,17 @@ lazy val scoverageSettings = {
 }
 
 ThisBuild / majorVersion := 0
-ThisBuild / scalaVersion := "2.13.12"
+ThisBuild / scalaVersion := "2.13.16"
 
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
-  .settings(scalaSettings: _*)
-  .settings(scoverageSettings: _*)
-  .settings(defaultSettings(): _*)
+  .settings(scalaSettings *)
+  .settings(scoverageSettings *)
+  .settings(defaultSettings() *)
   .settings(
     libraryDependencies ++= appDependencies,
     retrieveManaged := true,
-    RoutesKeys.routesImport := Seq.empty
+    RoutesKeys.routesImport += "uk.gov.hmrc.play.bootstrap.binders.RedirectUrl"
   )
   .settings(PlayKeys.playDefaultPort := 9156)
 
