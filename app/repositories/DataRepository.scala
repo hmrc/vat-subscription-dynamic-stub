@@ -24,17 +24,28 @@ import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 
 import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class DataRepository @Inject()(mongo: MongoComponent)
-                              (implicit ec: ExecutionContext) extends PlayMongoRepository[DataModel](
-  mongoComponent = mongo,
-  collectionName = "data",
-  domainFormat   = DataModel.formats,
-  indexes        = Seq(IndexModel(
-    Indexes.ascending("creationTimestamp"),
-    IndexOptions().name("expiry").expireAfter(Constants.timeToLiveInSeconds, TimeUnit.SECONDS)
-  )),
-  replaceIndexes = true
-)
+class DataRepository @Inject()(mongo: MongoComponent)(implicit ec: ExecutionContext)
+  extends PlayMongoRepository[DataModel](
+    mongoComponent = mongo,
+    collectionName = "data",
+    domainFormat   = DataModel.formats,
+    indexes        = Seq(
+      IndexModel(
+        Indexes.ascending("creationTimestamp"),
+        IndexOptions().name("expiry").expireAfter(Constants.timeToLiveInSeconds, TimeUnit.SECONDS)
+      ),
+      IndexModel(
+        Indexes.compoundIndex(
+          Indexes.ascending("method"),
+          Indexes.ascending("_id"),
+          Indexes.ascending("requestMatch.equals")
+        ),
+        IndexOptions().name("method_url_match_eq")
+      )
+    ),
+    replaceIndexes = true
+  ) {
+}

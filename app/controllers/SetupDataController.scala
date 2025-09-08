@@ -69,8 +69,14 @@ class SetupDataController @Inject()(schemaValidation: SchemaValidation,
   }
 
   private def addStubDataToDB(json: DataModel): Future[Result] = {
-    DataRepository.addEntry(json).map {
-      case result if result.wasAcknowledged() => Ok(s"The following JSON was added to the stub: \n\n${Json.toJson(json)}")
+    val uniqueId =
+      json.requestMatch
+        .map(m => s"${json._id}::${m.equals}")
+        .getOrElse(json._id)
+    val docToSave = json.copy(_id = uniqueId)
+    DataRepository.addEntry(docToSave).map {
+      case result if result.wasAcknowledged() =>
+        Ok(s"The following JSON was added to the stub: \n\n${Json.toJson(docToSave)}")
       case _ =>
         val message = "Failed to add data to Stub."
         logger.warn(s"[SetupDataController][addStubDataToDB] - $message")
