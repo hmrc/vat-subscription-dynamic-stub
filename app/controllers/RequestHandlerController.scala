@@ -16,10 +16,11 @@
 
 package controllers
 
+import models.DataModel
 import javax.inject.{Inject, Singleton}
 import models.HttpMethod._
 import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.{Action, AnyContent, ControllerComponents}
+import play.api.mvc.{Action, AnyContent, ControllerComponents, Result, Results}
 import services.DataService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import utils.SchemaValidation
@@ -44,22 +45,38 @@ class RequestHandlerController @Inject()(schemaValidation: SchemaValidation,
   def putRequestHandler(url: String): Action[AnyContent] = requestHandler(url,PUT)
 
   private def requestHandler(url: String, method: String): Action[AnyContent] = Action.async {
-    implicit request => {
-      DataRepository.find(Seq("_id" -> request.uri, "method" -> method)).flatMap {
-        stubData => if (stubData.nonEmpty) {
-          schemaValidation.validateRequestJson(stubData.head.schemaId, request.body.asJson) map {
-            case true => if (stubData.head.response.isEmpty) {
-              Status(stubData.head.status)
-            } else {
-              Status(stubData.head.status)(stubData.head.response.get)
+    implicit request =>
+    val bodyJson = request.body.asJson
+    val idFromBody: Option[String] =
+      bodyJson.flatMap(js => (js \ "idNumber").asOpt[String])
+
+      def serve(stub: DataModel): Future[Result] =
+        schemaValidation.validateRequestJson(stub.schemaId, bodyJson).map {
+          case true =>
+            stub.response match {
+              case Some(r) => Results.Status(stub.status)(r)
+              case None    => Results.Status(stub.status)
             }
-            case false => BadRequest(Json.obj("code" -> "400", "reason" -> "Request did not validate against schema"))
-          }
-        } else {
-          Future(NotFound(errorResponseBody))
+          case false =>
+            Results.BadRequest(Json.obj("code" -> "400", "reason" -> "Request did not validate against schema"))
         }
+
+      idFromBody match {
+        case Some(id) =>
+          DataRepository.find(Seq("_id" -> s"${request.uri}::${id}", "method" -> method)).flatMap {
+            case stub :: _ => serve(stub)
+            case Nil =>
+              DataRepository.find(Seq("_id" -> request.uri, "method" -> method)).flatMap {
+                case legacy :: _ => serve(legacy)
+                case Nil         => Future.successful(NotFound(errorResponseBody))
+              }
+          }
+        case None =>
+          DataRepository.find(Seq("_id" -> request.uri, "method" -> method)).flatMap {
+            case head :: _ => serve(head)
+            case Nil       => Future.successful(NotFound(errorResponseBody))
+          }
       }
-    }
   }
 
   val errorResponseBody: JsValue = Json.obj(

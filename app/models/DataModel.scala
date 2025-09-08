@@ -16,32 +16,43 @@
 
 package models
 
-import play.api.libs.json.{Format, JsNull, JsObject, JsValue, Json, Writes}
+import play.api.libs.json.{JsValue}
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
 import java.time.Instant
 
-case class DataModel(_id: String,
-                     schemaId: String,
-                     method: String,
-                     status: Int,
-                     response: Option[JsValue])
+
+case class RequestMatch(jsonPath: String, equals: String)
+
+case class DataModel(
+                      _id: String,
+                      schemaId: String,
+                      method: String,
+                      status: Int,
+                      response: Option[JsValue],
+                      requestMatch: Option[RequestMatch] = None
+                    )
 
 object DataModel {
+  import play.api.libs.json._
 
   implicit val dateFormat: Format[Instant] = MongoJavatimeFormats.instantFormat
+  implicit val requestMatchFormat: OFormat[RequestMatch] = Json.format[RequestMatch]
 
   implicit val formats: Format[DataModel] = Format(
     Json.reads[DataModel],
     Writes[DataModel] { model =>
-      JsObject(Json.obj(
-        "_id" -> model._id,
-        "schemaId" -> model.schemaId,
-        "method" -> model.method,
-        "status" -> model.status,
-        "response" -> model.response,
-        "creationTimestamp" -> Instant.now()
-      ).fields.filterNot(_._2 == JsNull))
+      JsObject(
+        Json.obj(
+          "_id"                 -> model._id,
+          "schemaId"            -> model.schemaId,
+          "method"              -> model.method,
+          "status"              -> model.status,
+          "response"            -> model.response,
+          "requestMatch"        -> model.requestMatch,
+          "creationTimestamp"   -> Instant.now()
+        ).fields.filterNot(_._2 == JsNull)
+      )
     }
   )
 }
