@@ -47,8 +47,10 @@ class RequestHandlerController @Inject()(schemaValidation: SchemaValidation,
   private def requestHandler(url: String, method: String): Action[AnyContent] = Action.async {
     implicit request =>
     val bodyJson = request.body.asJson
-    val idFromBody: Option[String] =
-      bodyJson.flatMap(js => (js \ "idNumber").asOpt[String])
+      val idFromBody: Option[String] =
+        bodyJson.flatMap { js =>
+          (js \ "taxpayerInformation" \ "idNumber").asOpt[String]
+        }
 
       def serve(stub: DataModel): Future[Result] =
         schemaValidation.validateRequestJson(stub.schemaId, bodyJson).map {
