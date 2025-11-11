@@ -1,4 +1,4 @@
-/*
+  /*
  * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,8 +20,8 @@ import uk.gov.hmrc.DefaultBuildSettings
 import uk.gov.hmrc.DefaultBuildSettings.*
 
 val appName = "vat-subscription-dynamic-stub"
-val hmrcMongoVersion = "2.6.0"
-val bootstrapVersion = "9.11.0"
+val hmrcMongoVersion = "2.10.0"
+val bootstrapVersion = "10.4.0"
 
 val compile: Seq[ModuleID] = Seq(ws,
   "uk.gov.hmrc.mongo"  %% "hmrc-mongo-play-30"        % hmrcMongoVersion,
@@ -32,7 +32,7 @@ val compile: Seq[ModuleID] = Seq(ws,
 
 def test(scope: String = "test"): Seq[ModuleID] = Seq(
   "uk.gov.hmrc"            %% "bootstrap-test-play-30"   % bootstrapVersion  % scope,
-  "org.scalamock"          %% "scalamock"                % "6.0.0"           % scope,
+  "org.scalamock"          %% "scalamock"                % "7.5.1"           % scope,
   "uk.gov.hmrc.mongo"      %% "hmrc-mongo-test-play-30"  % hmrcMongoVersion  % scope
 )
 

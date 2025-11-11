@@ -102,8 +102,8 @@ class SetupSchemaControllerSpec extends TestSupport with MockSchemaService {
       }
 
       "return an error message containing details about the fields that are invalid" in {
-        contentAsString(result) shouldBe "Invalid SchemaModel payload: " +
-          "List((/method,List(JsonValidationError(List(error.expected.jsstring),List()))))"
+        contentAsString(result) shouldBe
+          """{"statusCode":400,"message":"Invalid SchemaModel payload: List((/method,List(JsonValidationError(List(error.expected.jsstring),List()))))"}"""
       }
     }
 
